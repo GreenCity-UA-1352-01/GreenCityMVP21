@@ -12,6 +12,7 @@ import greencity.enums.ShoppingListItemStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.CustomShoppingListItemService;
 import greencity.service.UserService;
+import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.security.Principal;
 import java.util.Arrays;
@@ -88,6 +90,7 @@ class CustomShoppingListItemControllerTest {
 //                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
 //                        new UserArgumentResolver(userService, modelMapper))
 //                .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
+//                .setValidator(new LocalValidatorFactoryBean())
                 .build();
     }
 
@@ -102,7 +105,8 @@ class CustomShoppingListItemControllerTest {
         mockMvc.perform(get("/{url}/{userId}/{habitId}", CONTROLLER_URL, USER_ID, HABIT_ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
         verify(customShoppingListItemService).findAllAvailableCustomShoppingListItems(USER_ID, HABIT_ID);
     }
@@ -117,6 +121,8 @@ class CustomShoppingListItemControllerTest {
                 + "      }"
                 + "    ]"
                 + "}";
+        BulkSaveCustomShoppingListItemDto dto = objectMapper.readValue(content,
+                BulkSaveCustomShoppingListItemDto.class);
 
         var resultItem = getCustomShoppingListItemResponseDto();
         var expectedResult = Collections.singletonList(resultItem);
@@ -130,10 +136,8 @@ class CustomShoppingListItemControllerTest {
                         .content(content)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-
-        BulkSaveCustomShoppingListItemDto dto = objectMapper.readValue(content,
-                BulkSaveCustomShoppingListItemDto.class);
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
         verify(customShoppingListItemService).save(dto, USER_ID, HABIT_ID);
     }
@@ -152,16 +156,14 @@ class CustomShoppingListItemControllerTest {
                         .param("status", itemStatus)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
         verify(customShoppingListItemService).updateItemStatus(USER_ID, ITEM_ID, itemStatus);
     }
 
     @Test
     void updateItemStatusToDone() throws Exception {
-//        var expectedResult = getCustomShoppingListItemResponseDto();
-//        expectedResult.setStatus(ShoppingListItemStatus.DONE);
-
         doNothing().when(customShoppingListItemService).updateItemStatusToDone(anyLong(), anyLong());
 
         mockMvc.perform(patch("/{url}/{userId}/done", CONTROLLER_URL, USER_ID)
@@ -176,7 +178,7 @@ class CustomShoppingListItemControllerTest {
     void bulkDeleteCustomShoppingListItems(String ids) throws Exception {
         var expectedResult = Arrays.stream(ids.split(","))
                 .map(Long::parseLong)
-                .collect(Collectors.toList());
+                .toList();
 
         when(customShoppingListItemService.bulkDelete(anyString()))
                 .thenReturn(expectedResult);
@@ -185,7 +187,8 @@ class CustomShoppingListItemControllerTest {
                         .param("ids", ids)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
         verify(customShoppingListItemService).bulkDelete(ids);
     }
@@ -204,7 +207,8 @@ class CustomShoppingListItemControllerTest {
                         .param("status", itemStatus)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
         verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER_ID, itemStatus);
     }
@@ -214,13 +218,14 @@ class CustomShoppingListItemControllerTest {
         var resultItem = getCustomShoppingListItemResponseDto();
         var expectedResult = Collections.singletonList(resultItem);
 
-        when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(anyLong(), anyString()))
+        when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(anyLong(), isNull()))
                 .thenReturn(expectedResult);
 
         mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
         verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER_ID, null);
     }
