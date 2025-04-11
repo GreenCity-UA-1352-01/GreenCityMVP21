@@ -2,12 +2,14 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.dto.shoppinglistitem.BulkSaveCustomShoppingListItemDto;
+import greencity.dto.user.UserVO;
 import greencity.enums.ShoppingListItemStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.CustomShoppingListItemService;
-import greencity.service.UserService;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,24 +18,20 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -46,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CustomShoppingListItemControllerTest {
 
     private static final String CONTROLLER_URL = "custom/shopping-list-items";
-    public static final Long USER_ID = 2L;
+    public static final UserVO USER = getUserVO();
     public static final Long HABIT_ID = 1L;
     public static final Long ITEM_ID = 1L;
     public static final ShoppingListItemStatus STATUS = ShoppingListItemStatus.ACTIVE;
@@ -56,35 +54,23 @@ class CustomShoppingListItemControllerTest {
     private CustomShoppingListItemService customShoppingListItemService;
 
     @Mock
-    private UserService userService;
-
-    @Mock
-    private ModelMapper modelMapper;
-
-    @Spy
-    private ObjectMapper objectMapper;
+    private Filter authorizationFilter;
 
     @InjectMocks
     private CustomShoppingListItemController customShoppingListItemController;
 
-    //    private Principal principal = getPrincipal();
-    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+    private final ObjectMapper objectMapper = getObjectMapper();
+    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private MockMvc mockMvc;
 
-//    @BeforeAll
-//    public static void beforeAll() {
-//        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-//        validator = factory.getValidator();
-//        factory.close();
-//    }
-
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws Exception {
+        authorized();
+
         this.mockMvc = MockMvcBuilders.standaloneSetup(customShoppingListItemController)
-//                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-//                        new UserArgumentResolver(userService, modelMapper))
                 .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
                 .setValidator(new LocalValidatorFactoryBean())
+                .addFilters(authorizationFilter)
                 .build();
     }
 
@@ -96,37 +82,49 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.findAllAvailableCustomShoppingListItems(anyLong(), anyLong()))
                 .thenReturn(expectedResult);
 
-        mockMvc.perform(get("/{url}/{userId}/{habitId}", CONTROLLER_URL, USER_ID, HABIT_ID)
+        mockMvc.perform(get("/{url}/{userId}/{habitId}", CONTROLLER_URL, USER.getId(), HABIT_ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
-        verify(customShoppingListItemService).findAllAvailableCustomShoppingListItems(USER_ID, HABIT_ID);
+        verify(customShoppingListItemService).findAllAvailableCustomShoppingListItems(USER.getId(), HABIT_ID);
+    }
+
+    @Test
+    void getAllAvailableCustomShoppingListItems_unauthorized_shouldReturn401() throws Exception {
+        unauthorized();
+
+        checkRequestWithError(HttpMethod.GET, HttpStatus.UNAUTHORIZED,
+                "/{url}/{userId}/{habitId}",
+                CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
     }
 
     @Test
     void getAllAvailableCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.GET, "/{url}/{userId}/{habitId}",
+        checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
+                "/{url}/{userId}/{habitId}",
                 CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
     }
 
     @Test
     void getAllAvailableCustomShoppingListItems_withInvalidHabitId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.GET, "/{url}/{userId}/{habitId}",
-                CONTROLLER_URL, USER_ID, INVALID_VALUE);
+        checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
+                "/{url}/{userId}/{habitId}",
+                CONTROLLER_URL, USER.getId(), INVALID_VALUE);
     }
 
     @Test
     void saveUserCustomShoppingListItems() throws Exception {
-        String content = "{"
-                + "  \"customShoppingListItemSaveRequestDtoList\":"
-                + "    ["
-                + "      {"
-                + "        \"text\": \"text\""
-                + "      }"
-                + "    ]"
-                + "}";
+        String content = """
+                {
+                  "customShoppingListItemSaveRequestDtoList": [
+                    {
+                      "text": "text"
+                    }
+                  ]
+                }
+                """;
         BulkSaveCustomShoppingListItemDto dto = objectMapper.readValue(content,
                 BulkSaveCustomShoppingListItemDto.class);
 
@@ -137,7 +135,7 @@ class CustomShoppingListItemControllerTest {
                 .thenReturn(expectedResult);
 
         mockMvc.perform(post("/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
-                        CONTROLLER_URL, USER_ID, HABIT_ID)
+                        CONTROLLER_URL, USER.getId(), HABIT_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content)
                         .accept(MediaType.APPLICATION_JSON))
@@ -145,35 +143,47 @@ class CustomShoppingListItemControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
-        verify(customShoppingListItemService).save(dto, USER_ID, HABIT_ID);
+        verify(customShoppingListItemService).save(dto, USER.getId(), HABIT_ID);
+    }
+
+    @Test
+    void saveUserCustomShoppingListItems_unauthorized_shouldReturn401() throws Exception {
+        unauthorized();
+
+        checkRequestWithError(HttpMethod.POST, HttpStatus.UNAUTHORIZED,
+                "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
+                CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
     }
 
     @Test
     void saveUserCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.POST, "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
+        checkRequestWithError(HttpMethod.POST, HttpStatus.BAD_REQUEST,
+                "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
     }
 
     @Test
     void saveUserCustomShoppingListItems_withInvalidHabitAssignId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.POST, "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
-                CONTROLLER_URL, USER_ID, INVALID_VALUE);
+        checkRequestWithError(HttpMethod.POST, HttpStatus.BAD_REQUEST,
+                "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
+                CONTROLLER_URL, USER.getId(), INVALID_VALUE);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"\"other\"", "\"1\"", "text", "1"})
     void saveUserCustomShoppingListItems_withInvalidData_shouldReturn400(String fieldName) throws Exception {
-        String content = "{"
-                + "  \"customShoppingListItemSaveRequestDtoList\":"
-                + "    ["
-                + "      {"
-                + "        " + fieldName + ": \"text\""
-                + "      }"
-                + "    ]"
-                + "}";
+        String content = """
+                {
+                  "customShoppingListItemSaveRequestDtoList": [
+                    {
+                      %s: "text"
+                    }
+                  ]
+                }
+                """.formatted(fieldName);
 
         mockMvc.perform(post("/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
-                        CONTROLLER_URL, USER_ID, HABIT_ID)
+                        CONTROLLER_URL, USER.getId(), HABIT_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content)
                         .accept(MediaType.APPLICATION_JSON))
@@ -185,17 +195,18 @@ class CustomShoppingListItemControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"\"\"", "\"   \""})
     void saveUserCustomShoppingListItems_withBlankValues_shouldReturn400(String fieldValue) throws Exception {
-        String content = "{"
-                + "  \"customShoppingListItemSaveRequestDtoList\":"
-                + "    ["
-                + "      {"
-                + "        \"text\": " + fieldValue
-                + "      }"
-                + "    ]"
-                + "}";
+        String content = """
+                {
+                  "customShoppingListItemSaveRequestDtoList": [
+                    {
+                      "text": %s
+                    }
+                  ]
+                }
+                """.formatted(fieldValue);
 
         mockMvc.perform(post("/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
-                        CONTROLLER_URL, USER_ID, HABIT_ID)
+                        CONTROLLER_URL, USER.getId(), HABIT_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content)
                         .accept(MediaType.APPLICATION_JSON))
@@ -213,7 +224,7 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.updateItemStatus(anyLong(), anyLong(), anyString()))
                 .thenReturn(expectedResult);
 
-        mockMvc.perform(patch("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(patch("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("itemId", ITEM_ID.toString())
                         .param("status", itemStatus)
                         .accept(MediaType.APPLICATION_JSON))
@@ -221,12 +232,22 @@ class CustomShoppingListItemControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
-        verify(customShoppingListItemService).updateItemStatus(USER_ID, ITEM_ID, itemStatus);
+        verify(customShoppingListItemService).updateItemStatus(USER.getId(), ITEM_ID, itemStatus);
+    }
+
+    @Test
+    void updateItemStatus_unauthorized_shouldReturn401() throws Exception {
+        unauthorized();
+
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
+                mapOf("itemId", ITEM_ID.toString(), "status", STATUS.toString()),
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, INVALID_VALUE);
     }
 
     @Test
     void updateItemStatus_withInvalidUserId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.PATCH,
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", ITEM_ID.toString(), "status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE);
@@ -236,9 +257,10 @@ class CustomShoppingListItemControllerTest {
     @NullSource
     @ValueSource(strings = {INVALID_VALUE})
     void updateItemStatus_withInvalidItemId_shouldReturn400(String itemId) throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.PATCH, mapOf("itemId", itemId, "status", STATUS.toString()),
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
+                mapOf("itemId", itemId, "status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
-                CONTROLLER_URL, USER_ID);
+                CONTROLLER_URL, USER.getId());
     }
 
     @ParameterizedTest
@@ -248,13 +270,13 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.updateItemStatus(anyLong(), anyLong(), nullable(String.class)))
                 .thenThrow(BadRequestException.class);
 
-        mockMvc.perform(patch("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(patch("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("itemId", ITEM_ID.toString())
                         .param("status", status)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
-        verify(customShoppingListItemService, atMostOnce()).updateItemStatus(USER_ID, ITEM_ID, status);
+        verify(customShoppingListItemService, atMostOnce()).updateItemStatus(USER.getId(), ITEM_ID, status);
     }
 
     @Test
@@ -262,29 +284,40 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.updateItemStatus(anyLong(), anyLong(), anyString()))
                 .thenThrow(NotFoundException.class);
 
-        mockMvc.perform(patch("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(patch("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("itemId", ITEM_ID.toString())
                         .param("status", STATUS.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(customShoppingListItemService).updateItemStatus(USER_ID, ITEM_ID, STATUS.toString());
+        verify(customShoppingListItemService).updateItemStatus(USER.getId(), ITEM_ID, STATUS.toString());
     }
 
     @Test
     void updateItemStatusToDone() throws Exception {
         doNothing().when(customShoppingListItemService).updateItemStatusToDone(anyLong(), anyLong());
 
-        mockMvc.perform(patch("/{url}/{userId}/done", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(patch("/{url}/{userId}/done", CONTROLLER_URL, USER.getId())
                         .param("itemId", ITEM_ID.toString()))
                 .andExpect(status().isOk());
 
-        verify(customShoppingListItemService).updateItemStatusToDone(USER_ID, ITEM_ID);
+        verify(customShoppingListItemService).updateItemStatusToDone(USER.getId(), ITEM_ID);
+    }
+
+    @Test
+    void updateItemStatusToDone_unauthorized_shouldReturn401() throws Exception {
+        unauthorized();
+
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
+                mapOf("itemId", ITEM_ID.toString()),
+                "/{url}/{userId}/done",
+                CONTROLLER_URL, INVALID_VALUE);
     }
 
     @Test
     void updateItemStatusToDone_withInvalidUserId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.PATCH, mapOf("itemId", ITEM_ID.toString()),
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
+                mapOf("itemId", ITEM_ID.toString()),
                 "/{url}/{userId}/done",
                 CONTROLLER_URL, INVALID_VALUE);
     }
@@ -293,9 +326,10 @@ class CustomShoppingListItemControllerTest {
     @NullSource
     @ValueSource(strings = {INVALID_VALUE})
     void updateItemStatusToDone_withInvalidItemId_shouldReturn400(String itemId) throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.PATCH, mapOf("itemId", itemId),
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
+                mapOf("itemId", itemId),
                 "/{url}/{userId}/done",
-                CONTROLLER_URL, USER_ID);
+                CONTROLLER_URL, USER.getId());
     }
 
     @Test
@@ -303,12 +337,12 @@ class CustomShoppingListItemControllerTest {
         doThrow(NotFoundException.class)
                 .when(customShoppingListItemService).updateItemStatusToDone(anyLong(), anyLong());
 
-        mockMvc.perform(patch("/{url}/{userId}/done", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(patch("/{url}/{userId}/done", CONTROLLER_URL, USER.getId())
                         .param("itemId", ITEM_ID.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(customShoppingListItemService).updateItemStatusToDone(USER_ID, ITEM_ID);
+        verify(customShoppingListItemService).updateItemStatusToDone(USER.getId(), ITEM_ID);
     }
 
     @ParameterizedTest
@@ -321,7 +355,7 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.bulkDelete(anyString()))
                 .thenReturn(expectedResult);
 
-        mockMvc.perform(delete("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(delete("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("ids", ids)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -332,8 +366,19 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
+    void bulkDeleteCustomShoppingListItems_unauthorized_shouldReturn401() throws Exception {
+        unauthorized();
+
+        checkRequestWithError(HttpMethod.DELETE, HttpStatus.UNAUTHORIZED,
+                mapOf("ids", ITEM_ID.toString()),
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, INVALID_VALUE);
+    }
+
+    @Test
     void bulkDeleteCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.DELETE, mapOf("ids", ITEM_ID.toString()),
+        checkRequestWithError(HttpMethod.DELETE, HttpStatus.BAD_REQUEST,
+                mapOf("ids", ITEM_ID.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE);
     }
@@ -341,10 +386,9 @@ class CustomShoppingListItemControllerTest {
     @Test
     void bulkDeleteCustomShoppingListItems_withInvalidItemIds_shouldReturn400() throws Exception {
         when(customShoppingListItemService.bulkDelete(anyString()))
-//                .thenThrow(NumberFormatException.class);
-                .thenThrow(BadRequestException.class);
+                .thenThrow(NumberFormatException.class);
 
-        mockMvc.perform(delete("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(delete("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("ids", INVALID_VALUE)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -354,8 +398,9 @@ class CustomShoppingListItemControllerTest {
 
     @Test
     void bulkDeleteCustomShoppingListItems_withoutItemIds_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.DELETE, "/{url}/{userId}/custom-shopping-list-items",
-                CONTROLLER_URL, USER_ID);
+        checkRequestWithError(HttpMethod.DELETE, HttpStatus.BAD_REQUEST,
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, USER.getId());
     }
 
     @ParameterizedTest
@@ -368,14 +413,14 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(anyLong(), anyString()))
                 .thenReturn(expectedResult);
 
-        mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("status", itemStatus)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
-        verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER_ID, itemStatus);
+        verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER.getId(), itemStatus);
     }
 
     @Test
@@ -386,18 +431,29 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(anyLong(), isNull()))
                 .thenReturn(expectedResult);
 
-        mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResult)));
 
-        verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER_ID, null);
+        verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER.getId(), null);
+    }
+
+    @Test
+    void getAllCustomShoppingItemsByStatus_unauthorized_shouldReturn401() throws Exception {
+        unauthorized();
+
+        checkRequestWithError(HttpMethod.GET, HttpStatus.UNAUTHORIZED,
+                mapOf("status", STATUS.toString()),
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, INVALID_VALUE);
     }
 
     @Test
     void getAllCustomShoppingItemsByStatus_withInvalidUserId_shouldReturn400() throws Exception {
-        checkRequestWithInvalidParams(HttpMethod.GET, mapOf("status", STATUS.toString()),
+        checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
+                mapOf("status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE);
     }
@@ -409,29 +465,49 @@ class CustomShoppingListItemControllerTest {
         when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(anyLong(), nullable(String.class)))
                 .thenThrow(NotFoundException.class);
 
-        mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER_ID)
+        mockMvc.perform(get("/{url}/{userId}/custom-shopping-list-items", CONTROLLER_URL, USER.getId())
                         .param("status", status)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER_ID, status);
+        verify(customShoppingListItemService).findAllUsersCustomShoppingListItemsByStatus(USER.getId(), status);
     }
 
-    private void checkRequestWithInvalidParams(HttpMethod method, String urlTemplate, Object... params) throws Exception {
-        checkRequestWithInvalidParams(method, Collections.emptyMap(), urlTemplate, params);
+    private void authorized() throws Exception {
+        doAnswer(invocation -> {
+            FilterChain chain = invocation.getArgument(2);
+            chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
+            return null;
+        }).when(authorizationFilter).doFilter(any(), any(), any());
     }
 
-    private void checkRequestWithInvalidParams(HttpMethod method,
-                                               Map<String, String> pathVars,
-                                               String urlTemplate,
-                                               Object... params) throws Exception {
+    private void unauthorized() throws Exception {
+        doAnswer(invocation -> {
+            HttpServletResponse response = invocation.getArgument(1);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
+        }).when(authorizationFilter).doFilter(any(), any(), any());
+    }
+
+    private void checkRequestWithError(HttpMethod method,
+                                       HttpStatus status,
+                                       String urlTemplate,
+                                       Object... params) throws Exception {
+        checkRequestWithError(method, status, Collections.emptyMap(), urlTemplate, params);
+    }
+
+    private void checkRequestWithError(HttpMethod method,
+                                       HttpStatus status,
+                                       Map<String, String> pathVars,
+                                       String urlTemplate,
+                                       Object... params) throws Exception {
         var request = MockMvcRequestBuilders.request(method, urlTemplate, params)
                 .accept(MediaType.APPLICATION_JSON);
 
         pathVars.forEach(request::param);
 
         mockMvc.perform(request)
-                .andExpect(status().isBadRequest());
+                .andExpect(status().is(status.value()));
 
         verifyNoInteractions(customShoppingListItemService);
     }
