@@ -1,6 +1,8 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.aspects.CurrentUserIdValidationAspect;
+import greencity.client.RestClient;
 import greencity.dto.shoppinglistitem.BulkSaveCustomShoppingListItemDto;
 import greencity.dto.user.UserVO;
 import greencity.enums.ShoppingListItemStatus;
@@ -21,11 +23,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -56,6 +63,9 @@ class CustomShoppingListItemControllerTest {
     @Mock
     private Filter authorizationFilter;
 
+    @Mock
+    private RestClient restClient;
+
     @InjectMocks
     private CustomShoppingListItemController customShoppingListItemController;
 
@@ -67,7 +77,12 @@ class CustomShoppingListItemControllerTest {
     void beforeEach() throws Exception {
         authorized();
 
-        this.mockMvc = MockMvcBuilders.standaloneSetup(customShoppingListItemController)
+        when(restClient.findByEmail(anyString())).thenReturn(USER);
+
+        AspectJProxyFactory proxyFactory = new AspectJProxyFactory(customShoppingListItemController);
+        proxyFactory.addAspect(new CurrentUserIdValidationAspect(restClient));
+        CustomShoppingListItemController proxy = proxyFactory.getProxy();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(proxy)
                 .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
                 .setValidator(new LocalValidatorFactoryBean())
                 .addFilters(authorizationFilter)
@@ -92,7 +107,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllAvailableCustomShoppingListItems_unauthorized_shouldReturn401() throws Exception {
+    void getAllAvailableCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.GET, HttpStatus.UNAUTHORIZED,
@@ -147,12 +162,35 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void saveUserCustomShoppingListItems_unauthorized_shouldReturn401() throws Exception {
+    void saveUserCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.POST, HttpStatus.UNAUTHORIZED,
                 "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
+    }
+
+    @Test
+    void saveUserCustomShoppingListItems_whenNotCurrentUser_shouldReturn400() throws Exception {
+        String content = """
+                {
+                  "customShoppingListItemSaveRequestDtoList": [
+                    {
+                      "text": "text"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
+                        CONTROLLER_URL, USER.getId() + 1, HABIT_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(customShoppingListItemService);
+        verify(restClient).findByEmail(USER.getEmail());
     }
 
     @Test
@@ -236,13 +274,23 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatus_unauthorized_shouldReturn401() throws Exception {
+    void updateItemStatus_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
                 mapOf("itemId", ITEM_ID.toString(), "status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE);
+    }
+
+    @Test
+    void updateItemStatus_whenNotCurrentUser_shouldReturn400() throws Exception {
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
+                mapOf("itemId", ITEM_ID.toString(), "status", STATUS.toString()),
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, USER.getId() + 1);
+
+        verify(restClient).findByEmail(USER.getEmail());
     }
 
     @Test
@@ -305,13 +353,23 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatusToDone_unauthorized_shouldReturn401() throws Exception {
+    void updateItemStatusToDone_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
                 mapOf("itemId", ITEM_ID.toString()),
                 "/{url}/{userId}/done",
                 CONTROLLER_URL, INVALID_VALUE);
+    }
+
+    @Test
+    void updateItemStatusToDone_whenNotCurrentUser_shouldReturn400() throws Exception {
+        checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
+                mapOf("itemId", ITEM_ID.toString()),
+                "/{url}/{userId}/done",
+                CONTROLLER_URL, USER.getId() + 1);
+
+        verify(restClient).findByEmail(USER.getEmail());
     }
 
     @Test
@@ -366,13 +424,23 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void bulkDeleteCustomShoppingListItems_unauthorized_shouldReturn401() throws Exception {
+    void bulkDeleteCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.DELETE, HttpStatus.UNAUTHORIZED,
                 mapOf("ids", ITEM_ID.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE);
+    }
+
+    @Test
+    void bulkDeleteCustomShoppingListItems_whenNotCurrentUser_shouldReturn400() throws Exception {
+        checkRequestWithError(HttpMethod.DELETE, HttpStatus.BAD_REQUEST,
+                mapOf("ids", ITEM_ID.toString()),
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, USER.getId() + 1);
+
+        verify(restClient).findByEmail(USER.getEmail());
     }
 
     @Test
@@ -441,13 +509,23 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllCustomShoppingItemsByStatus_unauthorized_shouldReturn401() throws Exception {
+    void getAllCustomShoppingItemsByStatus_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.GET, HttpStatus.UNAUTHORIZED,
                 mapOf("status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE);
+    }
+
+    @Test
+    void getAllCustomShoppingItemsByStatus_whenNotCurrentUser_shouldReturn400() throws Exception {
+        checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
+                mapOf("status", STATUS.toString()),
+                "/{url}/{userId}/custom-shopping-list-items",
+                CONTROLLER_URL, USER.getId() + 1);
+
+        verify(restClient).findByEmail(USER.getEmail());
     }
 
     @Test
@@ -474,6 +552,10 @@ class CustomShoppingListItemControllerTest {
     }
 
     private void authorized() throws Exception {
+        Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(
+                USER.getEmail(), null, List.of((GrantedAuthority) () -> USER.getRole().name()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         doAnswer(invocation -> {
             FilterChain chain = invocation.getArgument(2);
             chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
@@ -482,6 +564,8 @@ class CustomShoppingListItemControllerTest {
     }
 
     private void unauthorized() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(null);
+
         doAnswer(invocation -> {
             HttpServletResponse response = invocation.getArgument(1);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
