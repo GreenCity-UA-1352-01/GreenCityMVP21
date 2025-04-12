@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -46,9 +47,9 @@ class SearchControllerTest {
         SearchNewsDto news = SearchNewsDto.builder()
                 .id(1L)
                 .title("Save the planet")
-                .author(new EcoNewsAuthorDto(1L,"John Doe"))
+                .author(new EcoNewsAuthorDto(1L, "John Doe"))
                 .creationDate(ZonedDateTime.now())
-                .tags(List.of("eco","planet"))
+                .tags(List.of("eco", "planet"))
                 .build();
 
         SearchResponseDto searchResponseDto = SearchResponseDto.builder()
@@ -58,25 +59,27 @@ class SearchControllerTest {
 
         Mockito.when(searchService.search(eq("eco"), eq("en"))).thenReturn(searchResponseDto);
         mockMvc.perform(get("/search")
-                .param("searchQuery", "eco")
-                .header("Accept-Language", "en"))
+                        .param("searchQuery", "eco")
+                        .header("Accept-Language", "en"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.countOfResults").value(1))
                 .andExpect(jsonPath("$.ecoNews[0].title").value("Save the planet"))
                 .andExpect(jsonPath("$.ecoNews[0].author.name").value("John Doe"))
                 .andExpect(jsonPath("$.ecoNews[0].tags[0]").value("eco"));
-        verify(searchService,times(1)).search(eq("eco"),eq( "en"));
+
+        verify(searchService, times(1)).search(eq("eco"), eq("en"));
     }
+
     @Test
     void search_InValidTest_ShouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/search")
-                .header("Accept-Language", "en"))
+                        .header("Accept-Language", "en"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void search_InValidTestinvalidLanguage_shouldReturnBadRequest() throws Exception {
+    void search_InvalidTest_invalidLanguage_shouldReturnBadRequest() throws Exception {
         Mockito.when(languageService.findAllLanguageCodes())
                 .thenReturn(List.of("en", "ua", "pl"));
 
@@ -85,13 +88,13 @@ class SearchControllerTest {
                         .header("Accept-Language", "de"))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void search_InValidTest_missingLanguageHeader_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/search")
                         .param("searchQuery", "eco"))
                 .andExpect(status().isBadRequest());
     }
-
 
 
     @Test
@@ -102,9 +105,9 @@ class SearchControllerTest {
         SearchNewsDto news = SearchNewsDto.builder()
                 .id(1L)
                 .title("Save the planet")
-                .author(new EcoNewsAuthorDto(1L,"John Doe"))
+                .author(new EcoNewsAuthorDto(1L, "John Doe"))
                 .creationDate(ZonedDateTime.now())
-                .tags(List.of("eco","planet"))
+                .tags(List.of("eco", "planet"))
                 .build();
 
         PageableDto<SearchNewsDto> dto = new PageableDto<>(
@@ -127,7 +130,7 @@ class SearchControllerTest {
                 .andExpect(jsonPath("$.page[0].title").value("Save the planet"))
                 .andExpect(jsonPath("$.page[0].author.name").value("John Doe"));
 
-        verify(searchService,times(1)).searchAllNews(any(), eq("eco"), eq("en"));
+        verify(searchService, times(1)).searchAllNews(any(), eq("eco"), eq("en"));
     }
 
     @Test
@@ -138,6 +141,7 @@ class SearchControllerTest {
                         .header("Accept-Language", "en"))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void searchEcoNews_InValidTest_noAcceptLanguage_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/search/econews")
