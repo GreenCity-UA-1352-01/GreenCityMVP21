@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.dto.habit.*;
 import greencity.dto.user.UserVO;
 import greencity.enums.HabitAssignStatus;
+import greencity.exception.exceptions.UserShoppingListItemNotSavedException;
+import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.HabitAssignService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,15 +16,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.security.Principal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -35,6 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class HabitAssignControllerTest {
 
+    private static final String habitAssignLink = "/habit/assign";
+
     private MockMvc mockMvc;
 
     @Mock
@@ -43,11 +50,18 @@ public class HabitAssignControllerTest {
     @InjectMocks
     private HabitAssignController habitAssignController;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private ObjectMapper objectMapper;
+
+    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+
+    private Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(habitAssignController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(habitAssignController)
+                .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
+                .build();
     }
 
     @Test
@@ -58,8 +72,8 @@ public class HabitAssignControllerTest {
 
         when(habitAssignService.assignDefaultHabitForUser(habitId, user)).thenReturn(dto);
 
-        mockMvc.perform(post("/habit/assign/{habitId}", habitId)
-                        .requestAttr("user", user)
+        mockMvc.perform(post(habitAssignLink + "/{habitId}", habitId)
+                        .principal(principal)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -74,17 +88,32 @@ public class HabitAssignControllerTest {
         HabitAssignCustomPropertiesDto requestDto = new HabitAssignCustomPropertiesDto();
         List<HabitAssignManagementDto> responseList = List.of(new HabitAssignManagementDto());
 
+        String mockJson = "{\"some\":\"value\"}";
+
         when(habitAssignService.assignCustomHabitForUser(habitId, user, requestDto)).thenReturn(responseList);
 
-        mockMvc.perform(post("/habit/assign/{habitId}/custom", habitId)
+        mockMvc.perform(post(habitAssignLink + "/{habitId}/custom", habitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto))
-                .requestAttr("user", user))
+                .content(mockJson)
+                .principal(principal))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(habitAssignService).assignCustomHabitForUser(habitId, user, requestDto);
+    }
+
+    @Test
+    void assignCustomTest_InvalidJson() throws Exception {
+        Long habitId = 1L;
+        String invalidJson = "{some:value}";
+
+        mockMvc.perform(post(habitAssignLink + "/{habitId}/custom", habitId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(invalidJson)
+                        .principal(principal))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -96,14 +125,25 @@ public class HabitAssignControllerTest {
 
         when(habitAssignService.updateUserHabitInfoDuration(habitId, user.getId(), duration)).thenReturn(responseDto);
 
-        mockMvc.perform(put("/habit/assign/{habitAssignId}/update-habit-duration", habitId)
-                .requestAttr("user", user)
+        mockMvc.perform(put(habitAssignLink + "/{habitAssignId}/update-habit-duration", habitId)
+                .principal(principal)
                 .param("duration", String.valueOf(duration))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(habitAssignService).updateUserHabitInfoDuration(habitId, user.getId(), duration);
+    }
+
+
+    @Test
+    void updateHabitAssignDurationTest_MissingParam() throws Exception {
+        Long habitAssignId = 1L;
+
+        mockMvc.perform(put(habitAssignLink + "/{habitAssignId}/update-habit-duration", habitAssignId)
+                        .principal(principal)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -116,9 +156,9 @@ public class HabitAssignControllerTest {
         when(habitAssignService.getByHabitAssignIdAndUserId(habitAssignId, user.getId(), locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/{habitAssignId}", habitAssignId)
-                .requestAttr("user", user)
-                .header("Accept-Language", locale.getLanguage())
+        mockMvc.perform(get(habitAssignLink + "/{habitAssignId}", habitAssignId)
+                .principal(principal)
+                .header("Accept-Language", "en")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -135,8 +175,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.getAllHabitAssignsByUserIdAndStatusNotCancelled(user.getId(), locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/allForCurrentUser")
-                        .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/allForCurrentUser")
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -155,11 +195,30 @@ public class HabitAssignControllerTest {
         when(habitAssignService.getUserShoppingAndCustomShoppingLists(user.getId(), habitAssignId, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/{habitAssignId}/allUserAndCustomList", habitAssignId)
-                        .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/{habitAssignId}/allUserAndCustomList", habitAssignId)
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+        verify(habitAssignService).getUserShoppingAndCustomShoppingLists(user.getId(), habitAssignId, locale.getLanguage());
+    }
+
+    @Test
+    void getUserShoppingAndCustomShoppingLists_NotSavedTest() throws Exception {
+        Long habitAssignId = 1L;
+        UserVO user = new UserVO();
+        Locale locale = Locale.ENGLISH;
+
+        when(habitAssignService.getUserShoppingAndCustomShoppingLists(user.getId(), habitAssignId, locale.getLanguage()))
+                .thenThrow(new UserShoppingListItemNotSavedException("Shopping list items not saved"));
+
+        mockMvc.perform(get(habitAssignLink + "/{habitAssignId}/allUserAndCustomList", habitAssignId)
+                        .principal(principal)
+                        .header("Accept-Language", locale.getLanguage())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(habitAssignService).getUserShoppingAndCustomShoppingLists(user.getId(), habitAssignId, locale.getLanguage());
@@ -172,15 +231,17 @@ public class HabitAssignControllerTest {
         Locale locale = Locale.ENGLISH;
         UserShoppingAndCustomShoppingListsDto listsDto = new UserShoppingAndCustomShoppingListsDto();
 
+        String mockJson = "{\"some\":\"value\"}";
+
         doNothing().when(habitAssignService)
                 .fullUpdateUserAndCustomShoppingLists(user.getId(), habitAssignId, listsDto, locale.getLanguage());
 
-        mockMvc.perform(put("/habit/assign/{habitAssignId}/allUserAndCustomList", habitAssignId)
-                        .requestAttr("user", user)
+        mockMvc.perform(put(habitAssignLink + "/{habitAssignId}/allUserAndCustomList", habitAssignId)
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(listsDto)))
+                        .content(mockJson))
                 .andExpect(status().isOk());
 
         verify(habitAssignService).fullUpdateUserAndCustomShoppingLists(user.getId(), habitAssignId, listsDto, locale.getLanguage());
@@ -195,8 +256,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.getListOfUserAndCustomShoppingListsWithStatusInprogress(user.getId(), locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/allUserAndCustomShoppingListsInprogress")
-                        .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/allUserAndCustomShoppingListsInprogress")
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -214,7 +275,7 @@ public class HabitAssignControllerTest {
         when(habitAssignService.getAllHabitAssignsByHabitIdAndStatusNotCancelled(habitId, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/{habitId}/all", habitId)
+        mockMvc.perform(get(habitAssignLink + "/{habitId}/all", habitId)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -234,8 +295,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.findHabitAssignByUserIdAndHabitId(user.getId(), habitId, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/{habitId}/active", habitId)
-                        .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/{habitId}/active", habitId)
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -254,8 +315,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.findHabitByUserIdAndHabitAssignId(user.getId(), habitAssignId, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/{habitAssignId}/more", habitAssignId)
-                .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/{habitAssignId}/more", habitAssignId)
+                .principal(principal)
                 .header("Accept-Language", locale.getLanguage())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -271,12 +332,14 @@ public class HabitAssignControllerTest {
         HabitAssignManagementDto responseDto = new HabitAssignManagementDto();
         requestDto.setStatus(HabitAssignStatus.INPROGRESS);
 
+        String mockJson = "{\"status\":\"INPROGRESS\"}";
+
         when(habitAssignService.updateStatusByHabitAssignId(habitAssignId, requestDto)).thenReturn(responseDto);
 
-        mockMvc.perform(patch("/habit/assign/{habitAssignId}", habitAssignId)
+        mockMvc.perform(patch(habitAssignLink + "/{habitAssignId}", habitAssignId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(mockJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
@@ -292,8 +355,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.enrollHabit(habitAssignId, user.getId(), date, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(post("/habit/assign/{habitAssignId}/enroll/{date}", habitAssignId, date)
-                        .requestAttr("user", user)
+        mockMvc.perform(post(habitAssignLink + "/{habitAssignId}/enroll/{date}", habitAssignId, date)
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -312,8 +375,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.unenrollHabit(habitAssignId, user.getId(), date))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(post("/habit/assign/{habitAssignId}/unenroll/{date}", habitAssignId, date)
-                        .requestAttr("user", user)
+        mockMvc.perform(post(habitAssignLink + "/{habitAssignId}/unenroll/{date}", habitAssignId, date)
+                        .principal(principal)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -331,8 +394,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.findInprogressHabitAssignsOnDate(user.getId(), date, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/active/{date}", date)
-                        .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/active/{date}", date)
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -352,8 +415,8 @@ public class HabitAssignControllerTest {
         when(habitAssignService.findHabitAssignsBetweenDates(user.getId(), from, to, locale.getLanguage()))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(get("/habit/assign/activity/{from}/to/{to}", from, to)
-                        .requestAttr("user", user)
+        mockMvc.perform(get(habitAssignLink + "/activity/{from}/to/{to}", from, to)
+                        .principal(principal)
                         .header("Accept-Language", locale.getLanguage())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -370,8 +433,8 @@ public class HabitAssignControllerTest {
 
         when(habitAssignService.cancelHabitAssign(habitId, user.getId())).thenReturn(responseDto);
 
-        mockMvc.perform(patch("/habit/assign/cancel/{habitId}", habitId)
-                        .requestAttr("user", user)
+        mockMvc.perform(patch(habitAssignLink + "/cancel/{habitId}", habitId)
+                        .principal(principal)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -384,8 +447,8 @@ public class HabitAssignControllerTest {
         Long habitAssignId = 1L;
         UserVO user = new UserVO();
 
-        mockMvc.perform(delete("/habit/assign/delete/{habitAssignId}", habitAssignId)
-                        .requestAttr("user", user)
+        mockMvc.perform(delete(habitAssignLink + "/delete/{habitAssignId}", habitAssignId)
+                        .principal(principal)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -395,13 +458,14 @@ public class HabitAssignControllerTest {
     @Test
     void updateShoppingListStatusTest() throws Exception {
         UpdateUserShoppingListDto requestDto = new UpdateUserShoppingListDto();
+        String mockJson = "{\"some\":\"value\"}";
 
         doNothing().when(habitAssignService).updateUserShoppingListItem(requestDto);
 
-        mockMvc.perform(put("/habit/assign/saveShoppingListForHabitAssign")
+        mockMvc.perform(put(habitAssignLink + "/saveShoppingListForHabitAssign")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(mockJson))
                 .andExpect(status().isOk());
 
         verify(habitAssignService).updateUserShoppingListItem(requestDto);
@@ -415,8 +479,8 @@ public class HabitAssignControllerTest {
 
         doNothing().when(habitAssignService).updateProgressNotificationHasDisplayed(habitAssignId, user.getId());
 
-        mockMvc.perform(put("/habit/assign/{habitAssignId}/updateProgressNotificationHasDisplayed", habitAssignId)
-                        .requestAttr("user", user)
+        mockMvc.perform(put(habitAssignLink + "/{habitAssignId}/updateProgressNotificationHasDisplayed", habitAssignId)
+                        .principal(principal)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
