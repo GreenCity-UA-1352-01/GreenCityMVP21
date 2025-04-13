@@ -260,7 +260,7 @@ public class ShoppingListItemControllerTest {
         List<UserShoppingListItemResponseDto> responseDto = List.of(dto);
 
         when(shoppingListItemService.updateUserShoppingListItemStatus(responseDto.get(0).getId(), responseDto.get(0).getId(),
-                responseDto.get(0).getStatus().toString(), "Done"))
+                responseDto.get(0).getStatus().toString(), "DONE"))
                 .thenReturn(responseDto);
 
         mockMvc.perform(patch("/user/shopping-list-items/{userShoppingListItemId}/status/{status}",
