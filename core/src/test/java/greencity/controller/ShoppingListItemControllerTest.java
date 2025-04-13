@@ -43,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ShoppingListItemController.class)
 @ContextConfiguration(classes = {GreenCityApplication.class})
-//@WithMockUser
 public class ShoppingListItemControllerTest {
 
     @Autowired
@@ -84,6 +83,7 @@ public class ShoppingListItemControllerTest {
         mockMvc.perform(post("/user/shopping-list-items?habitId=1")
                         .with(user("user@example.com"))
                         .with(csrf())
+                        .header("Accept-Language", "en")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isCreated())
@@ -107,7 +107,9 @@ public class ShoppingListItemControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message", is("Couldn't save user shopping list item.")));
     }
 
     @Test
@@ -181,7 +183,6 @@ public class ShoppingListItemControllerTest {
     @Test
     public void testBulkDeleteUserShoppingListItems_InvalidIds_BadRequest() throws Exception {
         String invalidIds = "1 2 3";
-//        String invalidIds = "1,,2,3";
 
         mockMvc.perform(delete("/user/shopping-list-items/user-shopping-list-items")
                         .with(user("user@example.com"))
