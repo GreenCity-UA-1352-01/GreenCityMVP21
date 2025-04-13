@@ -12,15 +12,19 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ShoppingListItemSpecificationTest {
@@ -33,15 +37,23 @@ class ShoppingListItemSpecificationTest {
     private CriteriaQuery<ShoppingListItem> criteriaQuery;
     @Mock
     private CriteriaBuilder criteriaBuilder;
-    @Mock
-    private Predicate predicate;
 
     @Mock
-    private SingularAttribute<Translation, String> content;
+    private Predicate allPredicates;
     @Mock
-    private SingularAttribute<ShoppingListItemTranslation, ShoppingListItem> shoppingListItem;
+    private Predicate idPredicate;
     @Mock
-    private SingularAttribute<ShoppingListItem, Long> id;
+    private Predicate contentPredicate;
+    @Mock
+    private Predicate combinedPredicate;
+
+    @Mock
+    private SingularAttribute<Translation, String> contentAttribute;
+    @Mock
+    private SingularAttribute<ShoppingListItemTranslation, ShoppingListItem> shoppingListItemAttribute;
+    @Mock
+    private SingularAttribute<ShoppingListItem, Long> idAttribute;
+
     @Mock
     private Path<String> contentPath;
     @Mock
@@ -49,63 +61,119 @@ class ShoppingListItemSpecificationTest {
     @Mock
     private Path<Long> idPath;
 
-    private List<SearchCriteria> searchCriteriaList = new ArrayList<>();
+    private final List<SearchCriteria> searchCriteriaList = new ArrayList<>();
 
     @Spy
     private ShoppingListItemSpecification shoppingListItemSpecification = new ShoppingListItemSpecification(searchCriteriaList);
 
     @BeforeEach
     public void setUp() {
-        Translation_.content = content;
-        ShoppingListItemTranslation_.shoppingListItem = shoppingListItem;
-        ShoppingListItem_.id = id;
+        Translation_.content = contentAttribute;
+        ShoppingListItemTranslation_.shoppingListItem = shoppingListItemAttribute;
+        ShoppingListItem_.id = idAttribute;
 
         searchCriteriaList.clear();
-//        when(shoppingListItemSpecification.getNumericPredicate(root, criteriaBuilder, any()))
-//                .thenReturn(numericPredicate);
-//
-//        when(criteriaBuilder.conjunction()).thenReturn(allPredicates);
-//        when(criteriaBuilder.and(allPredicates, numericPredicate)).thenReturn(expected);
-//        when(criteriaBuilder.and(expected, numericPredicate)).thenReturn(expected);
-//        when(criteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(itemTranslationRoot);
-//        when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
-//        when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
-//        when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
-//        when(criteriaBuilder.equal(idPath, idPath)).thenReturn(equalsPredicate);
-//        when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
-//        when(criteriaBuilder.like(contentPath, anyString())).thenReturn(likePredicate);
-//        when(criteriaBuilder.and(likePredicate, equalsPredicate)).thenReturn(andPredicate);
-//        when(criteriaBuilder.and(allPredicates, andPredicate)).thenReturn(expected);
-//        when(criteriaBuilder.and(expected, andPredicate)).thenReturn(expected);
-        when(shoppingListItemSpecification.getNumericPredicate(root, criteriaBuilder, any()))
-                .thenReturn(predicate);
 
-        when(criteriaBuilder.conjunction()).thenReturn(predicate);
-        when(criteriaBuilder.and(predicate, predicate)).thenReturn(predicate);
+        when(criteriaBuilder.conjunction()).thenReturn(allPredicates);
+    }
+
+    @Test
+    void testToPredicate_withEmptySearchCriteriaList() {
+        Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
+
+        assertEquals(allPredicates, actual);
+        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
+        verify(shoppingListItemSpecification, never()).getNumericPredicate(eq(root), eq(criteriaBuilder), any());
+        verify(criteriaQuery, never()).from(ShoppingListItemTranslation.class);
+    }
+
+    @Test
+    void testToPredicate_withIdSearchCriteria() {
+        ShoppingListItem entity = ModelUtils.getShoppingListItem();
+        SearchCriteria idSearchCriteria = getIdSearchCriteria(entity);
+        searchCriteriaList.add(idSearchCriteria);
+
+        doReturn(idPredicate).when(shoppingListItemSpecification).getNumericPredicate(
+                eq(root), eq(criteriaBuilder), any(SearchCriteria.class)
+        );
+        when(criteriaBuilder.and(allPredicates, idPredicate)).thenReturn(idPredicate);
+
+        Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
+
+        assertEquals(idPredicate, actual);
+        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
+        verify(shoppingListItemSpecification).getNumericPredicate(root, criteriaBuilder, idSearchCriteria);
+        verify(criteriaQuery, never()).from(ShoppingListItemTranslation.class);
+    }
+
+    @Test
+    void testToPredicate_withContentSearchCriteria() {
+        ShoppingListItem entity = ModelUtils.getShoppingListItem();
+        SearchCriteria contentSearchCriteria = getContentSearchCriteria(entity);
+        searchCriteriaList.add(contentSearchCriteria);
+
         when(criteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(itemTranslationRoot);
         when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
         when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
         when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
-        when(criteriaBuilder.equal(idPath, idPath)).thenReturn(predicate);
+        when(criteriaBuilder.equal(idPath, idPath)).thenReturn(contentPredicate);
         when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
-        when(criteriaBuilder.like(contentPath, anyString())).thenReturn(predicate);
+        when(criteriaBuilder.like(eq(contentPath), anyString())).thenReturn(contentPredicate);
+        when(criteriaBuilder.and(contentPredicate, contentPredicate)).thenReturn(contentPredicate);
+        when(criteriaBuilder.and(allPredicates, contentPredicate)).thenReturn(contentPredicate);
+
+        Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
+
+        assertEquals(contentPredicate, actual);
+        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
+        verify(shoppingListItemSpecification, never()).getNumericPredicate(eq(root), eq(criteriaBuilder), any());
+        verify(criteriaQuery).from(ShoppingListItemTranslation.class);
     }
 
-    @Test
-    void testToPredicate() {
+    @ParameterizedTest
+    @MethodSource("provideSearchCriteria")
+    void testToPredicate_withIdAndContentSearchCriteria(SearchCriteria firstSearchCriteria,
+                                                        SearchCriteria secondSearchCriteria,
+                                                        SearchCriteria idSearchCriteria) {
+        searchCriteriaList.add(firstSearchCriteria);
+        searchCriteriaList.add(secondSearchCriteria);
+
+        doReturn(idPredicate).when(shoppingListItemSpecification).getNumericPredicate(
+                eq(root), eq(criteriaBuilder), any(SearchCriteria.class)
+        );
+        when(criteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(itemTranslationRoot);
+        when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
+        when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
+        when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
+        when(criteriaBuilder.equal(idPath, idPath)).thenReturn(contentPredicate);
+        when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
+        when(criteriaBuilder.like(eq(contentPath), anyString())).thenReturn(contentPredicate);
+        when(criteriaBuilder.and(contentPredicate, contentPredicate)).thenReturn(contentPredicate);
+        lenient().when(criteriaBuilder.and(allPredicates, idPredicate)).thenReturn(idPredicate);
+        lenient().when(criteriaBuilder.and(allPredicates, contentPredicate)).thenReturn(contentPredicate);
+        lenient().when(criteriaBuilder.and(idPredicate, contentPredicate)).thenReturn(combinedPredicate);
+        lenient().when(criteriaBuilder.and(contentPredicate, idPredicate)).thenReturn(combinedPredicate);
+
+        Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
+
+        assertEquals(combinedPredicate, actual);
+        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
+        verify(shoppingListItemSpecification).getNumericPredicate(root, criteriaBuilder, idSearchCriteria);
+        verify(criteriaQuery).from(ShoppingListItemTranslation.class);
+    }
+
+    private static Stream<Arguments> provideSearchCriteria() {
         ShoppingListItem entity = ModelUtils.getShoppingListItem();
         SearchCriteria idSearchCriteria = getIdSearchCriteria(entity);
         SearchCriteria contentSearchCriteria = getContentSearchCriteria(entity);
-        searchCriteriaList.add(idSearchCriteria);
-        searchCriteriaList.add(contentSearchCriteria);
 
-        Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
-        assertEquals(predicate, actual);
-        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
-        verify(shoppingListItemSpecification).getNumericPredicate(root, criteriaBuilder, idSearchCriteria);
+        return Stream.of(
+            Arguments.of(idSearchCriteria, contentSearchCriteria, idSearchCriteria),
+            Arguments.of(contentSearchCriteria, idSearchCriteria, idSearchCriteria)
+        );
     }
 
-    private SearchCriteria getIdSearchCriteria(ShoppingListItem entity) {
+    private static SearchCriteria getIdSearchCriteria(ShoppingListItem entity) {
         return SearchCriteria.builder()
                 .type(ShoppingListItem_.ID)
                 .key(ShoppingListItem_.ID)
@@ -113,7 +181,7 @@ class ShoppingListItemSpecificationTest {
                 .build();
     }
 
-    private SearchCriteria getContentSearchCriteria(ShoppingListItem entity) {
+    private static SearchCriteria getContentSearchCriteria(ShoppingListItem entity) {
         return SearchCriteria.builder()
                 .type(Translation_.CONTENT)
                 .key(Translation_.CONTENT)
