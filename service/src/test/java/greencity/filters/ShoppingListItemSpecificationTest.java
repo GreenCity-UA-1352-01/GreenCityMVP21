@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -106,21 +107,24 @@ class ShoppingListItemSpecificationTest {
         verify(criteriaQuery, never()).from(ShoppingListItemTranslation.class);
     }
 
-    @Test
-    void testToPredicate_withContentSearchCriteria() {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "value"})
+    void testToPredicate_withContentSearchCriteria(String criteriaValue) {
         ShoppingListItem entity = ModelUtils.getShoppingListItem();
         SearchCriteria contentSearchCriteria = getContentSearchCriteria(entity);
+        contentSearchCriteria.setValue(criteriaValue);
         searchCriteriaList.add(contentSearchCriteria);
 
         when(criteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(itemTranslationRoot);
-        when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
-        when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
-        when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
-        when(criteriaBuilder.equal(idPath, idPath)).thenReturn(contentPredicate);
-        when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
-        when(criteriaBuilder.like(eq(contentPath), anyString())).thenReturn(contentPredicate);
-        when(criteriaBuilder.and(contentPredicate, contentPredicate)).thenReturn(contentPredicate);
-        when(criteriaBuilder.and(allPredicates, contentPredicate)).thenReturn(contentPredicate);
+        lenient().when(criteriaBuilder.and(allPredicates, allPredicates)).thenReturn(contentPredicate);
+        lenient().when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
+        lenient().when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
+        lenient().when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
+        lenient().when(criteriaBuilder.equal(idPath, idPath)).thenReturn(contentPredicate);
+        lenient().when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
+        lenient().when(criteriaBuilder.like(eq(contentPath), anyString())).thenReturn(contentPredicate);
+        lenient().when(criteriaBuilder.and(contentPredicate, contentPredicate)).thenReturn(contentPredicate);
+        lenient().when(criteriaBuilder.and(allPredicates, contentPredicate)).thenReturn(contentPredicate);
 
         Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
 
