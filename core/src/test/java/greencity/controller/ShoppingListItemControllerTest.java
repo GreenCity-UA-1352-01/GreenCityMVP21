@@ -295,7 +295,7 @@ public class ShoppingListItemControllerTest {
     public void testFindInProgressByUserId_InvalidLanguage_BadRequest() throws Exception {
         mockMvc.perform(get("/user/shopping-list-items/2/get-all-inprogress")
                         .with(user("user@example.com"))
-                        .param("Accept-Language", "fr"))
+                        .header("Accept-Language", "fr"))
                 .andExpect(status().isBadRequest());
 
         verify(shoppingListItemService, never())
