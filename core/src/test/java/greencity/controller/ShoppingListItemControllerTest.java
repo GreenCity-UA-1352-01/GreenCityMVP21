@@ -257,10 +257,10 @@ public class ShoppingListItemControllerTest {
     @Test
     public void testUpdateUserShoppingListItemStatus_Success() throws Exception {
         UserShoppingListItemResponseDto dto = ModelUtils.getUserShoppingListItemResponseDto();
+        dto.setStatus(ShoppingListItemStatus.DONE);
         List<UserShoppingListItemResponseDto> responseDto = List.of(dto);
 
-        when(shoppingListItemService.updateUserShoppingListItemStatus(responseDto.get(0).getId(), responseDto.get(0).getId(),
-                responseDto.get(0).getStatus().toString(), "DONE"))
+        when(shoppingListItemService.updateUserShoppingListItemStatus(eq(1L), eq(1L), eq("en"), eq("DONE")))
                 .thenReturn(responseDto);
 
         mockMvc.perform(patch("/user/shopping-list-items/{userShoppingListItemId}/status/{status}",
@@ -268,7 +268,11 @@ public class ShoppingListItemControllerTest {
                 .with(user("user@example.com"))
                 .with(csrf())
                 .header("Accept-Language", "en"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(responseDto.get(0).getId().intValue())))
+                .andExpect(jsonPath("$[0].status", is(responseDto.get(0).getStatus().toString())));
     }
 
     @Test
