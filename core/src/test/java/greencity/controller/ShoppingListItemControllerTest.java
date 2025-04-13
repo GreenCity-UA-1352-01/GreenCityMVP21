@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.GreenCityApplication;
 import greencity.ModelUtils;
 import greencity.config.SecurityConfig;
+import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.dto.shoppinglistitem.ShoppingListItemRequestDto;
 import greencity.dto.user.UserShoppingListItemResponseDto;
 import greencity.enums.ShoppingListItemStatus;
@@ -241,12 +242,63 @@ public class ShoppingListItemControllerTest {
                 .thenReturn(responseDto);
 
         mockMvc.perform(patch("/user/shopping-list-items/1")
-                .with(user("user@example.com"))
-                .with(csrf())
-                .header("Accept-Language", "en"))
+                        .with(user("user@example.com"))
+                        .with(csrf())
+                        .header("Accept-Language", "en"))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(responseDto.getId().intValue())))
                 .andExpect(jsonPath("$.status", is(responseDto.getStatus().toString())));
+
+        verify(shoppingListItemService, times(1))
+                .updateUserShopingListItemStatus(eq(1L), eq(1L), eq("en"));
+    }
+
+    @Test
+    public void testUpdateUserShoppingListItemStatus_Unauthorized_Forbidden() throws Exception {
+        when(shoppingListItemService.updateUserShopingListItemStatus(eq(1L), eq(2L), eq("en")))
+                .thenThrow(new AccessDeniedException("Forbidden"));
+
+        mockMvc.perform(patch("/user/shopping-list-items/2")
+                        .with(user("user@example.com"))
+                        .with(csrf())
+                        .header("Accept-Language", "en"))
+                .andExpect(status().isForbidden());
+
+        verify(shoppingListItemService, times(1))
+                .updateUserShopingListItemStatus(eq(1L), eq(2L), eq("en"));
+    }
+
+    @Test
+    public void testFindInProgressByUserId_Success() throws Exception {
+        ShoppingListItemDto dto = new ShoppingListItemDto();
+        dto.setId(1L);
+        dto.setStatus(ShoppingListItemStatus.INPROGRESS.toString());
+        List<ShoppingListItemDto> responseList = Collections.singletonList(dto);
+
+        when(shoppingListItemService.findInProgressByUserIdAndLanguageCode(eq(1L), eq("en")))
+                .thenReturn(responseList);
+
+        mockMvc.perform(get("/user/shopping-list-items/1/get-all-inprogress")
+                        .with(user("user@example.com"))
+                        .param("lang", "en"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(responseList.getFirst().getId().intValue())));
+
+        verify(shoppingListItemService, times(1))
+                .findInProgressByUserIdAndLanguageCode(eq(1L), eq("en"));
+    }
+
+    @Test
+    public void testFindInProgressByUserId_InvalidLanguage_BadRequest() throws Exception {
+        mockMvc.perform(get("/user/shopping-list-items/2/get-all-inprogress")
+                        .with(user("user@example.com"))
+                        .param("Accept-Language", "fr"))
+                .andExpect(status().isBadRequest());
+
+        verify(shoppingListItemService, never())
+                .findInProgressByUserIdAndLanguageCode(anyLong(), eq("fr"));
     }
 }
