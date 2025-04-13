@@ -36,7 +36,6 @@ class SearchControllerTest {
     SearchService searchService;
     @MockBean
     private LanguageService languageService;
-
     @Autowired
     private MockMvc mockMvc;
     private static final List<String> SUPPORTED_LANGUAGES = List.of("en", "ua", "pl");
@@ -81,6 +80,27 @@ class SearchControllerTest {
         mockMvc.perform(get("/search")
                         .header("Accept-Language", "en"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void search_ValidTest_NoResultsFound_ShouldReturnEmptyList() throws Exception {
+        SearchResponseDto emptyResponseDto = SearchResponseDto.builder()
+                .ecoNews(List.of())
+                .countOfResults(0L)
+                .build();
+
+        Mockito.when(searchService.search(eq("nonexistent"), eq("en"))).thenReturn(emptyResponseDto);
+
+        mockMvc.perform(get("/search")
+                        .param("searchQuery", "nonexistent")
+                        .header("Accept-Language", "en"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.countOfResults").value(0))
+                .andExpect(jsonPath("$.ecoNews").isArray())
+                .andExpect(jsonPath("$.ecoNews").isEmpty());
+
+        verify(searchService, times(1)).search(eq("nonexistent"), eq("en"));
     }
 
     @Test
@@ -145,5 +165,4 @@ class SearchControllerTest {
                         .header("Accept-Language", "de"))
                 .andExpect(status().isBadRequest());
     }
-
 }
