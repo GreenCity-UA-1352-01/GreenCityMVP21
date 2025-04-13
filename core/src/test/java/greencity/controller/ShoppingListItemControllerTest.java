@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ShoppingListItemController.class)
 @ContextConfiguration(classes = {GreenCityApplication.class})
-@WithMockUser
+//@WithMockUser
 public class ShoppingListItemControllerTest {
 
     @Autowired
@@ -252,6 +252,23 @@ public class ShoppingListItemControllerTest {
 
         verify(shoppingListItemService, times(1))
                 .updateUserShopingListItemStatus(eq(1L), eq(1L), eq("en"));
+    }
+
+    @Test
+    public void testUpdateUserShoppingListItemStatus_Success() throws Exception {
+        UserShoppingListItemResponseDto dto = ModelUtils.getUserShoppingListItemResponseDto();
+        List<UserShoppingListItemResponseDto> responseDto = List.of(dto);
+
+        when(shoppingListItemService.updateUserShoppingListItemStatus(responseDto.get(0).getId(), responseDto.get(0).getId(),
+                responseDto.get(0).getStatus().toString(), "Done"))
+                .thenReturn(responseDto);
+
+        mockMvc.perform(patch("/user/shopping-list-items/{userShoppingListItemId}/status/{status}",
+                        responseDto.get(0).getId(), responseDto.get(0).getStatus().toString())
+                .with(user("user@example.com"))
+                .with(csrf())
+                .header("Accept-Language", "en"))
+                .andExpect(status().isOk());
     }
 
     @Test
