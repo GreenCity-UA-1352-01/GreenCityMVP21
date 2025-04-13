@@ -43,17 +43,6 @@ public class LanguageValidatorTest {
     }
 
     @Test
-    void isValidNullLanguageTest() {
-        List<String> trueCodes = Arrays.asList("en", "ua");
-        when(languageService.findAllLanguageCodes()).thenReturn(trueCodes);
-        languageValidator.initialize(null);
-
-        Locale nullLocale = new Locale("");
-        boolean result = languageValidator.isValid(nullLocale, null);
-        assertFalse(result);
-    }
-
-    @Test
     void isValidEmptyLanguageTest() {
         List<String> trueCodes = Arrays.asList("en", "ua");
         when(languageService.findAllLanguageCodes()).thenReturn(trueCodes);
