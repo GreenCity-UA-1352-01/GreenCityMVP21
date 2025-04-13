@@ -6,6 +6,7 @@ import greencity.dto.search.SearchResponseDto;
 import greencity.dto.user.EcoNewsAuthorDto;
 import greencity.service.LanguageService;
 import greencity.service.SearchService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,12 +39,16 @@ class SearchControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    private static final List<String> SUPPORTED_LANGUAGES = List.of("en", "ua", "pl");
+
+    @BeforeEach
+    void setUp() {
+        Mockito.when(languageService.findAllLanguageCodes())
+                .thenReturn(SUPPORTED_LANGUAGES);
+    }
 
     @Test
     void search_ValidTest_ShouldReturnSearchResponseDto() throws Exception {
-        Mockito.when(languageService.findAllLanguageCodes())
-                .thenReturn(List.of("en", "ua", "pl"));
-
         SearchNewsDto news = SearchNewsDto.builder()
                 .id(1L)
                 .title("Save the planet")
@@ -81,22 +85,14 @@ class SearchControllerTest {
 
     @Test
     void search_InvalidTest_invalidLanguage_shouldReturnBadRequest() throws Exception {
-        Mockito.when(languageService.findAllLanguageCodes())
-                .thenReturn(List.of("en", "ua", "pl"));
-
         mockMvc.perform(get("/search")
                         .param("searchQuery", "eco")
                         .header("Accept-Language", "de"))
                 .andExpect(status().isBadRequest());
     }
 
-
-
     @Test
     void searchEcoNews_ValidTest_shouldReturnPaginatedResults() throws Exception {
-        Mockito.when(languageService.findAllLanguageCodes())
-                .thenReturn(List.of("en", "ua", "pl"));
-
         SearchNewsDto news = SearchNewsDto.builder()
                 .id(1L)
                 .title("Save the planet")
@@ -111,7 +107,9 @@ class SearchControllerTest {
                 0,
                 1
         );
-        Mockito.when(searchService.searchAllNews(any(), eq("eco"), eq("en"))).thenReturn(dto);
+        Mockito.when(searchService.searchAllNews(argThat(pageable -> pageable.getPageNumber() == 0 && pageable.getPageSize() == 5), eq("eco"), eq("en")))
+                .thenReturn(dto);
+
         mockMvc.perform(get("/search/econews")
                         .param("searchQuery", "eco")
                         .param("page", "0")
@@ -125,7 +123,8 @@ class SearchControllerTest {
                 .andExpect(jsonPath("$.page[0].title").value("Save the planet"))
                 .andExpect(jsonPath("$.page[0].author.name").value("John Doe"));
 
-        verify(searchService, times(1)).searchAllNews(any(), eq("eco"), eq("en"));
+        verify(searchService, times(1))
+                .searchAllNews(argThat(pageable -> pageable.getPageNumber() == 0 && pageable.getPageSize() == 5), eq("eco"), eq("en"));
     }
 
     @Test
@@ -139,9 +138,6 @@ class SearchControllerTest {
 
     @Test
     void searchEcoNews_InValidTest_invalidLanguage_shouldReturnBadRequest() throws Exception {
-        Mockito.when(languageService.findAllLanguageCodes())
-                .thenReturn(List.of("en", "ua", "pl"));
-
         mockMvc.perform(get("/search/econews")
                         .param("searchQuery", "eco")
                         .param("page", "0")
@@ -149,6 +145,5 @@ class SearchControllerTest {
                         .header("Accept-Language", "de"))
                 .andExpect(status().isBadRequest());
     }
-
 
 }
