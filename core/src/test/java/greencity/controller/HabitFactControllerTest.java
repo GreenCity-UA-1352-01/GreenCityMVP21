@@ -105,7 +105,18 @@ class HabitFactControllerTest {
         verify(habitFactService, times(1)).delete(1L);
     }
 
+    @Test
+    void testGetRandomFactByHabitIdWhenFactNotFound() {
+        Long habitId = 999L;
+        Locale locale = new Locale("en");
+        when(habitFactService.getRandomHabitFactByHabitIdAndLanguage(habitId, "en"))
+                .thenReturn(null);
 
+        LanguageTranslationDTO result = habitFactController.getRandomFactByHabitId(habitId, locale);
+        assertThat(result).isNull();
+
+        verify(habitFactService).getRandomHabitFactByHabitIdAndLanguage(habitId, "en");
+    }
 
 
 }
