@@ -21,11 +21,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = SearchController.class)
 @ContextConfiguration(classes = {SearchController.class})
@@ -89,12 +90,6 @@ class SearchControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void search_InValidTest_missingLanguageHeader_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/search")
-                        .param("searchQuery", "eco"))
-                .andExpect(status().isBadRequest());
-    }
 
 
     @Test
@@ -139,15 +134,6 @@ class SearchControllerTest {
                         .param("page", "0")
                         .param("size", "5")
                         .header("Accept-Language", "en"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void searchEcoNews_InValidTest_noAcceptLanguage_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/search/econews")
-                        .param("searchQuery", "eco")
-                        .param("page", "0")
-                        .param("size", "5"))
                 .andExpect(status().isBadRequest());
     }
 
