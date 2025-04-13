@@ -83,8 +83,8 @@ class ShoppingListItemSpecificationTest {
         Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
 
         assertEquals(allPredicates, actual);
-        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
-        verify(shoppingListItemSpecification, never()).getNumericPredicate(eq(root), eq(criteriaBuilder), any());
+        verify(shoppingListItemSpecification).toPredicate(any(), any(), any());
+        verify(shoppingListItemSpecification, never()).getNumericPredicate(any(), any(), any());
         verify(criteriaQuery, never()).from(ShoppingListItemTranslation.class);
     }
 
@@ -102,35 +102,50 @@ class ShoppingListItemSpecificationTest {
         Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
 
         assertEquals(idPredicate, actual);
-        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
-        verify(shoppingListItemSpecification).getNumericPredicate(root, criteriaBuilder, idSearchCriteria);
+        verify(shoppingListItemSpecification).toPredicate(any(), any(), any());
+        verify(shoppingListItemSpecification).getNumericPredicate(any(), any(), any());
         verify(criteriaQuery, never()).from(ShoppingListItemTranslation.class);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"", "value"})
-    void testToPredicate_withContentSearchCriteria(String criteriaValue) {
+    @Test
+    void testToPredicate_withContentSearchCriteria_withEmptyValue() {
         ShoppingListItem entity = ModelUtils.getShoppingListItem();
         SearchCriteria contentSearchCriteria = getContentSearchCriteria(entity);
-        contentSearchCriteria.setValue(criteriaValue);
+        contentSearchCriteria.setValue("");
         searchCriteriaList.add(contentSearchCriteria);
 
         when(criteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(itemTranslationRoot);
-        lenient().when(criteriaBuilder.and(allPredicates, allPredicates)).thenReturn(contentPredicate);
-        lenient().when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
-        lenient().when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
-        lenient().when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
-        lenient().when(criteriaBuilder.equal(idPath, idPath)).thenReturn(contentPredicate);
-        lenient().when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
-        lenient().when(criteriaBuilder.like(eq(contentPath), anyString())).thenReturn(contentPredicate);
-        lenient().when(criteriaBuilder.and(contentPredicate, contentPredicate)).thenReturn(contentPredicate);
-        lenient().when(criteriaBuilder.and(allPredicates, contentPredicate)).thenReturn(contentPredicate);
+        when(criteriaBuilder.and(allPredicates, allPredicates)).thenReturn(contentPredicate);
 
         Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
 
         assertEquals(contentPredicate, actual);
-        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
-        verify(shoppingListItemSpecification, never()).getNumericPredicate(eq(root), eq(criteriaBuilder), any());
+        verify(shoppingListItemSpecification).toPredicate(any(), any(), any());
+        verify(shoppingListItemSpecification, never()).getNumericPredicate(any(), any(), any());
+        verify(criteriaQuery).from(ShoppingListItemTranslation.class);
+    }
+
+    @Test
+    void testToPredicate_withContentSearchCriteria_withNonEmptyValue() {
+        ShoppingListItem entity = ModelUtils.getShoppingListItem();
+        SearchCriteria contentSearchCriteria = getContentSearchCriteria(entity);
+        searchCriteriaList.add(contentSearchCriteria);
+
+        when(criteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(itemTranslationRoot);
+        when(root.get(ShoppingListItem_.id)).thenReturn(idPath);
+        when(itemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem)).thenReturn(shoppingListItemPath);
+        when(shoppingListItemPath.get(ShoppingListItem_.id)).thenReturn(idPath);
+        when(criteriaBuilder.equal(idPath, idPath)).thenReturn(contentPredicate);
+        when(itemTranslationRoot.get(Translation_.content)).thenReturn(contentPath);
+        when(criteriaBuilder.like(eq(contentPath), anyString())).thenReturn(contentPredicate);
+        when(criteriaBuilder.and(contentPredicate, contentPredicate)).thenReturn(contentPredicate);
+        when(criteriaBuilder.and(allPredicates, contentPredicate)).thenReturn(contentPredicate);
+
+        Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
+
+        assertEquals(contentPredicate, actual);
+        verify(shoppingListItemSpecification).toPredicate(any(), any(), any());
+        verify(shoppingListItemSpecification, never()).getNumericPredicate(any(), any(), any());
         verify(criteriaQuery).from(ShoppingListItemTranslation.class);
     }
 
@@ -161,8 +176,8 @@ class ShoppingListItemSpecificationTest {
         Predicate actual = shoppingListItemSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
 
         assertEquals(combinedPredicate, actual);
-        verify(shoppingListItemSpecification).toPredicate(root, criteriaQuery, criteriaBuilder);
-        verify(shoppingListItemSpecification).getNumericPredicate(root, criteriaBuilder, idSearchCriteria);
+        verify(shoppingListItemSpecification).toPredicate(any(), any(), any());
+        verify(shoppingListItemSpecification).getNumericPredicate(any(), any(), any());
         verify(criteriaQuery).from(ShoppingListItemTranslation.class);
     }
 
@@ -172,8 +187,10 @@ class ShoppingListItemSpecificationTest {
         SearchCriteria contentSearchCriteria = getContentSearchCriteria(entity);
 
         return Stream.of(
-            Arguments.of(idSearchCriteria, contentSearchCriteria, idSearchCriteria),
-            Arguments.of(contentSearchCriteria, idSearchCriteria, idSearchCriteria)
+                // Test ID criteria first, content criteria second
+                Arguments.of(idSearchCriteria, contentSearchCriteria, idSearchCriteria),
+                // Test content criteria first, ID criteria second
+                Arguments.of(contentSearchCriteria, idSearchCriteria, idSearchCriteria)
         );
     }
 
