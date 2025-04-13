@@ -90,7 +90,13 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllAvailableCustomShoppingListItems() throws Exception {
+    void testWrongUrl() throws Exception {
+        checkRequestWithError(HttpMethod.GET, HttpStatus.NOT_FOUND,
+                "/wrong/url", CONTROLLER_URL);
+    }
+
+    @Test
+    void testGetAllAvailableCustomShoppingListItems_shouldReturn200() throws Exception {
         var resultItem = getCustomShoppingListItemResponseDto();
         var expectedResult = Collections.singletonList(resultItem);
 
@@ -107,7 +113,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllAvailableCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
+    void testGetAllAvailableCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.GET, HttpStatus.UNAUTHORIZED,
@@ -116,21 +122,21 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllAvailableCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
+    void testGetAllAvailableCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 "/{url}/{userId}/{habitId}",
                 CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
     }
 
     @Test
-    void getAllAvailableCustomShoppingListItems_withInvalidHabitId_shouldReturn400() throws Exception {
+    void testGetAllAvailableCustomShoppingListItems_withInvalidHabitId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 "/{url}/{userId}/{habitId}",
                 CONTROLLER_URL, USER.getId(), INVALID_VALUE);
     }
 
     @Test
-    void saveUserCustomShoppingListItems() throws Exception {
+    void testSaveUserCustomShoppingListItems_shouldReturn201() throws Exception {
         String content = """
                 {
                   "customShoppingListItemSaveRequestDtoList": [
@@ -162,7 +168,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void saveUserCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
+    void testSaveUserCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.POST, HttpStatus.UNAUTHORIZED,
@@ -171,7 +177,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void saveUserCustomShoppingListItems_whenNotCurrentUser_shouldReturn400() throws Exception {
+    void testSaveUserCustomShoppingListItems_whenNotCurrentUser_shouldReturn400() throws Exception {
         String content = """
                 {
                   "customShoppingListItemSaveRequestDtoList": [
@@ -194,14 +200,14 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void saveUserCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
+    void testSaveUserCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.POST, HttpStatus.BAD_REQUEST,
                 "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
                 CONTROLLER_URL, INVALID_VALUE, HABIT_ID);
     }
 
     @Test
-    void saveUserCustomShoppingListItems_withInvalidHabitAssignId_shouldReturn400() throws Exception {
+    void testSaveUserCustomShoppingListItems_withInvalidHabitAssignId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.POST, HttpStatus.BAD_REQUEST,
                 "/{url}/{userId}/{habitAssignId}/custom-shopping-list-items",
                 CONTROLLER_URL, USER.getId(), INVALID_VALUE);
@@ -209,7 +215,7 @@ class CustomShoppingListItemControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"\"other\"", "\"1\"", "text", "1"})
-    void saveUserCustomShoppingListItems_withInvalidData_shouldReturn400(String fieldName) throws Exception {
+    void testSaveUserCustomShoppingListItems_withInvalidData_shouldReturn400(String fieldName) throws Exception {
         String content = """
                 {
                   "customShoppingListItemSaveRequestDtoList": [
@@ -232,7 +238,7 @@ class CustomShoppingListItemControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"\"\"", "\"   \""})
-    void saveUserCustomShoppingListItems_withBlankValues_shouldReturn400(String fieldValue) throws Exception {
+    void testSaveUserCustomShoppingListItems_withBlankValues_shouldReturn400(String fieldValue) throws Exception {
         String content = """
                 {
                   "customShoppingListItemSaveRequestDtoList": [
@@ -255,7 +261,7 @@ class CustomShoppingListItemControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"active", "done", "disabled", "inprogress"})
-    void updateItemStatus(String itemStatus) throws Exception {
+    void testUpdateItemStatus_shouldReturn200(String itemStatus) throws Exception {
         var expectedResult = getCustomShoppingListItemResponseDto();
         expectedResult.setStatus(ShoppingListItemStatus.valueOf(itemStatus.toUpperCase()));
 
@@ -274,7 +280,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatus_whenUnauthorized_shouldReturn401() throws Exception {
+    void testUpdateItemStatus_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
@@ -284,7 +290,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatus_whenNotCurrentUser_shouldReturn400() throws Exception {
+    void testUpdateItemStatus_whenNotCurrentUser_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", ITEM_ID.toString(), "status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -294,7 +300,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatus_withInvalidUserId_shouldReturn400() throws Exception {
+    void testUpdateItemStatus_withInvalidUserId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", ITEM_ID.toString(), "status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -304,7 +310,7 @@ class CustomShoppingListItemControllerTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {INVALID_VALUE})
-    void updateItemStatus_withInvalidItemId_shouldReturn400(String itemId) throws Exception {
+    void testUpdateItemStatus_withInvalidItemId_shouldReturn400(String itemId) throws Exception {
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", itemId, "status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -314,7 +320,7 @@ class CustomShoppingListItemControllerTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {INVALID_VALUE})
-    void updateItemStatus_withInvalidStatus_shouldReturn400(String status) throws Exception {
+    void testUpdateItemStatus_withInvalidStatus_shouldReturn400(String status) throws Exception {
         when(customShoppingListItemService.updateItemStatus(anyLong(), anyLong(), nullable(String.class)))
                 .thenThrow(BadRequestException.class);
 
@@ -328,7 +334,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatus_withNotExistingItem_shouldReturn404() throws Exception {
+    void testUpdateItemStatus_withNotExistingItem_shouldReturn404() throws Exception {
         when(customShoppingListItemService.updateItemStatus(anyLong(), anyLong(), anyString()))
                 .thenThrow(NotFoundException.class);
 
@@ -342,7 +348,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatusToDone() throws Exception {
+    void testUpdateItemStatusToDone_shouldReturn200() throws Exception {
         doNothing().when(customShoppingListItemService).updateItemStatusToDone(anyLong(), anyLong());
 
         mockMvc.perform(patch("/{url}/{userId}/done", CONTROLLER_URL, USER.getId())
@@ -353,7 +359,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatusToDone_whenUnauthorized_shouldReturn401() throws Exception {
+    void testUpdateItemStatusToDone_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
@@ -363,7 +369,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatusToDone_whenNotCurrentUser_shouldReturn400() throws Exception {
+    void testUpdateItemStatusToDone_whenNotCurrentUser_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", ITEM_ID.toString()),
                 "/{url}/{userId}/done",
@@ -373,7 +379,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatusToDone_withInvalidUserId_shouldReturn400() throws Exception {
+    void testUpdateItemStatusToDone_withInvalidUserId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", ITEM_ID.toString()),
                 "/{url}/{userId}/done",
@@ -383,7 +389,7 @@ class CustomShoppingListItemControllerTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {INVALID_VALUE})
-    void updateItemStatusToDone_withInvalidItemId_shouldReturn400(String itemId) throws Exception {
+    void testUpdateItemStatusToDone_withInvalidItemId_shouldReturn400(String itemId) throws Exception {
         checkRequestWithError(HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 mapOf("itemId", itemId),
                 "/{url}/{userId}/done",
@@ -391,7 +397,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void updateItemStatusToDone_withNotExistingItem_shouldReturn404() throws Exception {
+    void testUpdateItemStatusToDone_withNotExistingItem_shouldReturn404() throws Exception {
         doThrow(NotFoundException.class)
                 .when(customShoppingListItemService).updateItemStatusToDone(anyLong(), anyLong());
 
@@ -405,7 +411,7 @@ class CustomShoppingListItemControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"1", "1,2", "1,2,3"})
-    void bulkDeleteCustomShoppingListItems(String ids) throws Exception {
+    void testBulkDeleteCustomShoppingListItems_shouldReturn200(String ids) throws Exception {
         var expectedResult = Arrays.stream(ids.split(","))
                 .map(Long::parseLong)
                 .toList();
@@ -424,7 +430,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void bulkDeleteCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
+    void testBulkDeleteCustomShoppingListItems_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.DELETE, HttpStatus.UNAUTHORIZED,
@@ -434,7 +440,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void bulkDeleteCustomShoppingListItems_whenNotCurrentUser_shouldReturn400() throws Exception {
+    void testBulkDeleteCustomShoppingListItems_whenNotCurrentUser_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.DELETE, HttpStatus.BAD_REQUEST,
                 mapOf("ids", ITEM_ID.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -444,7 +450,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void bulkDeleteCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
+    void testBulkDeleteCustomShoppingListItems_withInvalidUserId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.DELETE, HttpStatus.BAD_REQUEST,
                 mapOf("ids", ITEM_ID.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -452,7 +458,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void bulkDeleteCustomShoppingListItems_withInvalidItemIds_shouldReturn400() throws Exception {
+    void testBulkDeleteCustomShoppingListItems_withInvalidItemIds_shouldReturn400() throws Exception {
         when(customShoppingListItemService.bulkDelete(anyString()))
                 .thenThrow(NumberFormatException.class);
 
@@ -465,7 +471,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void bulkDeleteCustomShoppingListItems_withoutItemIds_shouldReturn400() throws Exception {
+    void testBulkDeleteCustomShoppingListItems_withoutItemIds_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.DELETE, HttpStatus.BAD_REQUEST,
                 "/{url}/{userId}/custom-shopping-list-items",
                 CONTROLLER_URL, USER.getId());
@@ -473,7 +479,7 @@ class CustomShoppingListItemControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"active", "done", "disabled", "inprogress"})
-    void getAllCustomShoppingItemsByStatus_withStatus_shouldReturn200(String itemStatus) throws Exception {
+    void testGetAllCustomShoppingItemsByStatus_withStatus_shouldReturn200(String itemStatus) throws Exception {
         var resultItem = getCustomShoppingListItemResponseDto();
         resultItem.setStatus(ShoppingListItemStatus.valueOf(itemStatus.toUpperCase()));
         var expectedResult = Collections.singletonList(resultItem);
@@ -492,7 +498,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllCustomShoppingItemsByStatus_withoutStatus_shouldReturn200() throws Exception {
+    void testGetAllCustomShoppingItemsByStatus_withoutStatus_shouldReturn200() throws Exception {
         var resultItem = getCustomShoppingListItemResponseDto();
         var expectedResult = Collections.singletonList(resultItem);
 
@@ -509,7 +515,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllCustomShoppingItemsByStatus_whenUnauthorized_shouldReturn401() throws Exception {
+    void testGetAllCustomShoppingItemsByStatus_whenUnauthorized_shouldReturn401() throws Exception {
         unauthorized();
 
         checkRequestWithError(HttpMethod.GET, HttpStatus.UNAUTHORIZED,
@@ -519,7 +525,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllCustomShoppingItemsByStatus_whenNotCurrentUser_shouldReturn400() throws Exception {
+    void testGetAllCustomShoppingItemsByStatus_whenNotCurrentUser_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 mapOf("status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -529,7 +535,7 @@ class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    void getAllCustomShoppingItemsByStatus_withInvalidUserId_shouldReturn400() throws Exception {
+    void testGetAllCustomShoppingItemsByStatus_withInvalidUserId_shouldReturn400() throws Exception {
         checkRequestWithError(HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 mapOf("status", STATUS.toString()),
                 "/{url}/{userId}/custom-shopping-list-items",
@@ -539,7 +545,7 @@ class CustomShoppingListItemControllerTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {INVALID_VALUE})
-    void getAllCustomShoppingItemsByStatus_withInvalidStatus_shouldReturn400(String status) throws Exception {
+    void testGetAllCustomShoppingItemsByStatus_withInvalidStatus_shouldReturn400(String status) throws Exception {
         when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(anyLong(), nullable(String.class)))
                 .thenThrow(NotFoundException.class);
 
