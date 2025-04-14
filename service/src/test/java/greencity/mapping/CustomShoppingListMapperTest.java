@@ -3,9 +3,8 @@ package greencity.mapping;
 import greencity.ModelUtils;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
 import greencity.entity.CustomShoppingListItem;
-import greencity.entity.Filter;
 import greencity.enums.ShoppingListItemStatus;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -19,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CustomShoppingListMapperTest {
 
-    private static CustomShoppingListMapper mapper;
-    private static CustomShoppingListItemResponseDto dto;
-    private static CustomShoppingListItem entity;
+    private CustomShoppingListMapper mapper;
+    private CustomShoppingListItemResponseDto dto;
+    private CustomShoppingListItem entity;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         mapper = new CustomShoppingListMapper();
         dto = ModelUtils.getCustomShoppingListItemResponseDto();
         entity = ModelUtils.getCustomShoppingListItem();
@@ -83,6 +82,8 @@ class CustomShoppingListMapperTest {
      * Provides a stream of Arguments to test the testConvert_whenOneFieldNull method
      */
     public static Stream<Arguments> provideArgumentsForTestConvertWithNull() {
+        CustomShoppingListItemResponseDto dto = ModelUtils.getCustomShoppingListItemResponseDto();
+
         return Stream.of(
                 Arguments.of(null, dto.getText(), dto.getStatus()),
                 Arguments.of(dto.getId(), null, dto.getStatus()),
