@@ -3,6 +3,7 @@ package greencity.mapping;
 import greencity.ModelUtils;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
 import greencity.entity.CustomShoppingListItem;
+import greencity.entity.Filter;
 import greencity.enums.ShoppingListItemStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,10 @@ class CustomShoppingListMapperTest {
                 .status(status)
                 .build();
 
-        assertDoesNotThrow(() -> mapper.convert(item));
+        CustomShoppingListItem actual = assertDoesNotThrow(() -> mapper.convert(item));
+        assertEquals(id, actual.getId());
+        assertEquals(text, actual.getText());
+        assertEquals(status, actual.getStatus());
     }
 
     @Test

@@ -51,7 +51,10 @@ class CustomShoppingListResponseDtoMapperTest {
                 .status(status)
                 .build();
 
-        assertDoesNotThrow(() -> mapper.convert(item));
+        CustomShoppingListItemResponseDto actual = assertDoesNotThrow(() -> mapper.convert(item));
+        assertEquals(id, actual.getId());
+        assertEquals(text, actual.getText());
+        assertEquals(status, actual.getStatus());
     }
 
     @Test
