@@ -32,6 +32,7 @@ class FilterDtoRequestMapperTest {
     void testConvert() {
         Filter actual = assertDoesNotThrow(() -> mapper.convert(dto));
         String[] actualValues = actual.getValues().split(";");
+
         assertEquals(dto.getName(), actual.getName());
         assertEquals(dto.getSearchCriteria(), actualValues[0]);
         assertEquals(dto.getUserRole(), actualValues[1]);
@@ -47,6 +48,7 @@ class FilterDtoRequestMapperTest {
     @Test
     void testConvert_whenSearchCriteriaNull() {
         dto.setSearchCriteria(null);
+
         assertThrows(NullPointerException.class, () -> mapper.convert(dto));
     }
 
@@ -62,6 +64,7 @@ class FilterDtoRequestMapperTest {
 
         Filter actual = assertDoesNotThrow(() -> mapper.convert(item));
         String[] actualValues = actual.getValues().split(";");
+
         assertEquals(name, actual.getName());
         assertEquals(String.valueOf(userRole), actualValues[1]);
         assertEquals(String.valueOf(userStatus), actualValues[2]);
