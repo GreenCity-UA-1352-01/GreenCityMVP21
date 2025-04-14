@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,12 +37,9 @@ class CustomShoppingListResponseDtoMapperTest {
     }
 
     @Test
-    void testMapAllToList() {
-        List<CustomShoppingListItem> items = List.of(entity, entity, entity);
-
-        List<CustomShoppingListItemResponseDto> actual =
-                assertDoesNotThrow(() -> mapper.mapAllToList(items));
-        actual.forEach(item -> assertEquals(dto, item));
+    void testConvert_whenNull() {
+        assertThrows(NullPointerException.class,
+                () -> mapper.convert((CustomShoppingListItem) null));
     }
 
     @ParameterizedTest
@@ -54,6 +52,28 @@ class CustomShoppingListResponseDtoMapperTest {
                 .build();
 
         assertDoesNotThrow(() -> mapper.convert(item));
+    }
+
+    @Test
+    void testMapAllToList() {
+        List<CustomShoppingListItem> items = List.of(entity, entity, entity);
+
+        List<CustomShoppingListItemResponseDto> actual =
+                assertDoesNotThrow(() -> mapper.mapAllToList(items));
+        actual.forEach(item -> assertEquals(dto, item));
+    }
+
+    @Test
+    void testMapAllToList_whenNull() {
+        assertThrows(NullPointerException.class,
+                () -> mapper.mapAllToList(null));
+    }
+
+    @Test
+    void testMapAllToList_whenEmptyList() {
+        List<CustomShoppingListItemResponseDto> actual =
+                assertDoesNotThrow(() -> mapper.mapAllToList(Collections.emptyList()));
+        assertTrue(actual.isEmpty());
     }
 
     /**
