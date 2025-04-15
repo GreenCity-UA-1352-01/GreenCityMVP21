@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NewTagDtoMapperTest {
     private NewTagDtoMapper newTagDtoMapper;
@@ -58,6 +57,18 @@ public class NewTagDtoMapperTest {
         assertEquals(tag.getId(), dto.getId());
         assertNull(dto.getName());
         assertNull( dto.getNameUa());
+    }
+
+    @Test
+    void testConvertFromEntityToDto_WithNull(){
+        tag = null;
+        assertThrows(NullPointerException.class,() -> newTagDtoMapper.convert(tag));
+    }
+
+    @Test
+    void testConvertFromEntityToDto_EmptyTag(){
+        Tag tag1 = new Tag();
+        assertThrows(NullPointerException.class,() -> newTagDtoMapper.convert(tag1));
     }
 
 }
