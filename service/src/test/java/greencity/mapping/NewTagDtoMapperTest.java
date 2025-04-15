@@ -50,7 +50,7 @@ public class NewTagDtoMapperTest {
 
     @Test
     void testConvertFromEntityToDto_NoTranslation(){
-        tag.setTagTranslations(Collections.EMPTY_LIST);
+        tag.setTagTranslations(Collections.emptyList());
 
         NewTagDto dto = newTagDtoMapper.convert(tag);
 
