@@ -45,7 +45,7 @@ public class MultipartBase64ImageMapper extends AbstractConverter<String, Multip
                 return new MultipartFileImpl("mainFile", tempFile.getName(),
                         Files.probeContentType(tempFile.toPath()), Files.readAllBytes(tempFile.toPath()));
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new NotSavedException("Cannot convert to BASE64 image");
         }
     }
