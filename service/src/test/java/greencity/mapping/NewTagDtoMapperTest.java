@@ -70,5 +70,4 @@ public class NewTagDtoMapperTest {
         Tag tag1 = new Tag();
         assertThrows(NullPointerException.class,() -> newTagDtoMapper.convert(tag1));
     }
-
 }

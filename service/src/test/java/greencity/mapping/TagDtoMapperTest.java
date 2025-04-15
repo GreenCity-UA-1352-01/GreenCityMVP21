@@ -7,8 +7,6 @@ import greencity.entity.localization.TagTranslation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,8 +14,9 @@ public class TagDtoMapperTest {
     TagDtoMapper tagDtoMapper;
     TagTranslation tagTranslation;
     Tag tag;
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         tagDtoMapper = new TagDtoMapper();
         tag = ModelUtils.getTag();
         tagTranslation = ModelUtils.getTagTranslations().get(0);
@@ -25,7 +24,7 @@ public class TagDtoMapperTest {
     }
 
     @Test
-    void testConvertFromEntityToDto(){
+    void testConvertFromEntityToDto() {
 
         TagDto dto = tagDtoMapper.convert(tagTranslation);
 
@@ -35,12 +34,13 @@ public class TagDtoMapperTest {
     }
 
     @Test
-    void testConvertFromEntityToDto_NullTag(){
+    void testConvertFromEntityToDto_NullTag() {
         tagTranslation.setTag(null);
-        assertThrows(NullPointerException.class, ()->tagDtoMapper.convert(tagTranslation));
+        assertThrows(NullPointerException.class, () -> tagDtoMapper.convert(tagTranslation));
     }
+
     @Test
-    void testConvertFromEntityToDto_EmptyName(){
+    void testConvertFromEntityToDto_EmptyName() {
         tagTranslation.setName("");
         TagDto dto = tagDtoMapper.convert(tagTranslation);
 
@@ -50,7 +50,7 @@ public class TagDtoMapperTest {
     }
 
     @Test
-    void testConvertFromEntityToDto_NullName(){
+    void testConvertFromEntityToDto_NullName() {
         tagTranslation.setName(null);
         TagDto dto = tagDtoMapper.convert(tagTranslation);
 
