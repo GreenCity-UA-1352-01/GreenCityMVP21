@@ -102,7 +102,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/management/", "/management/login").permitAll()
-                        .requestMatchers("/v2/api-docs/**", "/v3/api-docs/**", "/swagger.json",
+                        .requestMatchers("/error","/v2/api-docs/**", "/v3/api-docs/**", "/swagger.json",
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-resources/**", "/webjars/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/management/**",
