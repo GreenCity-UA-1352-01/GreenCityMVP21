@@ -1,10 +1,8 @@
-package greencity.specification;
+package greencity.filters;
 
 import greencity.annotations.RatingCalculationEnum;
 import greencity.entity.RatingStatistics;
 import greencity.entity.User;
-import greencity.filters.RatingStatisticsSpecification;
-import greencity.filters.SearchCriteria;
 import jakarta.persistence.criteria.*;
 import jakarta.persistence.metamodel.SingularAttribute;
 import org.junit.jupiter.api.Assertions;
