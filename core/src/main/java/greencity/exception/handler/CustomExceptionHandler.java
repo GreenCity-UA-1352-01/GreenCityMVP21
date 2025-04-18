@@ -626,12 +626,4 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE)));
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public final ResponseEntity<Object> handleAccessDeniedException(
-            AccessDeniedException ex, WebRequest request) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
-    }
-
 }
