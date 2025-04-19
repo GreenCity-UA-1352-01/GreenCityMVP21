@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.*;
+import greencity.constant.ErrorMessage;
 import greencity.constant.HttpStatuses;
 import greencity.constant.SwaggerExampleModel;
 import greencity.dto.PageableAdvancedDto;
@@ -8,6 +9,7 @@ import greencity.dto.econews.*;
 import greencity.dto.tag.TagDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.service.EcoNewsService;
 import greencity.service.FileService;
@@ -111,11 +113,15 @@ public class EcoNewsController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
         @ApiResponse(responseCode = "303", description = HttpStatuses.SEE_OTHER),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PostMapping(path = "/uploadImages", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String[]> uploadImages(
             @Parameter(description = "Array of eco news images") MultipartFile[] images) {
+        if (images == null) {
+            throw new BadRequestException(ErrorMessage.MULTIPART_FILE_BAD_REQUEST);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ecoNewsService.uploadImages(images));
     }
