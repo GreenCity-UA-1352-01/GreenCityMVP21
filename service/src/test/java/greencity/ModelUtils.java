@@ -349,7 +349,7 @@ public class ModelUtils {
 
     public static AddEcoNewsDtoRequest getAddEcoNewsDtoRequest() {
         return new AddEcoNewsDtoRequest("title", "text",
-            Collections.singletonList("News"), "source", null, "shortInfo");
+            Collections.singletonList("News"), "source");
     }
 
     public static AddEcoNewsDtoResponse getAddEcoNewsDtoResponse() {
