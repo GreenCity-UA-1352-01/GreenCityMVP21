@@ -453,15 +453,11 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         MultipartFile image) {
         toUpdate.setTitle(updateEcoNewsDto.getTitle());
         toUpdate.setText(updateEcoNewsDto.getContent());
-        toUpdate.setShortInfo(updateEcoNewsDto.getShortInfo());
         toUpdate.setSource(updateEcoNewsDto.getSource());
         toUpdate.setTags(modelMapper.map(tagService
             .findTagsByNamesAndType(updateEcoNewsDto.getTags(), TagType.ECO_NEWS),
             new TypeToken<List<Tag>>() {
             }.getType()));
-        if (updateEcoNewsDto.getImage() != null) {
-            image = fileService.convertToMultipartImage(updateEcoNewsDto.getImage());
-        }
         if (image != null) {
             toUpdate.setImagePath(fileService.upload(image));
         }
@@ -473,6 +469,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public void update(EcoNewsDtoManagement ecoNewsDtoManagement, MultipartFile image) {
+
         EcoNews toUpdate = modelMapper.map(findById(ecoNewsDtoManagement.getId()), EcoNews.class);
         enhanceWithNewManagementData(toUpdate, ecoNewsDtoManagement, image);
 
@@ -487,7 +484,13 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public EcoNewsGenericDto update(UpdateEcoNewsDto updateEcoNewsDto, MultipartFile image, UserVO user) {
-        EcoNews toUpdate = modelMapper.map(findById(updateEcoNewsDto.getId()), EcoNews.class);
+        Long id;
+        try {
+            id = Long.valueOf(updateEcoNewsDto.getId());
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Invalid eco news ID format");
+        }
+        EcoNews toUpdate = modelMapper.map(findById(Long.valueOf((updateEcoNewsDto.getId()))), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
             throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
