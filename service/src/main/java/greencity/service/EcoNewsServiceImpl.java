@@ -488,9 +488,9 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         try {
             id = Long.valueOf(updateEcoNewsDto.getId());
         } catch (NumberFormatException e) {
-            throw new BadRequestException("Invalid eco news ID format");
+            throw new BadRequestException("EcoNews ID must be a valid number");
         }
-        EcoNews toUpdate = modelMapper.map(findById(Long.valueOf((updateEcoNewsDto.getId()))), EcoNews.class);
+        EcoNews toUpdate = modelMapper.map(findById(id), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
             throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }

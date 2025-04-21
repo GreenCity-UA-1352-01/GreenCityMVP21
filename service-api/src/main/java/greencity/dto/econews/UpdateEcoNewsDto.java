@@ -1,11 +1,9 @@
 package greencity.dto.econews;
 
 import greencity.constant.ServiceValidationConstants;
+import jakarta.validation.constraints.*;
 import lombok.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+
 import java.util.List;
 
 @AllArgsConstructor
@@ -16,6 +14,7 @@ import java.util.List;
 @Builder
 public class UpdateEcoNewsDto {
     @NotNull
+    @Pattern(regexp = "^[0-9]+$", message = "ID must contain only digits")
     private String id;
 
     @NotEmpty(message = ServiceValidationConstants.MIN_AMOUNT_OF_TAGS)
@@ -31,5 +30,6 @@ public class UpdateEcoNewsDto {
 
     private String source;
 
+    @Size(min = 20, max = 63206, message = "Text length must be between 20 and 63206 characters")
     private String text;
 }
