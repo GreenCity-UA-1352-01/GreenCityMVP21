@@ -12,7 +12,6 @@ public final class HttpStatuses {
     public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     public static final String UNSUPPORTED_MEDIA_TYPE = "Unsupported Media Type";
 
-
     HttpStatuses() {
     }
 }
