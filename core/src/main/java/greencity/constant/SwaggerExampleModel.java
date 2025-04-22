@@ -15,18 +15,13 @@ public final class SwaggerExampleModel {
         + "\t<pre>\n";
 
     private static final String EXAMPLE =
-        "  \"image\": \"string\",\n"
-            + "  \"source\": \"https://example.org/\",\n"
-            + "  \"shortInfo\": \"string\",\n"
+
+            "  \"source\": \"https://example.org/\",\n"
+            + "  \"title\": \"Title\",\n"
+            + "  \"text\": \"Text\",\n"
             + "  \"tags\": [\n"
             + "    \"string\"\n"
-            + "  ],\n"
-            + "  \"titleTranslation\":\n"
-            + "     {\"content\": \"string\",\n"
-            + "     \"languageCode\": \"string\"},\n"
-            + "  \"textTranslation\":\n"
-            + "     {\"content\": \"string\",\n"
-            + "     \"languageCode\": \"string\"}\n";
+            + "  ],\n";
 
     private static final String AFTER_EXAMPLE = "\t</pre>\n"
         + "</div>";
