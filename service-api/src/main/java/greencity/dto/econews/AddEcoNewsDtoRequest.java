@@ -24,7 +24,7 @@ public class AddEcoNewsDtoRequest {
 
     private String source;
 
-    private String image;
+//    private String image;
 
-    private String shortInfo;
+//    private String shortInfo;
 }
