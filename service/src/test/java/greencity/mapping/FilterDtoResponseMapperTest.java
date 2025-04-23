@@ -17,13 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilterDtoResponseMapperTest {
 
     private FilterDtoResponseMapper mapper;
-    private UserFilterDtoResponse dto;
     private Filter entity;
 
     @BeforeEach
     void setUp() {
         mapper = new FilterDtoResponseMapper();
-        dto = ModelUtils.getUserFilterDtoResponse();
         entity = ModelUtils.getFilter();
     }
 
