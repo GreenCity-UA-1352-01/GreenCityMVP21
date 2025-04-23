@@ -65,7 +65,14 @@ class FilterDtoResponseMapperTest {
     void testConvert_whenValuesSizeThreeOrMore_shouldMapSuccessfully(String values) {
         entity.setValues(values);
 
-        assertDoesNotThrow(() -> mapper.convert(entity));
+        UserFilterDtoResponse actual = assertDoesNotThrow(() -> mapper.convert(entity));
+        String[] expectedValues = values.split(";");
+
+        assertEquals(entity.getId(), actual.getId());
+        assertEquals(entity.getName(), actual.getName());
+        assertEquals(expectedValues[0], actual.getSearchCriteria());
+        assertEquals(expectedValues[1], actual.getUserRole());
+        assertEquals(expectedValues[2], actual.getUserStatus());
     }
 
     @ParameterizedTest
@@ -81,9 +88,21 @@ class FilterDtoResponseMapperTest {
 
         assertEquals(id, actual.getId());
         assertEquals(name, actual.getName());
-        assertEquals(dto.getSearchCriteria(), actual.getSearchCriteria());
-        assertEquals(dto.getUserRole(), actual.getUserRole());
-        assertEquals(dto.getUserStatus(), actual.getUserStatus());
+        String[] expectedValues = entity.getValues().split(";");
+        assertEquals(expectedValues[0], actual.getSearchCriteria());
+        assertEquals(expectedValues[1], actual.getUserRole());
+        assertEquals(expectedValues[2], actual.getUserStatus());
+    }
+
+    @Test
+    void testConvert_whenValuesContainInvalidData() {
+        entity.setValues("criteria;INVALID_ROLE;INVALID_STATUS");
+
+        UserFilterDtoResponse actual = assertDoesNotThrow(() -> mapper.convert(entity));
+
+        assertEquals("criteria", actual.getSearchCriteria());
+        assertEquals("INVALID_ROLE", actual.getUserRole());
+        assertEquals("INVALID_STATUS", actual.getUserStatus());
     }
 
     /**

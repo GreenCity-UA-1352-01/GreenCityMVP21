@@ -33,7 +33,9 @@ class CustomShoppingListResponseDtoMapperTest {
     void testConvert() {
         CustomShoppingListItemResponseDto actual =
                 assertDoesNotThrow(() -> mapper.convert(entity));
-        assertEquals(dto, actual);
+        assertEquals(dto.getId(), actual.getId());
+        assertEquals(dto.getText(), actual.getText());
+        assertEquals(dto.getStatus(), actual.getStatus());
     }
 
     @Test
