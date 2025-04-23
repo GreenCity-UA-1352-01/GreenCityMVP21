@@ -44,14 +44,17 @@ public final class SwaggerExampleModel {
             + "}\n"
             + AFTER_EXAMPLE;
     public static final String UPDATE_ECO_NEWS =
-        "Update Eco News\n"
-            + IMAGE_DESCRIPTION
+            "Update Eco News\n"
             + BEFORE_EXAMPLE
-            + "{\n"
-            + "  \"id\": 0,\n"
-            + EXAMPLE
+            + "{\"id\":\"string\",\n"
+            + "\"tags\":[\"string\"],\n"
+            + "\"content\":\"string\",\n"
+            + "\"title\":\"string\",\n"
+            + "\"source\":\"string\",\n"
+            + "\"text\":\"string\""
             + "}\n"
             + AFTER_EXAMPLE;
+
     public static final String ADD_EVENT = BEFORE_EXAMPLE
         + "{\n"
         + "\t\"title\":\"string\",\n"

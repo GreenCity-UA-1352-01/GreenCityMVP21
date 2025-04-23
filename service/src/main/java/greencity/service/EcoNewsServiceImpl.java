@@ -473,6 +473,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public void update(EcoNewsDtoManagement ecoNewsDtoManagement, MultipartFile image) {
+
         EcoNews toUpdate = modelMapper.map(findById(ecoNewsDtoManagement.getId()), EcoNews.class);
         enhanceWithNewManagementData(toUpdate, ecoNewsDtoManagement, image);
 
@@ -487,7 +488,13 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public EcoNewsGenericDto update(UpdateEcoNewsDto updateEcoNewsDto, MultipartFile image, UserVO user) {
-        EcoNews toUpdate = modelMapper.map(findById(updateEcoNewsDto.getId()), EcoNews.class);
+        Long id;
+        try {
+            id = Long.valueOf(updateEcoNewsDto.getId());
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("EcoNews ID must be a valid number");
+        }
+        EcoNews toUpdate = modelMapper.map(findById(id), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
