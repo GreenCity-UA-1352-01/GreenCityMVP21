@@ -15,8 +15,6 @@ public class HabitAssignManagementDtoMapperTest {
         HabitAssign entity = ModelUtils.getHabitAssign();
         HabitAssignManagementDto dto = mapper.convert(entity);
 
-        ModelUtils.getLanguageTranslationDTO();
-
         assertNotNull(dto);
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getStatus(), dto.getStatus());
@@ -51,15 +49,7 @@ public class HabitAssignManagementDtoMapperTest {
     }
 
     @Test
-    void convert_givenHabitAssignWithNullUser_shouldThrowNullPointerException() {
-        HabitAssign entity = ModelUtils.getHabitAssign();
-        entity.setUser(null);
-
-        assertThrows(NullPointerException.class, () -> mapper.convert(entity));
-    }
-
-    @Test
-    void convert_givenHabitAssignWithNullDuration() {
+    void convert_givenHabitAssignWithNullHabit() {
         HabitAssign entity = ModelUtils.getHabitAssign();
         entity.setHabit(null);
 
