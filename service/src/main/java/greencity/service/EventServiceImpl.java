@@ -1,7 +1,7 @@
 package greencity.service;
 
-import greencity.dto.event.EditEventDto;
-import greencity.dto.event.EditEventDtoResponse;
+import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -17,7 +17,7 @@ public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
 
     @Override
-    public EditEventDtoResponse update(EditEventDto editEventDto, List<MultipartFile> images, UserVO user) {
+    public UpdateEventDtoResponse update(UpdateEventDto updateEventDto, List<MultipartFile> images, UserVO user) {
         return null;
     }
 }
