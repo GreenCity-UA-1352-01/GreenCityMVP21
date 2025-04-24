@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface EventService {
 
+    UpdateEventDtoResponse findById(Long id);
+
     /**
      * Method for updating Event.
      *
