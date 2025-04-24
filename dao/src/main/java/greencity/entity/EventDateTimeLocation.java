@@ -11,17 +11,23 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(exclude = {"event"})
+@ToString(exclude = {"event"})
 public class EventDateTimeLocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "start_date_time", nullable = false)
     private ZonedDateTime startDateTime;
 
+    @Column(name = "end_date_time", nullable = false)
     private ZonedDateTime endDateTime;
 
+    @Column(name = "location")
     private String location;
 
+    @Column(name = "link")
     private String link;
 
     @ManyToOne(fetch = FetchType.LAZY)
