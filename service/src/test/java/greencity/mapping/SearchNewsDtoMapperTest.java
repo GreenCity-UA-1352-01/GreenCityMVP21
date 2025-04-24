@@ -44,7 +44,7 @@ public class SearchNewsDtoMapperTest {
     @Test
     void testConvertFromEntityToDto_EmptyTags(){
         LocaleContextHolder.setLocale(Locale.ENGLISH);
-        EcoNews emptyTagsEcoNews = ecoNews;
+        EcoNews emptyTagsEcoNews = ModelUtils.getEcoNews();
         emptyTagsEcoNews.setTags(List.of());
 
         SearchNewsDto dto = searchNewsDtoMapper.convert(emptyTagsEcoNews);
@@ -65,7 +65,7 @@ public class SearchNewsDtoMapperTest {
 
     @Test
     void testConvertFromEntityToDto_NullTags(){
-        EcoNews ecoNewsWithNullTags = ecoNews;
+        EcoNews ecoNewsWithNullTags = ModelUtils.getEcoNews();
         ecoNewsWithNullTags.setTags(null);
 
         assertThrows(NullPointerException.class, () -> searchNewsDtoMapper.convert(ecoNewsWithNullTags));
