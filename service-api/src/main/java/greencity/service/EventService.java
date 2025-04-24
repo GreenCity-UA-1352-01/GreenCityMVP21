@@ -1,10 +1,7 @@
 package greencity.service;
 
-import greencity.dto.econews.EcoNewsDto;
-import greencity.dto.econews.EcoNewsVO;
-import greencity.dto.econews.UpdateEcoNewsDto;
-import greencity.dto.event.EditEventDto;
-import greencity.dto.event.EditEventDtoResponse;
+import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,8 +12,8 @@ public interface EventService {
     /**
      * Method for updating Event.
      *
-     * @param editEventDto - instance of {@link EditEventDto}.
-     * @return instance of {@link EditEventDtoResponse};=.
+     * @param updateEventDto - instance of {@link UpdateEventDto}.
+     * @return instance of {@link UpdateEventDtoResponse};=.
      */
-    EditEventDtoResponse update(EditEventDto editEventDto, List<MultipartFile> images, UserVO user);
+    UpdateEventDtoResponse update(UpdateEventDto updateEventDto, List<MultipartFile> images, UserVO user);
 }

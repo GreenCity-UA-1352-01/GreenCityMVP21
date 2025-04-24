@@ -2,8 +2,8 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.annotations.ImageValidation;
-import greencity.dto.event.EditEventDto;
-import greencity.dto.event.EditEventDtoResponse;
+import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,14 +41,12 @@ public class EventController {
     })
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE,
     MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity <EditEventDtoResponse> update(
-            @Valid @RequestPart EditEventDto editEventDto,
+    public ResponseEntity <UpdateEventDtoResponse> update(
+            @Valid @RequestPart UpdateEventDto updateEventDto,
             @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)")@ImageValidation
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user){
-        return ResponseEntity.ok(eventService.update(editEventDto, images, user));
-
-
+        return ResponseEntity.ok(eventService.update(updateEventDto, images, user));
     }
 
 
