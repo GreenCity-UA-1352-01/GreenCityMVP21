@@ -15,8 +15,6 @@ public class EventImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "image_path", nullable = false)
     private String imagePath;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Event event;
 }
