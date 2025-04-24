@@ -1,6 +1,6 @@
 package greencity.service;
 
-import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,8 +14,8 @@ public interface EventService {
     /**
      * Method for updating Event.
      *
-     * @param updateEventDto - instance of {@link UpdateEventDto}.
+     * @param updateEventDtoRequest - instance of {@link UpdateEventDtoRequest}.
      * @return instance of {@link UpdateEventDtoResponse};=.
      */
-    UpdateEventDtoResponse update(UpdateEventDto updateEventDto, List<MultipartFile> images, UserVO user);
+    UpdateEventDtoResponse update(UpdateEventDtoRequest updateEventDtoRequest, List<MultipartFile> images, UserVO user);
 }

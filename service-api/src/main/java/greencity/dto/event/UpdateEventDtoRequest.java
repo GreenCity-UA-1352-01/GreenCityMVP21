@@ -1,4 +1,4 @@
 package greencity.dto.event;
 
-public class UpdateEventDto {
+public class UpdateEventDtoRequest {
 }
