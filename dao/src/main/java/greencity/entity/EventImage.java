@@ -17,4 +17,8 @@ public class EventImage {
 
     @Column(name = "image_path", nullable = false)
     private String imagePath;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
 }

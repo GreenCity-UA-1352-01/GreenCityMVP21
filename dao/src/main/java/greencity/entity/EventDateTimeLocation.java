@@ -30,6 +30,7 @@ public class EventDateTimeLocation {
     @Column(name = "link")
     private String link;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 }
