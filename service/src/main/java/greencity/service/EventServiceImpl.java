@@ -1,7 +1,7 @@
 package greencity.service;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
@@ -30,8 +30,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public UpdateEventDtoResponse update(UpdateEventDto updateEventDto, List<MultipartFile> images, UserVO user) {
-        Event event = getById(updateEventDto.getId());
+    public UpdateEventDtoResponse update(UpdateEventDtoRequest updateEventDtoRequest, List<MultipartFile> images, UserVO user) {
+        Event event = getById(updateEventDtoRequest.getId());
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())){
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
