@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="addFriendsTableRakuta" author="Anastasiia Rakuta">
+        <createTable tableName="friends">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="friend_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="friends"
+                baseColumnNames="user_id"
+                constraintName="FK_friends_user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="friends"
+                baseColumnNames="friend_id"
+                constraintName="FK_friends_friend_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="friends" indexName="IDX_friends_user_friend">
+            <column name="user_id"/>
+            <column name="friend_id"/>
+        </createIndex>
+        <createIndex tableName="friends" indexName="IDX_friends_friend_id">
+            <column name="friend_id"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="friends"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>
