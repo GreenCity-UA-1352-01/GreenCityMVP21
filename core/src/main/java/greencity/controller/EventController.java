@@ -38,13 +38,14 @@ public class EventController {
     })
     @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<CreateEventDtoResponse> createEvent(
-            @Valid @RequestPart CreateEventDto createEventDto,
+            @Valid @RequestPart("event") CreateEventDto createEventDto,
             @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)")
-            @ImageValidation
+//            @ImageValidation
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
 
         CreateEventDtoResponse response = eventService.createEvent(createEventDto, images, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 }

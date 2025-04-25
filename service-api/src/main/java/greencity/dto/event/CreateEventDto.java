@@ -19,7 +19,6 @@ import java.util.List;
 @ToString
 @ValidEventType
 public class CreateEventDto {
-    private Long id;
 
     @NotBlank
     @Size(max = 70, message = "Title must be no longer than 70 characters")
