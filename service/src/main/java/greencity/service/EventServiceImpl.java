@@ -41,6 +41,9 @@ public class EventServiceImpl implements EventService {
 
         eventRepository.deleteById(id);
 
+        if (event.getMainImage() != null) {
+            fileService.delete(event.getMainImage().getImagePath());
+        }
         event.getEventImages()
             .forEach(image -> fileService.delete(image.getImagePath()));
     }
