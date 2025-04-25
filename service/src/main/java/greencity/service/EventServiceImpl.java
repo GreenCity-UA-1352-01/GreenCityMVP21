@@ -27,8 +27,8 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
 
     @Override
-    public UpdateEventDtoResponse findById(Long id) {
-        Event event = getById(id);
+    public UpdateEventDtoResponse findUpdateEventDtoResponseById(Long id) {
+        Event event = getEventById(id);
         return modelMapper.map(event, UpdateEventDtoResponse.class);
     }
 
@@ -36,8 +36,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public UpdateEventDtoResponse update(UpdateEventDtoRequest updateEventDtoRequest,
                                          List<MultipartFile> images, UserVO user) {
-        Event event = getById(updateEventDtoRequest.getId());
-
+        Event event = getEventById(updateEventDtoRequest.getId());
         boolean hasFutureEvent = event.getDateTimes().stream()
                 .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(ZonedDateTime.now()));
 
@@ -53,7 +52,7 @@ public class EventServiceImpl implements EventService {
         return  modelMapper.map(event,UpdateEventDtoResponse.class);
     }
 
-    private Event getById(Long id) {
+    private Event getEventById(Long id) {
         return eventRepository
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));

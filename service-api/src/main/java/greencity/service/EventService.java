@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface EventService {
 
-    UpdateEventDtoResponse findById(Long id);
+    UpdateEventDtoResponse findUpdateEventDtoResponseById(Long id);
 
     /**
      * Method for updating Event.
