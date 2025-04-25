@@ -18,9 +18,12 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
 
+    private final FileService fileService;
+
     /**
      * {@inheritDoc}
-     * Method check user is owner of event or has ADMIN role
+     * Method check user is owner of event or has ADMIN role.
+     * All images related to event will be deleted from external file storage.
      *
      * @param id   the ID of the event to be deleted
      * @param user the user requesting the deletion
@@ -37,5 +40,8 @@ public class EventServiceImpl implements EventService {
         }
 
         eventRepository.deleteById(id);
+
+        event.getEventImages()
+            .forEach(image -> fileService.delete(image.getImagePath()));
     }
 }
