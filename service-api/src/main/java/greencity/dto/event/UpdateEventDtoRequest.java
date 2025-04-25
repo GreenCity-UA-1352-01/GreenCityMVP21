@@ -3,9 +3,7 @@ package greencity.dto.event;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.eventimage.EventImageRequestDto;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import java.util.List;
 
@@ -14,7 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UpdateEventDtoRequest {
-
+    @NotNull
+    @Min(1)
+    private Long id;
     @NotBlank(message = "The title of event can not be empty")
     @Size(max = 70, message = "The title of event can not be longer than 70 characters")
     private String title;
