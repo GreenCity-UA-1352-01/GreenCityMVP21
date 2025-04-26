@@ -5,17 +5,20 @@ import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
+import greencity.entity.EventDateTimeLocation;
 import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,6 +58,16 @@ public class EventServiceImpl implements EventService {
         return eventRepository
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+    }
+
+    private  void UpdateWithNewData(Event updateEvent, UpdateEventDtoRequest updateEventDtoRequest,
+                                    List<MultipartFile> images){
+        updateEvent.setTitle(updateEventDtoRequest.getTitle());
+        updateEvent.setDescription(updateEventDtoRequest.getDescription());
+        List<EventDateTimeLocation> updatetDate = new ArrayList<>();
+        for (var dateTime: updateEventDtoRequest.getDateTimes()){
+            updatetDate.ad
+        }
     }
 
 }
