@@ -94,6 +94,7 @@
         </rollback>
     </changeSet>
 
+    <!-- removed table -->
     <changeSet id="addEventsInvitedUsersTableZadyraichuk" author="Rostyslav Zadyraichuk">
         <createTable tableName="events_invited_users">
             <column name="event_id"  type="BIGINT">
@@ -105,6 +106,53 @@
         </createTable>
         <rollback>
             <dropTable tableName="events_invited_users"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="modifyEventTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <dropNotNullConstraint tableName="events" columnName="main_image_id"/>
+        <dropColumn tableName="events" columnName="is_for_all_friends"/>
+        <dropTable tableName="events_invited_users"/>
+        <rollback>
+            <addNotNullConstraint tableName="events" columnName="main_image_id"/>
+            <addColumn tableName="events">
+                <column name="is_for_all_friends" type="BOOLEAN">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+            <createTable tableName="events_invited_users">
+                <column name="event_id"  type="BIGINT">
+                    <constraints foreignKeyName="FK_events_invited_users_event_id" references="events (id)"/>
+                </column>
+                <column name="user_id"  type="BIGINT">
+                    <constraints foreignKeyName="FK_events_invited_users_user_id" references="users (id)"/>
+                </column>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addEventsAttendersTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="events_attenders">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="event_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_attenders_event_id"
+                             references="events (id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="attender_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_attenders_attender_id"
+                             references="users (id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="events_attenders" columnNames="event_id, attender_id"/>
+        <rollback>
+            <dropTable tableName="events_attenders"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

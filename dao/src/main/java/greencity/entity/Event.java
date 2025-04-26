@@ -35,8 +35,8 @@ public class Event {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "main_image_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "main_image_id")
     private EventImage mainImage;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -61,15 +61,4 @@ public class Event {
 
     @Column(name = "is_open", nullable = false)
     private boolean isOpen = true;
-
-    @Column(name = "is_for_all_friends", nullable = false)
-    private boolean isForAllFriends = true;
-
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "events_invited_users",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> invitedUsers = new ArrayList<>();
 }
