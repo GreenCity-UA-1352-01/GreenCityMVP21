@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventDateTimeLocation;
@@ -20,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -49,9 +52,18 @@ public class EventServiceImpl implements EventService {
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())){
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
+
+        System.out.println(event.toString());
+
+        event.setTitle(updateEventDtoRequest.getTitle());
+        event.setDescription(updateEventDtoRequest.getDescription());
+
+        updateEvent(event, updateEventDtoRequest.getDateTimes());
+
+        System.out.println(event.toString());
         // додати логіку оновлення полів
         eventRepository.save(event);
-        return  modelMapper.map(event,UpdateEventDtoResponse.class);
+        return modelMapper.map(event,UpdateEventDtoResponse.class);
     }
 
     private Event getEventById(Long id) {
@@ -60,14 +72,15 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
     }
 
-    private  void UpdateWithNewData(Event updateEvent, UpdateEventDtoRequest updateEventDtoRequest,
-                                    List<MultipartFile> images){
-        updateEvent.setTitle(updateEventDtoRequest.getTitle());
-        updateEvent.setDescription(updateEventDtoRequest.getDescription());
-        List<EventDateTimeLocation> updatetDate = new ArrayList<>();
-        for (var dateTime: updateEventDtoRequest.getDateTimes()){
-            updatetDate.ad
+    private void updateEvent(Event event, List<EventDateTimeLocationRequestDto> dto) {
+        List<EventDateTimeLocation> newDates = dto.stream()
+                .map(dateTimeDto -> {
+                    EventDateTimeLocation dt = modelMapper.map(dateTimeDto, EventDateTimeLocation.class);
+                    dt.setEvent(event);
+                    return dt;
+                })
+                .collect(Collectors.toList());
+        event.getDateTimes().clear();
+        event.getDateTimes().addAll(newDates);
         }
-    }
-
 }
