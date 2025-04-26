@@ -15,10 +15,10 @@ public class EventImageRequestDto {
     private Long id;
 
     @NotBlank(message = "Image path can not be empty")
-    @Pattern(
-            regexp = "https?://.*\\.(?i)(jpg|jpeg|png)$",
-            message = "Invalid image format"
-    )
+//    @Pattern(
+//            regexp = "https?://.*\\.(?i)(jpg|jpeg|png)$",
+//            message = "Invalid image format"
+//    )
     private String imagePath;
 
 }
