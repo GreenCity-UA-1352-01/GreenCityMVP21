@@ -18,10 +18,7 @@ public class CreateEventDtoResponse {
     private String title;
     private String description;
     private Boolean open;
-    private Boolean place;
-    private Boolean online;
-    private List<String> initiativeTypes;
-    private List<TagUaEnDto> tags;
+    private List<String> tags;
     private List<EventDateLocationDto> dates;
     private List<String> images;
     private ZonedDateTime createdDateTime;

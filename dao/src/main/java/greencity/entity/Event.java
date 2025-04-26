@@ -35,7 +35,7 @@ public class Event {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "main_image_id")
     private EventImage mainImage;
 
@@ -44,10 +44,10 @@ public class Event {
     private User initiator;
 
     @OneToMany(
-        mappedBy = "event",
-        cascade = CascadeType.ALL,
-        fetch = FetchType.LAZY,
-        orphanRemoval = true
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
     )
     private List<EventImage> eventImages = new ArrayList<>();
 
@@ -61,4 +61,6 @@ public class Event {
 
     @Column(name = "is_open", nullable = false)
     private boolean isOpen = true;
+
+
 }

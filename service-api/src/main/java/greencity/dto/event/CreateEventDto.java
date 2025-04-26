@@ -1,6 +1,6 @@
 package greencity.dto.event;
 
-import greencity.annotations.ValidEventType;
+//import greencity.annotations.ValidEventType;
 import greencity.dto.tag.TagUaEnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,7 +17,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @ToString
-@ValidEventType
+//@ValidEventType
 public class CreateEventDto {
 
     @NotBlank
@@ -27,10 +27,7 @@ public class CreateEventDto {
     @Size(min = 20, max = 63206, message = "Description must be between 20 and 63,206 characters")
     private String description;
 
-    @Size(max = 5)
-    private List<EventImageDto> images;
-
-    private String titleImage;
+    private String mainImage;
 
     private Boolean open;
 
@@ -38,11 +35,8 @@ public class CreateEventDto {
     @Size(min = 1, max = 7, message = "No more than 7 date/time entries allowed")
     private List<@Valid EventDateLocationDto> dates;
 
-    private List<String> additionalImages;
-
     private List<TagUaEnDto> tags;
 
-    private Boolean place;
     private Boolean online;
 
     @NotNull
