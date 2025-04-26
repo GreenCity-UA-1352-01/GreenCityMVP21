@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class HabitTranslationMapperTest {
     private final HabitTranslationMapper mapper = new HabitTranslationMapper();
     @Test
-    void testConvertFromEntityToDto() {
+    void testConvertFromDtoToEntity() {
         Language language = ModelUtils.getLanguage();
         HabitTranslationDto habitTranslationDto = HabitTranslationDto.builder()
                 .habitItem("Test Habit Item")
