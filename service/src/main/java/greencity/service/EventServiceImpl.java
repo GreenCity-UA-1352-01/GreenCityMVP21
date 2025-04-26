@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -49,21 +46,18 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException(ErrorMessage.CANNOT_EDIT_PAST_EVENT);
         }
 
-        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())){
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
 
-        System.out.println(event.toString());
 
         event.setTitle(updateEventDtoRequest.getTitle());
         event.setDescription(updateEventDtoRequest.getDescription());
 
-        updateEvent(event, updateEventDtoRequest.getDateTimes());
+        updateEventDateTimeLocation(event, updateEventDtoRequest.getDateTimes());
 
-        System.out.println(event.toString());
-        // додати логіку оновлення полів
         eventRepository.save(event);
-        return modelMapper.map(event,UpdateEventDtoResponse.class);
+        return modelMapper.map(event, UpdateEventDtoResponse.class);
     }
 
     private Event getEventById(Long id) {
@@ -72,15 +66,15 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
     }
 
-    private void updateEvent(Event event, List<EventDateTimeLocationRequestDto> dto) {
+    private void updateEventDateTimeLocation(Event event, List<EventDateTimeLocationRequestDto> dto) {
         List<EventDateTimeLocation> newDates = dto.stream()
                 .map(dateTimeDto -> {
                     EventDateTimeLocation dt = modelMapper.map(dateTimeDto, EventDateTimeLocation.class);
                     dt.setEvent(event);
                     return dt;
                 })
-                .collect(Collectors.toList());
+                .toList();
         event.getDateTimes().clear();
         event.getDateTimes().addAll(newDates);
-        }
+    }
 }
