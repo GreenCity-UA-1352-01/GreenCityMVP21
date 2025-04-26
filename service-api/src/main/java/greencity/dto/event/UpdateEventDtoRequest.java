@@ -2,6 +2,7 @@ package greencity.dto.event;
 
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.eventimage.EventImageRequestDto;
+import greencity.dto.tag.TagUaEnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -33,4 +34,7 @@ public class UpdateEventDtoRequest {
     @Size(max = 5, message = "Maximum number of images is 5")
     @Valid
     private List<EventImageRequestDto> eventImages;
+
+    @NotEmpty(message = "The tags of event can not be empty")
+    private List<String> tags;
 }

@@ -23,6 +23,5 @@ public class UpdateEventDtoResponse {
 
     private Set<Long> tagIds;
     private boolean isOpen;
-    private boolean isForAllFriends;
 
 }
