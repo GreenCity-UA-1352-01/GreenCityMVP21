@@ -76,7 +76,7 @@ public class HabitDtoMapperTest {
     }
 
     @Test
-    void testConvert_NullInput_ReturnsNull() {
+    void testConvert_NullInput_ThrowsNullPointerException() {
         assertThrows((NullPointerException.class), () -> mapper.convert((HabitTranslation) null));
     }
 }
