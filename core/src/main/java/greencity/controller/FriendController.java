@@ -1,10 +1,25 @@
 package greencity.controller;
 
+import greencity.annotations.CurrentUser;
+import greencity.constant.HttpStatuses;
+import greencity.dto.PageableDto;
+import greencity.dto.friend.SearchFriendDtoResponse;
+import greencity.dto.user.UserVO;
 import greencity.service.FriendService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Validated
 @RestController
@@ -12,4 +27,45 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class FriendController {
     private final FriendService friendService;
+
+    /**
+     * Finds users that are not friends of current user yet.
+     *
+     * @param name               ordered letters sequence of name of user to search
+     * @param isTheSameCity      if true, limits the search to users from the same city as the requester
+     * @param isFriendsOfFriends if true, limits the search to users who are friends of the requester's friends
+     * @param user               current user
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    @Operation(summary = "Get users that are not friends of current user yet")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @Parameters({
+        @Parameter(name = "name", schema = @Schema(type = "string", pattern = "^[a-zA-Zа-яА-Я. ]{1,30}$"),
+            description = "Must be 1–30 characters long. "
+                + "Only alphabetic letters (A–Z, a–z), dots (.), and spaces are allowed. "
+                + "The input will be used to generate an ordered character search pattern."),
+        @Parameter(name = "theSameCity", schema = @Schema(type = "boolean"),
+            description = "If true, limits the search to users from the same city as the requester."),
+        @Parameter(name = "friendsOfFriends", schema = @Schema(type = "boolean"),
+            description = "If true, limits the search to users who are friends of the requester's friends."),
+        @Parameter(name = "page", schema = @Schema(type = "int", minimum = "0", defaultValue = "0"),
+            description = "Page index you want to retrieve [0..N]. "
+                + "If page index is less than 0 or not specified then default value is used!")
+    })
+    @GetMapping("/not-friends-yet")
+    public ResponseEntity<PageableDto<SearchFriendDtoResponse>> searchFriends(
+        @RequestParam(value = "name") @Pattern(regexp = "^[a-zA-Zа-яА-Я. ]{1,30}$") String name,
+        @RequestParam(value = "theSameCity", required = false) Boolean isTheSameCity,
+        @RequestParam(value = "friendsOfFriends", required = false) Boolean isFriendsOfFriends,
+        @Parameter(hidden = true) @ApiIgnore Pageable pageable,
+        @Parameter(hidden = true) @CurrentUser UserVO user) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(friendService.searchNewFriends(name, isTheSameCity, isFriendsOfFriends, user, pageable));
+    }
 }
