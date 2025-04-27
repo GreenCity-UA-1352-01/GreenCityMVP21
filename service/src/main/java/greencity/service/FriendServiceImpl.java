@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.mapping.SearchFriendDtoResponseMapper;
 import greencity.projection.UserWithMutualFriendsProjection;
 import greencity.repository.FriendRepo;
@@ -36,6 +37,9 @@ public class FriendServiceImpl implements FriendService {
                                                                  Boolean isFriendsOfFriends,
                                                                  UserVO user,
                                                                  Pageable pageable) {
+        if (name == null) {
+            throw new BadRequestException("Name for search friends cannot be null");
+        }
         String namePattern = "%" + String.join("%", name.split("")) + "%";
         String city = Boolean.TRUE.equals(isTheSameCity) ? user.getCity() : null;
 
@@ -50,5 +54,24 @@ public class FriendServiceImpl implements FriendService {
             potentialFriendsPage.getTotalElements(),
             potentialFriendsPage.getNumber(),
             potentialFriendsPage.getTotalPages());
+    }
+
+    /**
+     * Method to add a user friend.
+     *
+     * <p>
+     * This method is idempotent, so if the friend is already added, then the method will do nothing.
+     *
+     * @param currentUserId the ID of the user who is adding a friend
+     * @param friendId      the ID of the user to add as a friend
+     */
+    @Override
+    public void addFriend(Long currentUserId, Long friendId) {
+        if (currentUserId == null || friendId == null) {
+            throw new BadRequestException("User id and friend id cannot be null");
+        }
+        if (!currentUserId.equals(friendId)) {
+            friendRepository.addFriend(currentUserId, friendId);
+        }
     }
 }

@@ -21,4 +21,16 @@ public interface FriendService {
                                                           Boolean isFriendsOfFriends,
                                                           UserVO user,
                                                           Pageable pageable);
+
+
+    /**
+     * Method to add a user friend.
+     *
+     * <p>
+     * This method is idempotent, so if the friend is already added, then the method will do nothing.
+     *
+     * @param currentUserId the ID of the user who is adding a friend
+     * @param friendId      the ID of the user to add as a friend
+     */
+    void addFriend(Long currentUserId, Long friendId);
 }

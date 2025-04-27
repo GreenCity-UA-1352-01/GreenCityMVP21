@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.CurrentUserId;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
@@ -9,9 +10,11 @@ import greencity.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -35,15 +38,14 @@ public class FriendController {
      * @param isTheSameCity      if true, limits the search to users from the same city as the requester
      * @param isFriendsOfFriends if true, limits the search to users who are friends of the requester's friends
      * @param user               current user
-     *
      * @author Rostyslav Zadyraichuk
      */
     @Operation(summary = "Get users that are not friends of current user yet")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @Parameters({
         @Parameter(name = "name", schema = @Schema(type = "string", pattern = "^[a-zA-Zа-яА-Я. ]{1,30}$"),
@@ -67,5 +69,30 @@ public class FriendController {
         @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(friendService.searchNewFriends(name, isTheSameCity, isFriendsOfFriends, user, pageable));
+    }
+
+    /**
+     * Adds a user friend.
+     *
+     * <p>
+     * This method is idempotent, so if the friend is already added, then the method will do nothing.
+     *
+     * @param friendId the ID of the user to add as a friend
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    @Operation(summary = "Add new user friend")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @Parameter(name = "friendId", schema = @Schema(type = "int", minimum = "1", defaultValue = "1"),
+        description = "Id friend of current user. Cannot be empty.")
+    @PostMapping("/{friendId}")
+    public void addFriend(@PathVariable @Min(1) Long friendId,
+                          @Parameter(hidden = true) @CurrentUserId Long currentUserId) {
+        friendService.addFriend(friendId, currentUserId);
     }
 }
