@@ -37,4 +37,5 @@ public class UpdateEventDtoRequest {
 
     @NotEmpty(message = "The tags of event can not be empty")
     private List<String> tags;
+    private boolean isOpen;
 }

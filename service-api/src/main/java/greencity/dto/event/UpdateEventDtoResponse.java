@@ -3,6 +3,7 @@ package greencity.dto.event;
 
 import greencity.dto.eventdatetime.EventDateTimeLocationResponseDto;
 import greencity.dto.eventimage.EventImageResponseDto;
+import greencity.dto.tag.TagVO;
 import lombok.*;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class UpdateEventDtoResponse {
     private EventImageResponseDto mainImage;
     private List<EventImageResponseDto> eventImages;
 
-    private Set<Long> tagIds;
+    private Set<TagVO> tags;
     private boolean isOpen;
 
 }
