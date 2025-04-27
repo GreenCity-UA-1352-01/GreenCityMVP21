@@ -86,7 +86,7 @@ public class EventServiceImpl implements EventService {
                             .findFirst()
                             .orElseGet(() -> {
                                 EventDateTimeLocation newDateTime = new EventDateTimeLocation();
-                                newDateTime.setEvent(event); // Встановлюємо event
+                                newDateTime.setEvent(event);
                                 return newDateTime;
                             });
                     dateTimeLocation.setStartDateTime(dateTimeDto.getStartDateTime());

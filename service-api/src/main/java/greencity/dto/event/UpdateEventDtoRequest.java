@@ -28,12 +28,16 @@ public class UpdateEventDtoRequest {
     @Valid
     private List<EventDateTimeLocationRequestDto> dateTimes;
 
-    @Valid
-    private EventImageRequestDto mainImage;
+    @NotBlank(message = "Image path can not be empty")
+    @Pattern(
+            regexp = ".*\\.(?i)(jpg|jpeg|png)$",
+            message = "Invalid image format"
+    )
+    private String mainImage;
 
-    @Size(max = 5, message = "Maximum number of images is 5")
-    @Valid
-    private List<EventImageRequestDto> eventImages;
+//    @Size(max = 5, message = "Maximum number of images is 5")
+//    @Valid
+//    private List<EventImageRequestDto> eventImages;
 
     @NotEmpty(message = "The tags of event can not be empty")
     private List<String> tags;

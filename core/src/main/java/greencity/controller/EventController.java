@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.annotations.ImageValidation;
+import greencity.annotations.ValidEventImages;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
@@ -43,7 +44,7 @@ public class EventController {
     MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity <UpdateEventDtoResponse> update(
             @Valid @RequestPart UpdateEventDtoRequest updateEventDtoRequest,
-            @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)")
+            @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)") @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user){
         return ResponseEntity.ok(eventService.update(updateEventDtoRequest, images, user));
