@@ -30,14 +30,10 @@ public class UpdateEventDtoRequest {
 
     @NotBlank(message = "Image path can not be empty")
     @Pattern(
-            regexp = ".*\\.(?i)(jpg|jpeg|png)$",
+            regexp = ".*\\.(?i)(jpg|png)$",
             message = "Invalid image format"
     )
     private String mainImage;
-
-//    @Size(max = 5, message = "Maximum number of images is 5")
-//    @Valid
-//    private List<EventImageRequestDto> eventImages;
 
     @NotEmpty(message = "The tags of event can not be empty")
     private List<String> tags;

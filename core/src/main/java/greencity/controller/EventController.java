@@ -41,12 +41,12 @@ public class EventController {
             @ApiResponse(responseCode = "404", description = "Event not found")
     })
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE,
-    MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity <UpdateEventDtoResponse> update(
+            MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<UpdateEventDtoResponse> update(
             @Valid @RequestPart UpdateEventDtoRequest updateEventDtoRequest,
             @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)") @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
-            @Parameter(hidden = true) @CurrentUser UserVO user){
+            @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity.ok(eventService.update(updateEventDtoRequest, images, user));
     }
 

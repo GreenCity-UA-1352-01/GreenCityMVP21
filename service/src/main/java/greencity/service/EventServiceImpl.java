@@ -7,6 +7,7 @@ import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventDateTimeLocation;
+import greencity.entity.EventImage;
 import greencity.entity.Tag;
 import greencity.enums.Role;
 import greencity.enums.TagType;
@@ -22,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +38,7 @@ public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
     private final EventRepository eventRepository;
     private final TagsRepo tagsRepo;
-    private final TagsServiceImpl tagService;
+    private final FileService fileService;
 
     @Override
     public UpdateEventDtoResponse findUpdateEventDtoResponseById(Long id) {
@@ -66,6 +69,8 @@ public class EventServiceImpl implements EventService {
         updateEventDateTimeLocation(event, updateEventDtoRequest.getDateTimes());
 
         updateEventTags(event, updateEventDtoRequest.getTags());
+
+        updateEventImages(event, images, updateEventDtoRequest.getMainImage());
 
         eventRepository.save(event);
 
@@ -114,4 +119,33 @@ public class EventServiceImpl implements EventService {
         event.setTags(updateTags);
     }
 
+    private void updateEventImages(Event event, List<MultipartFile> images, String mainImageFilename) {
+        event.getEventImages().forEach(img -> {
+            fileService.delete(img.getImagePath());
+        });
+        event.getEventImages().clear();
+
+        List<EventImage> eventImages = new ArrayList<>();
+
+        MultipartFile mainImageFile = images.stream()
+                .filter(file -> file.getOriginalFilename() != null && file.getOriginalFilename().equals(mainImageFilename))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT));
+
+        for (MultipartFile file : images) {
+            EventImage eventImage = new EventImage();
+            String uploadedPath = fileService.upload(file);
+            eventImage.setImagePath(uploadedPath);
+            eventImage.setEvent(event);
+            eventImages.add(eventImage);
+        }
+
+        EventImage mainImage = eventImages.stream()
+                .filter(img -> img.getImagePath().endsWith(mainImageFile.getOriginalFilename()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT));
+
+        event.getEventImages().addAll(eventImages);
+        event.setMainImage(mainImage);
+    }
 }

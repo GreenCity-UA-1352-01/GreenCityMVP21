@@ -18,10 +18,12 @@ public class EventImagesValidator implements ConstraintValidator<ValidEventImage
             return false;
         }
 
+
         for (MultipartFile file : files) {
-            if (file.getSize() > MAX_SIZE_BYTES) {
+            if (file == null||file.getSize() > MAX_SIZE_BYTES){
                 return false;
             }
+
             String contentType = file.getContentType();
             if (contentType == null || !(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
                 return false;
