@@ -1,16 +1,15 @@
 package greencity.controller;
 
+import greencity.dto.newssubscription.SubscribeNewsRequestDto;
 import greencity.service.NewsSubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller for managing news subscriptions.
@@ -29,7 +28,7 @@ public class NewsSubscriptionController {
     /**
      * Subscribes a user to the news updates by email.
      *
-     * @param email the email address to subscribe
+     * @param request the {@link SubscribeNewsRequestDto} containing the email address to subscribe
      * @return 200 OK if subscription is successful, or 400 Bad Request if an error occurs
      */
     @PostMapping
@@ -38,10 +37,10 @@ public class NewsSubscriptionController {
             @ApiResponse(responseCode = "200", description = "Subscribed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid email or already subscribed")
     })
-    public ResponseEntity<String> subscribe(@RequestParam String email) {
+    public ResponseEntity<?> subscribe(@Valid @RequestBody SubscribeNewsRequestDto request) {
         try {
-            newsSubscriptionService.subscribe(email);
-            return ResponseEntity.ok("Subscribed successfully!");
+            newsSubscriptionService.subscribe(request.getEmail());
+            return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
