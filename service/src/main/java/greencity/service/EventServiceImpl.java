@@ -10,6 +10,7 @@ import greencity.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -31,6 +32,7 @@ public class EventServiceImpl implements EventService {
      * @author Rostyslav Zadyraichuk
      */
     @Override
+    @Transactional
     public void deleteById(Long id, UserVO user) {
         Event event = eventRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));

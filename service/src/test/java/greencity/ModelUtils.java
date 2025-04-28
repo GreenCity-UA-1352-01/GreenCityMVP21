@@ -670,17 +670,24 @@ public class ModelUtils {
     }
 
     public static Event getEvent() {
+        Event event = getEventWithoutDates();
+        List<EventDateTimeLocation> dateTimes = getEventDateTimeLocationsWithoutEvent();
+        event.setDateTimes(dateTimes);
+        dateTimes.forEach(dateTime -> dateTime.setEvent(event));
+        return event;
+    }
+
+    private static Event getEventWithoutDates() {
         return Event.builder()
             .id(1L)
             .title("test")
             .description("test")
-            .dateTimes(getEventDateTimeLocations())
             .tags(Set.copyOf(getTags()))
             .isOpen(true)
             .build();
     }
 
-    public static List<EventDateTimeLocation> getEventDateTimeLocations() {
+    private static List<EventDateTimeLocation> getEventDateTimeLocationsWithoutEvent() {
         return Arrays.asList(
             EventDateTimeLocation.builder()
                 .id(1L)
