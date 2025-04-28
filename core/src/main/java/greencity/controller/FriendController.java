@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
-import greencity.annotations.CurrentUserId;
 import greencity.constant.AppConstant;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
@@ -15,8 +14,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -64,7 +64,7 @@ public class FriendController {
     })
     @GetMapping("/not-friends-yet")
     public ResponseEntity<PageableDto<SearchFriendDtoResponse>> searchFriends(
-        @RequestParam(value = "name") @Pattern(regexp = "^[a-zA-Zа-яА-Я. ]{1,30}$") String name,
+        @RequestParam(value = "name") @Valid @Pattern(regexp = "^[a-zA-Zа-яА-Я. ]{1,30}$") String name,
         @RequestParam(value = "theSameCity", required = false, defaultValue = "false") Boolean isTheSameCity,
         @RequestParam(value = "friendsOfFriends", required = false, defaultValue = "false") Boolean isFriendsOfFriends,
         @Parameter(hidden = true) @ApiIgnore Pageable pageable,
@@ -91,11 +91,10 @@ public class FriendController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @Parameter(name = "friendId", schema = @Schema(type = "int", minimum = "1", defaultValue = "1"),
-        description = "Id friend of current user. Cannot be empty.")
+    @Parameter(name = "friendId", description = "Friend's id. Cannot be empty and must be greater than 0.")
     @PostMapping("/{friendId}")
-    public void addFriend(@PathVariable @Min(1) Long friendId,
-                          @Parameter(hidden = true) @CurrentUserId Long currentUserId) {
-        friendService.addFriend(friendId, currentUserId);
+    public void addFriend(@PathVariable("friendId") @Valid @Positive Long friendId,
+                          @Parameter(hidden = true) @CurrentUser UserVO currentUser) {
+        friendService.addFriend(currentUser.getId(), friendId);
     }
 }

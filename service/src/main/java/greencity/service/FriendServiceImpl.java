@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -66,6 +67,7 @@ public class FriendServiceImpl implements FriendService {
      * @param friendId      the ID of the user to add as a friend
      */
     @Override
+    @Transactional
     public void addFriend(Long currentUserId, Long friendId) {
         if (currentUserId == null || friendId == null) {
             throw new BadRequestException("User id and friend id cannot be null");
