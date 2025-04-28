@@ -226,6 +226,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,
                                 "/habit/statistic/{id}",
                                 "/econews/update",
+                                "/events/update",
                                 "/ownSecurity",
                                 "/user/profile",
                                 HABIT_ASSIGN_ID + "/update-habit-duration",
