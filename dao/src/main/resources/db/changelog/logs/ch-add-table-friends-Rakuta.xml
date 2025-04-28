@@ -49,5 +49,8 @@
 
     <changeSet id="changeFriendsTableNameZadyraichuk" author="Rostyslav Zadyraichuk">
         <renameTable oldTableName="friends" newTableName="users_friends"/>
+        <rollback>
+            <renameTable oldTableName="users_friends" newTableName="friends"/>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
