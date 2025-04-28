@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.annotations.CurrentUserId;
+import greencity.constant.AppConstant;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,9 +54,9 @@ public class FriendController {
             description = "Must be 1–30 characters long. "
                 + "Only alphabetic letters (A–Z, a–z), dots (.), and spaces are allowed. "
                 + "The input will be used to generate an ordered character search pattern."),
-        @Parameter(name = "theSameCity", schema = @Schema(type = "boolean"),
+        @Parameter(name = "theSameCity", schema = @Schema(type = "boolean", defaultValue = "false"),
             description = "If true, limits the search to users from the same city as the requester."),
-        @Parameter(name = "friendsOfFriends", schema = @Schema(type = "boolean"),
+        @Parameter(name = "friendsOfFriends", schema = @Schema(type = "boolean", defaultValue = "false"),
             description = "If true, limits the search to users who are friends of the requester's friends."),
         @Parameter(name = "page", schema = @Schema(type = "int", minimum = "0", defaultValue = "0"),
             description = "Page index you want to retrieve [0..N]. "
@@ -63,10 +65,11 @@ public class FriendController {
     @GetMapping("/not-friends-yet")
     public ResponseEntity<PageableDto<SearchFriendDtoResponse>> searchFriends(
         @RequestParam(value = "name") @Pattern(regexp = "^[a-zA-Zа-яА-Я. ]{1,30}$") String name,
-        @RequestParam(value = "theSameCity", required = false) Boolean isTheSameCity,
-        @RequestParam(value = "friendsOfFriends", required = false) Boolean isFriendsOfFriends,
+        @RequestParam(value = "theSameCity", required = false, defaultValue = "false") Boolean isTheSameCity,
+        @RequestParam(value = "friendsOfFriends", required = false, defaultValue = "false") Boolean isFriendsOfFriends,
         @Parameter(hidden = true) @ApiIgnore Pageable pageable,
         @Parameter(hidden = true) @CurrentUser UserVO user) {
+        pageable = PageRequest.of(pageable.getPageNumber(), AppConstant.FRIENDS_RESPONSE_SIZE, pageable.getSort());
         return ResponseEntity.status(HttpStatus.OK)
             .body(friendService.searchNewFriends(name, isTheSameCity, isFriendsOfFriends, user, pageable));
     }

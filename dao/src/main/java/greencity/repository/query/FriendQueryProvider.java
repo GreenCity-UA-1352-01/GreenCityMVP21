@@ -7,10 +7,10 @@ public class FriendQueryProvider {
                     u.id AS user_id,
                     COUNT(*) AS mutual_friends_count
                 FROM users u
-                INNER JOIN friends f
+                INNER JOIN users_friends f
                     ON f.user_id = :currentUserId
                         OR f.friend_id = :currentUserId
-                INNER JOIN friends ff
+                INNER JOIN users_friends ff
                     ON (ff.user_id = u.id OR ff.friend_id = u.id)
                         AND (f.user_id = ff.user_id OR f.user_id = ff.friend_id
                             OR f.friend_id = ff.user_id OR f.friend_id = ff.friend_id)
@@ -22,10 +22,15 @@ public class FriendQueryProvider {
                 GROUP BY u.id
             )
             SELECT
-                u.id, u.name, u.first_name, u.city, u.rating, u.profile_picture,
-                COALESCE(mf.mutual_friends_count, 0) AS mutual_friends_count
+                u.id,
+                u.name,
+                u.first_name AS firstName,
+                u.city,
+                u.rating,
+                u.profile_picture AS profilePicture,
+                COALESCE(mf.mutual_friends_count, 0) AS mutualFriendsCount
             FROM users u
-            LEFT JOIN friends f
+            LEFT JOIN users_friends f
                 ON (u.id = f.friend_id AND f.user_id = :currentUserId)
                 OR (u.id = f.user_id AND f.friend_id = :currentUserId)
             LEFT JOIN mutual_friends mf
@@ -43,10 +48,10 @@ public class FriendQueryProvider {
                     u.id AS user_id,
                     COUNT(*) AS mutual_friends_count
                 FROM users u
-                INNER JOIN friends f
+                INNER JOIN users_friends f
                     ON f.user_id = :currentUserId
                         OR f.friend_id = :currentUserId
-                INNER JOIN friends ff
+                INNER JOIN users_friends ff
                     ON (ff.user_id = u.id OR ff.friend_id = u.id)
                         AND (f.user_id = ff.user_id OR f.user_id = ff.friend_id
                             OR f.friend_id = ff.user_id OR f.friend_id = ff.friend_id)
@@ -58,8 +63,13 @@ public class FriendQueryProvider {
                 GROUP BY u.id
             )
             SELECT DISTINCT
-                u.id, u.name, u.first_name, u.city, u.rating, u.profile_picture,
-                COALESCE(mf.mutual_friends_count, 0) AS mutual_friends_count
+                u.id,
+                u.name,
+                u.first_name AS firstName,
+                u.city,
+                u.rating,
+                u.profile_picture AS profilePicture,
+                COALESCE(mf.mutual_friends_count, 0) AS mutualFriendsCount
             FROM users u
             JOIN users_friends f
                 ON f.user_id = :currentUserId OR f.friend_id = :currentUserId
