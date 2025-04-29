@@ -97,12 +97,15 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint((req, resp, exc) -> resp
                                 .sendError(SC_UNAUTHORIZED, "Authorize first."))
-                        .accessDeniedHandler((req, resp, exc) ->
-                                resp.sendError(SC_FORBIDDEN, "You don't have authorities.")))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            String message = accessDeniedException.getMessage();
+                            response.sendError(SC_FORBIDDEN,
+                                    (message == null || message.isBlank()) ? "You don't have authorities." : message);
+                        }))
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/management/", "/management/login").permitAll()
-                        .requestMatchers("/v2/api-docs/**", "/v3/api-docs/**", "/swagger.json",
+                        .requestMatchers("/error","/v2/api-docs/**", "/v3/api-docs/**", "/swagger.json",
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-resources/**", "/webjars/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/management/**",

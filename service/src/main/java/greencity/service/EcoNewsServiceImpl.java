@@ -36,6 +36,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -317,7 +318,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public void delete(Long id, UserVO user) {
         EcoNewsVO ecoNewsVO = findById(id);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(ecoNewsVO.getAuthor().getId())) {
-            throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
@@ -472,6 +473,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public void update(EcoNewsDtoManagement ecoNewsDtoManagement, MultipartFile image) {
+
         EcoNews toUpdate = modelMapper.map(findById(ecoNewsDtoManagement.getId()), EcoNews.class);
         enhanceWithNewManagementData(toUpdate, ecoNewsDtoManagement, image);
 
@@ -486,9 +488,15 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public EcoNewsGenericDto update(UpdateEcoNewsDto updateEcoNewsDto, MultipartFile image, UserVO user) {
-        EcoNews toUpdate = modelMapper.map(findById(updateEcoNewsDto.getId()), EcoNews.class);
+        Long id;
+        try {
+            id = Long.valueOf(updateEcoNewsDto.getId());
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("EcoNews ID must be a valid number");
+        }
+        EcoNews toUpdate = modelMapper.map(findById(id), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
-            throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         enhanceWithNewData(toUpdate, updateEcoNewsDto, image);
         ecoNewsRepo.save(toUpdate);
@@ -751,9 +759,9 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         UserVO byEmail = restClient.findByEmail(email);
         User user = modelMapper.map(byEmail, User.class);
         toSave.setAuthor(user);
-        if (addEcoNewsDtoRequest.getImage() != null) {
-            image = fileService.convertToMultipartImage(addEcoNewsDtoRequest.getImage());
-        }
+//        if (addEcoNewsDtoRequest.getImage() != null) {
+//            image = fileService.convertToMultipartImage(addEcoNewsDtoRequest.getImage());
+//        }
         if (image != null) {
             toSave.setImagePath(fileService.upload(image));
         }
