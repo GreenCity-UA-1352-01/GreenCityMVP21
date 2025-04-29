@@ -15,18 +15,13 @@ public final class SwaggerExampleModel {
         + "\t<pre>\n";
 
     private static final String EXAMPLE =
-        "  \"image\": \"string\",\n"
-            + "  \"source\": \"https://example.org/\",\n"
-            + "  \"shortInfo\": \"string\",\n"
+
+            "  \"source\": \"https://example.org/\",\n"
+            + "  \"title\": \"Title\",\n"
+            + "  \"text\": \"Text\",\n"
             + "  \"tags\": [\n"
             + "    \"string\"\n"
-            + "  ],\n"
-            + "  \"titleTranslation\":\n"
-            + "     {\"content\": \"string\",\n"
-            + "     \"languageCode\": \"string\"},\n"
-            + "  \"textTranslation\":\n"
-            + "     {\"content\": \"string\",\n"
-            + "     \"languageCode\": \"string\"}\n";
+            + "  ],\n";
 
     private static final String AFTER_EXAMPLE = "\t</pre>\n"
         + "</div>";
@@ -49,14 +44,17 @@ public final class SwaggerExampleModel {
             + "}\n"
             + AFTER_EXAMPLE;
     public static final String UPDATE_ECO_NEWS =
-        "Update Eco News\n"
-            + IMAGE_DESCRIPTION
+            "Update Eco News\n"
             + BEFORE_EXAMPLE
-            + "{\n"
-            + "  \"id\": 0,\n"
-            + EXAMPLE
+            + "{\"id\":\"string\",\n"
+            + "\"tags\":[\"string\"],\n"
+            + "\"content\":\"string\",\n"
+            + "\"title\":\"string\",\n"
+            + "\"source\":\"string\",\n"
+            + "\"text\":\"string\""
             + "}\n"
             + AFTER_EXAMPLE;
+
     public static final String ADD_EVENT = BEFORE_EXAMPLE
         + "{\n"
         + "\t\"title\":\"string\",\n"
