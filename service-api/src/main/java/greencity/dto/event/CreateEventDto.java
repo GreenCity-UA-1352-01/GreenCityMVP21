@@ -1,5 +1,6 @@
 package greencity.dto.event;
 
+import greencity.annotations.UniqueEventDates;
 import greencity.dto.tag.TagUaEnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,12 +17,14 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @ToString
+@UniqueEventDates
 public class CreateEventDto {
 
     @NotBlank
     @Size(max = 70, message = "Title must be no longer than 70 characters")
     private String title;
 
+    @NotBlank
     @Size(min = 20, max = 63206, message = "Description must be between 20 and 63,206 characters")
     private String description;
 
