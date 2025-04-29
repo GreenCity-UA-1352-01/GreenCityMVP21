@@ -1,6 +1,5 @@
 package greencity.dto.event;
 
-//import greencity.annotations.ValidEventType;
 import greencity.dto.tag.TagUaEnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,7 +16,6 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @ToString
-//@ValidEventType
 public class CreateEventDto {
 
     @NotBlank
