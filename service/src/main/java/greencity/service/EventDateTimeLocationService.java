@@ -13,9 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +24,7 @@ public class EventDateTimeLocationService {
     private final EventDateLocationDtoMapper eventDateLocationDtoMapper;
     private final EventDateTimeLocationRepo evDateTimeLocRepo;
 
-    protected void handleDateTimeLocations(List<EventDateLocationDto> dates, Event event) {
+    public void handleDateTimeLocations(List<EventDateLocationDto> dates, Event event) {
         List<EventDateTimeLocation> dateTimes = dates.stream()
                 .map(dto -> EventDateTimeLocation.builder()
                         .startDateTime(dto.getStartDateTime())
@@ -39,70 +38,56 @@ public class EventDateTimeLocationService {
         event.setDateTimes(dateTimes);
     }
 
-    protected List<EventDateLocationDto> getAllDates(Event event) {
+    public List<EventDateLocationDto> getAllDates(Event event) {
         return event.getDateTimes().stream()
                 .map(eventDateLocationDtoMapper::convert)
                 .collect(Collectors.toList());
     }
 
-    protected void updateEventDateTimeLocation(Event event, List<EventDateTimeLocationRequestDto> dtoList) {
-//        List<EventDateTimeLocation> updatedDates = dtoList.stream()
-//                .map(dateTimeDto -> {
-//                    EventDateTimeLocation dateTimeLocation = event.getDateTimes().stream()
-//                            .filter(dt -> dt.getId() != null && dt.getId().equals(dateTimeDto.getId()))
-//                            .findFirst()
-//                            .orElseGet(() -> {
-//                                EventDateTimeLocation newDateTime = new EventDateTimeLocation();
-//                                newDateTime.setEvent(event);
-//                                return newDateTime;
-//                            });
-//                    dateTimeLocation.setStartDateTime(dateTimeDto.getStartDateTime());
-//                    dateTimeLocation.setEndDateTime(dateTimeDto.getEndDateTime());
-//                    dateTimeLocation.setLocation(dateTimeDto.getLocation());
-//                    dateTimeLocation.setLink(dateTimeDto.getLink());
-//                    return dateTimeLocation;
-//                })
-//                .toList();
-//        event.getDateTimes().clear();
-//        event.getDateTimes().addAll(updatedDates);
-        Set<Long> existingIds = event.getDateTimes().stream()
-                .map(EventDateTimeLocation::getId)
+
+    public void updateEventDateTimeLocation(Event event,
+                                            List<EventDateTimeLocationRequestDto> dtoList) {
+        // 1. Збираємо id, які прийшли в DTO
+        Set<Long> dtoIds = dtoList.stream()
+                .map(EventDateTimeLocationRequestDto::getId)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        List<EventDateTimeLocation> resultDateTimes = new ArrayList<>();
+        // 2. Видаляємо з колекції ті, яких нема в DTO (orphanRemoval видалить їх із БД)
+        event.getDateTimes().removeIf(edtl ->
+                edtl.getId() != null && !dtoIds.contains(edtl.getId())
+        );
 
+        // 3. Індекс існуючих по id
+        Map<Long, EventDateTimeLocation> existing = event.getDateTimes().stream()
+                .filter(e -> e.getId() != null)
+                .collect(Collectors.toMap(EventDateTimeLocation::getId, Function.identity()));
+
+        // 4. Оновлюємо існуючі та додаємо нові
         for (EventDateTimeLocationRequestDto dto : dtoList) {
-            Long dtoId = dto.getId();
-
-            if (dtoId != null) {
-                if (!existingIds.contains(dtoId)) {
-                    throw new BadRequestException("The event date-time location id " + dtoId + " does not exist");
+            if (dto.getId() != null) {
+                EventDateTimeLocation toUpdate = existing.get(dto.getId());
+                if (toUpdate == null) {
+                    throw new BadRequestException(
+                            "Немає дати з id=" + dto.getId() + " або вона належить іншому івенту");
                 }
-                EventDateTimeLocation entity = evDateTimeLocRepo.findById(dtoId)
-                        .orElseThrow(() -> new NotFoundException("The EventDateTimeLocation with id " + dtoId + " does not exist"));
-
-                entity.setStartDateTime(dto.getStartDateTime());
-                entity.setEndDateTime(dto.getEndDateTime());
-                entity.setLocation(dto.getLocation());
-                entity.setLink(dto.getLink());
-
-                resultDateTimes.add(entity);
-            }else {
-                EventDateTimeLocation newEntity = EventDateTimeLocation.builder()
-                        .event(event)
+                toUpdate.setStartDateTime(dto.getStartDateTime());
+                toUpdate.setEndDateTime(dto.getEndDateTime());
+                toUpdate.setLocation(dto.getLocation());
+                toUpdate.setLink(dto.getLink());
+            } else {
+                EventDateTimeLocation created = EventDateTimeLocation.builder()
                         .startDateTime(dto.getStartDateTime())
                         .endDateTime(dto.getEndDateTime())
                         .location(dto.getLocation())
                         .link(dto.getLink())
+                        .event(event)
                         .build();
-                resultDateTimes.add(newEntity);
+                event.getDateTimes().add(created);
             }
-
-
         }
-
-
+        // при виході з транзакції Hibernate:
+        // • видалить «сиріт»
+        // • збереже оновлення та нові записи
     }
-
-
 }
