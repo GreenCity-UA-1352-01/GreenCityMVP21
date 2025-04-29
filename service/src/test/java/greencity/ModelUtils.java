@@ -4,6 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
+import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
@@ -20,6 +21,8 @@ import greencity.entity.*;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
+import greencity.projection.ProjectionProxy;
+import greencity.projection.UserWithMutualFriendsProjection;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -666,6 +669,30 @@ public class ModelUtils {
             .id(2L)
             .text("item")
             .status(ShoppingListItemStatus.INPROGRESS)
+            .build();
+    }
+
+    public static UserWithMutualFriendsProjection getUserWithMutualFriendsProjection() {
+        Map<String, Object> values = Map.of(
+            "id", 1L,
+            "name", "Username",
+            "firstName", "Taras",
+            "city", "Kyiv",
+            "profilePicture", "picture",
+            "rating", 5D,
+            "mutualFriendsCount", 1
+        );
+        return ProjectionProxy.createProjection(UserWithMutualFriendsProjection.class, values);
+    }
+
+    public static SearchFriendDtoResponse getSearchFriendDtoResponse() {
+        return SearchFriendDtoResponse.builder()
+            .id(1L)
+            .name("Taras Username")
+            .city("Kyiv")
+            .picture("picture")
+            .rating(5D)
+            .mutualFriends(1)
             .build();
     }
 }
