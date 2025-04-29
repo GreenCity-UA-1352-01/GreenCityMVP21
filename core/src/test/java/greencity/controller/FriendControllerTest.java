@@ -5,7 +5,6 @@ import greencity.GreenCityApplication;
 import greencity.ModelUtils;
 import greencity.config.SecurityConfig;
 import greencity.config.WebMvcConfig;
-import greencity.constant.AppConstant;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.user.UserVO;
@@ -19,13 +18,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,7 +33,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest(FriendController.class)
 @ContextConfiguration(classes = {GreenCityApplication.class})
@@ -90,26 +86,6 @@ class FriendControllerTest {
 
         verify(friendService).searchNewFriends(eq(NAME), eq(IS_THE_SAME_CITY),
             eq(IS_FRIENDS_OF_FRIENDS), eq(USER), any());
-    }
-
-    @Test
-    @WithMockUser(username = USER_EMAIL)
-    void testSearchNewFriends_shouldSetPageSizeToConstant() throws Exception {
-        when(friendService.searchNewFriends(eq(NAME), eq(IS_THE_SAME_CITY), eq(IS_FRIENDS_OF_FRIENDS),
-            eq(USER), any())).thenReturn(null);
-
-        mockMvc.perform(get("/friends/not-friends-yet")
-                .accept(MediaType.APPLICATION_JSON)
-                .param("name", NAME)
-                .param("size", "100"))
-            .andExpect(status().isOk());
-
-        ArgumentCaptor<Pageable> pageableArgumentCaptor = ArgumentCaptor.forClass(Pageable.class);
-
-        verify(friendService).searchNewFriends(eq(NAME), eq(IS_THE_SAME_CITY), eq(IS_FRIENDS_OF_FRIENDS),
-            eq(USER), pageableArgumentCaptor.capture());
-        Pageable pageable = pageableArgumentCaptor.getValue();
-        assertEquals(AppConstant.FRIENDS_RESPONSE_SIZE, pageable.getPageSize());
     }
 
     @Test

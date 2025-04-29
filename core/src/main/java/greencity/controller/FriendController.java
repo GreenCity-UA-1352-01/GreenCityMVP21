@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
-import greencity.constant.AppConstant;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
@@ -18,7 +17,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +67,6 @@ public class FriendController {
         @RequestParam(value = "friendsOfFriends", required = false, defaultValue = "false") Boolean isFriendsOfFriends,
         @Parameter(hidden = true) @ApiIgnore Pageable pageable,
         @Parameter(hidden = true) @CurrentUser UserVO user) {
-        pageable = PageRequest.of(pageable.getPageNumber(), AppConstant.FRIENDS_RESPONSE_SIZE, pageable.getSort());
         return ResponseEntity.status(HttpStatus.OK)
             .body(friendService.searchNewFriends(name, isTheSameCity, isFriendsOfFriends, user, pageable));
     }

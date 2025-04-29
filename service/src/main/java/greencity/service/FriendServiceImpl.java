@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.constant.AppConstant;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.user.UserVO;
@@ -9,6 +10,7 @@ import greencity.projection.UserWithMutualFriendsProjection;
 import greencity.repository.FriendRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,7 @@ public class FriendServiceImpl implements FriendService {
         }
         String namePattern = "%" + String.join("%", name.split("")) + "%";
         String city = Boolean.TRUE.equals(isTheSameCity) ? user.getCity() : null;
+        pageable = PageRequest.of(pageable.getPageNumber(), AppConstant.FRIENDS_RESPONSE_SIZE, pageable.getSort());
 
         Page<UserWithMutualFriendsProjection> potentialFriendsPage = Boolean.TRUE.equals(isFriendsOfFriends)
             ? friendRepository.findFriendsOfFriends(user.getId(), namePattern, city, pageable)
