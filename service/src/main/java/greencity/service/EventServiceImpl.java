@@ -93,6 +93,12 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    private Event buildBaseEvent(CreateEventDto dto, User initiator) {
+        Event event = modelMapper.map(dto, Event.class);
+        event.setInitiator(initiator);
+        return event;
+    }
+
     private CreateEventDtoResponse buildResponse(Event event) {
         return CreateEventDtoResponse.builder()
                 .eventId(event.getId())
@@ -171,12 +177,6 @@ public class EventServiceImpl implements EventService {
 
         event.getEventImages().addAll(eventImages);
         event.setMainImage(mainImage);
-    }
-
-    private Event buildBaseEvent(CreateEventDto dto, User initiator) {
-        Event event = modelMapper.map(dto, Event.class);
-        event.setInitiator(initiator);
-        return event;
     }
 
     @Override
