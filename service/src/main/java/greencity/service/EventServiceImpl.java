@@ -150,17 +150,17 @@ public class EventServiceImpl implements EventService {
     }
 
     private void updateEventImages(Event event, List<MultipartFile> images, String mainImageFilename) {
+        MultipartFile mainImageFile = images.stream()
+                .filter(file -> file.getOriginalFilename() != null && file.getOriginalFilename().equals(mainImageFilename))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT));
+
         event.getEventImages().forEach(img -> {
             fileService.delete(img.getImagePath());
         });
         event.getEventImages().clear();
 
         List<EventImage> eventImages = new ArrayList<>();
-
-        MultipartFile mainImageFile = images.stream()
-                .filter(file -> file.getOriginalFilename() != null && file.getOriginalFilename().equals(mainImageFilename))
-                .findFirst()
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT));
 
         for (MultipartFile file : images) {
             EventImage eventImage = new EventImage();
