@@ -15,7 +15,7 @@
             </column>
             <column name="action" type="VARCHAR(300)"/>
             <column name="object_name" type="VARCHAR(200)"/>
-            <column name="datetime" type="TIMESTAMP WITH TIME ZONE">
+            <column name="creation_date" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
             <column name="status" type="VARCHAR(20)"/>
@@ -44,7 +44,7 @@
             <column name="user_id" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="count" type="INT"/>
+            <column name="count_of_notifications" type="INT"/>
         </createTable>
         <rollback>
             <dropTable tableName="notification_counter"/>
