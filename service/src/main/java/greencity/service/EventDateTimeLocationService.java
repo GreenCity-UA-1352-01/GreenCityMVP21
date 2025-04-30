@@ -47,23 +47,23 @@ public class EventDateTimeLocationService {
 
     public void updateEventDateTimeLocation(Event event,
                                             List<EventDateTimeLocationRequestDto> dtoList) {
-        // 1. Збираємо id, які прийшли в DTO
+        //  collect ids that come from dto
         Set<Long> dtoIds = dtoList.stream()
                 .map(EventDateTimeLocationRequestDto::getId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        // 2. Видаляємо з колекції ті, яких нема в DTO (orphanRemoval видалить їх із БД)
+        // delete old ids that don't match with new (orphanRemoval)
         event.getDateTimes().removeIf(edtl ->
                 edtl.getId() != null && !dtoIds.contains(edtl.getId())
         );
 
-        // 3. Індекс існуючих по id
+        // Collect all ids to map
         Map<Long, EventDateTimeLocation> existing = event.getDateTimes().stream()
                 .filter(e -> e.getId() != null)
                 .collect(Collectors.toMap(EventDateTimeLocation::getId, Function.identity()));
 
-        // 4. Оновлюємо існуючі та додаємо нові
+        // update existing id. Check ids from dtoList and matching with existing in the map. Or create new.
         for (EventDateTimeLocationRequestDto dto : dtoList) {
             if (dto.getId() != null) {
                 EventDateTimeLocation toUpdate = existing.get(dto.getId());
@@ -86,8 +86,5 @@ public class EventDateTimeLocationService {
                 event.getDateTimes().add(created);
             }
         }
-        // при виході з транзакції Hibernate:
-        // • видалить «сиріт»
-        // • збереже оновлення та нові записи
     }
 }
