@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
+import greencity.constant.SwaggerExampleModel;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.user.UserVO;
@@ -34,7 +35,9 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
     private final EventService eventService;
     @Operation(summary = "Create a new event")
+    @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
