@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="addNotificationsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="notifications">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="receiver_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="initiator_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="VARCHAR(300)"/>
+            <column name="object_name" type="VARCHAR(200)"/>
+            <column name="creation_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="notifications"
+                                 baseColumnNames="receiver_id"
+                                 constraintName="FK_NOTIFICATIONS_RECEIVER_ID"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="notifications"
+                                 baseColumnNames="initiator_id"
+                                 constraintName="FK_NOTIFICATIONS_INITIATOR_ID"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        <createIndex tableName="notifications" indexName="IDX_NOTIFICATIONS_RECEIVER_ID">
+            <column name="receiver_id"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="notifications"/>
+            <dropIndex tableName="notifications" indexName="IDX_NOTIFICATIONS_RECEIVER_ID"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addNotificationCounterTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="notification_counter">
+            <column name="user_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="count_of_notifications" type="INT"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="notification_counter"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

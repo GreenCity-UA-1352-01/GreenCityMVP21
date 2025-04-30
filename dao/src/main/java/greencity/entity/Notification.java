@@ -13,6 +13,8 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(exclude = {"receiver", "initiator"})
+@ToString(exclude = {"receiver", "initiator"})
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +23,10 @@ public class Notification {
     @Column
     private String action;
 
-    @Column
-    private String object_name;
+    @Column(name = "object_name")
+    private String objectName;
 
-    @Column(nullable = false)
+    @Column(name = "creation_date", nullable = false)
     private ZonedDateTime creationDate;
 
     @Column
