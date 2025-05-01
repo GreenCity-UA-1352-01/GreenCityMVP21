@@ -70,5 +70,4 @@ public class EventController {
         return ResponseEntity.ok(eventService.updateEvent(updateEventDtoRequest, images, user));
     }
 
-
 }
