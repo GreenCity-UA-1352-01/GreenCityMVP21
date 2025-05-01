@@ -3,15 +3,17 @@ package greencity.mapping;
 import greencity.ModelUtils;
 import greencity.dto.shoppinglistitem.ShoppingListItemResponseDto;
 import greencity.entity.ShoppingListItem;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ShoppingListItemResponseDtoMapperTest {
+class ShoppingListItemResponseDtoMapperTest {
     private final ShoppingListItemResponseDtoMapper mapper = new ShoppingListItemResponseDtoMapper();
 
     @Test
-    public void testConvertFromEntityToDto() {
+    @DisplayName("Convert shopping list item entity to response DTO")
+    void testConvertFromEntityToDto() {
         ShoppingListItem entity = ModelUtils.getShoppingListItem();
 
         ShoppingListItemResponseDto dto = mapper.convert(entity);
@@ -24,10 +26,9 @@ public class ShoppingListItemResponseDtoMapperTest {
         );
     }
 
-    ;
-
     @Test
-    public void testTranslationsAreMapped() {
+    @DisplayName("Verify translations are correctly mapped")
+    void testTranslationsAreMapped() {
         ShoppingListItem entity = ModelUtils.getShoppingListItem();
 
         ShoppingListItemResponseDto dto = mapper.convert(entity);
@@ -36,5 +37,11 @@ public class ShoppingListItemResponseDtoMapperTest {
             assertEquals(entity.getTranslations().get(i).getId(), dto.getTranslations().get(i).getId());
             assertEquals(entity.getTranslations().get(i).getContent(), dto.getTranslations().get(i).getContent());
         }
+    }
+
+    @Test
+    @DisplayName("Convert null shopping list item throws NPE")
+    void testConvertNullEntity() {
+        assertThrows(NullPointerException.class, () -> mapper.convert((ShoppingListItem) null));
     }
 }
