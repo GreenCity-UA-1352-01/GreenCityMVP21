@@ -34,6 +34,7 @@ public final class ErrorMessage {
     public static final String TAG_NOT_FOUND = "Tag not found by id : ";
     public static final String TAGS_NOT_FOUND = "There should be at least one valid tag";
     public static final String DUPLICATED_TAG = "Tags should be unique";
+    public static final String INVALID_TAG_TYPE = "Invalid tag type.";
     public static final String INVALID_NUM_OF_TAGS =
             "Invalid tags. You must have less than " + ServiceValidationConstants.MAX_AMOUNT_OF_TAGS + " tags";
     public static final String FACT_OF_THE_DAY_NOT_FOUND = "The fact of the day not found: ";

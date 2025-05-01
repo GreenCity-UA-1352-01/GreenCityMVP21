@@ -14,6 +14,7 @@ import greencity.exception.exceptions.TagNotFoundException;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,15 +112,22 @@ public class EventServiceImpl implements EventService {
                 .build();
     }
 
-    private void handleTags(List<TagUaEnDto> tagsDto, Event event) {
-        if (tagsDto != null) {
-            Set<Tag> tags = tagsDto.stream()
-                    .map(tagDto -> tagsRepo.findById(tagDto.getId())
-                            .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagDto.getId())))
-                    .collect(Collectors.toSet());
-            event.setTags(tags);
-        }
+private void handleTags(List<TagUaEnDto> tagsDto, Event event) {
+    if (tagsDto != null) {
+        Set<Tag> tags = tagsDto.stream()
+                .map(tagDto -> {
+                    Tag tag = tagsRepo.findById(tagDto.getId())
+                            .orElseThrow(() -> new TagNotFoundException(ErrorMessage.TAG_NOT_FOUND));
+                    if (tag.getType() != TagType.EVENT) {
+                        throw new BadRequestException(ErrorMessage.INVALID_TAG_TYPE + " Should be " + TagType.EVENT);
+                    }
+                    return tag;
+                })
+                .collect(Collectors.toSet());
+        event.setTags(tags);
     }
+}
+
 
     private void updateEventTags(Event event, List<String> tags) {
         Set<Tag> updateTags = new HashSet<>(tagsRepo.findTagsByNamesAndType(
