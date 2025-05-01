@@ -1,7 +1,6 @@
 package greencity.dto.event;
 
 import greencity.annotations.UniqueEventDates;
-import greencity.dto.tag.TagUaEnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,7 +35,7 @@ public class CreateEventDto {
     @Size(min = 1, max = 7, message = "No more than 7 date/time entries allowed")
     private List<@Valid EventDateLocationDto> dates;
 
-    private List<TagUaEnDto> tags;
+    private List<String> tags;
 
     private Boolean online;
 

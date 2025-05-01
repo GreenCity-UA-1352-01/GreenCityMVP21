@@ -2,7 +2,6 @@ package greencity.service;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.*;
-import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
@@ -14,7 +13,6 @@ import greencity.exception.exceptions.TagNotFoundException;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +47,7 @@ public class EventServiceImpl implements EventService {
         event.setEventImages(eventImages);
 
         eventDateTimeLocationService.handleDateTimeLocations(dto.getDates(), event);
-        handleTags(dto.getTags(), event);
+        updateEventTags(event, dto.getTags());
 
         Event savedEvent = eventRepository.save(event);
 
@@ -101,6 +99,12 @@ public class EventServiceImpl implements EventService {
     }
 
     private CreateEventDtoResponse buildResponse(Event event) {
+        List<String> imagePaths = new ArrayList<>();
+        if (event.getEventImages() != null) {
+            for (EventImage image : event.getEventImages()) {
+                imagePaths.add(image.getImagePath());
+            }
+        }
         return CreateEventDtoResponse.builder()
                 .eventId(event.getId())
                 .title(event.getTitle())
@@ -108,25 +112,10 @@ public class EventServiceImpl implements EventService {
                 .open(event.isOpen())
                 .tags(tagsConverter(event))
                 .dates(eventDateTimeLocationService.getAllDates(event))
+                .images(imagePaths)
                 .createdDateTime(ZonedDateTime.now())
                 .build();
     }
-
-private void handleTags(List<TagUaEnDto> tagsDto, Event event) {
-    if (tagsDto != null) {
-        Set<Tag> tags = tagsDto.stream()
-                .map(tagDto -> {
-                    Tag tag = tagsRepo.findById(tagDto.getId())
-                            .orElseThrow(() -> new TagNotFoundException(ErrorMessage.TAG_NOT_FOUND));
-                    if (tag.getType() != TagType.EVENT) {
-                        throw new BadRequestException(ErrorMessage.INVALID_TAG_TYPE + " Should be " + TagType.EVENT);
-                    }
-                    return tag;
-                })
-                .collect(Collectors.toSet());
-        event.setTags(tags);
-    }
-}
 
 
     private void updateEventTags(Event event, List<String> tags) {

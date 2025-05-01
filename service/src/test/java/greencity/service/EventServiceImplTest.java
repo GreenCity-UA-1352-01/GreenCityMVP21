@@ -1,17 +1,17 @@
 package greencity.service;
 
+import greencity.ModelUtils;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
-import greencity.entity.EventDateTimeLocation;
+import greencity.entity.Tag;
 import greencity.entity.User;
-import greencity.enums.EmailNotification;
-import greencity.enums.Role;
+import greencity.enums.TagType;
+import greencity.exception.exceptions.TagNotFoundException;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,19 +20,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static greencity.enums.UserStatus.ACTIVATED;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class EventServiceImplTest {
@@ -48,8 +41,89 @@ class EventServiceImplTest {
     private EventDateTimeLocationService eventDateTimeLocationService;
     @Mock
     private ModelMapper modelMapper;
+
     @InjectMocks
     private EventServiceImpl eventService;
 
+    private final CreateEventDto createEventDto = ModelUtils.getCreateEventDto();
+    private final CreateEventDtoResponse expectedResponse = ModelUtils.getCreateEventDtoResponse();
+    private final User user = ModelUtils.getUser();
+    private final UserVO userVO = ModelUtils.getUserVO();
+    private final Event event = ModelUtils.getEvent();
+
+    @Test
+    void createEvent_ReturnsCreateEventDtoResponse() {
+        List<MultipartFile> images = Collections.emptyList();
+
+        Tag tag = ModelUtils.getEventTag();
+
+        when(userRepo.findById(user.getId())).thenReturn(Optional.of(user));
+        when(modelMapper.map(any(CreateEventDto.class), eq(Event.class))).thenReturn(event);
+        when(tagsRepo.findTagsByNamesAndType(anyList(), eq(TagType.EVENT))).thenReturn(List.of(tag));
+        when(eventRepository.save(event)).thenReturn(event);
+        when(eventDateTimeLocationService.getAllDates(event)).thenReturn(List.of(ModelUtils.getEventDateLocationDto()));
+
+        CreateEventDtoResponse actualResponse = eventService.createEvent(createEventDto, images, userVO);
+
+        assertNotNull(actualResponse);
+        assertEquals(expectedResponse.getTitle(), actualResponse.getTitle());
+        assertEquals(expectedResponse.getDescription(), actualResponse.getDescription());
+        assertEquals(expectedResponse.getTags(), actualResponse.getTags());
+        assertEquals(expectedResponse.getOpen(), actualResponse.getOpen());
+        assertEquals(expectedResponse.getDates(), actualResponse.getDates());
+
+        verify(userRepo).findById(user.getId());
+        verify(modelMapper).map(any(CreateEventDto.class), eq(Event.class));
+        verify(tagsRepo).findTagsByNamesAndType(anyList(), eq(TagType.EVENT));
+        verify(eventRepository).save(event);
+        verify(eventDateTimeLocationService).handleDateTimeLocations(createEventDto.getDates(), event);
+        verify(eventDateTimeLocationService).getAllDates(event);
+        verifyNoInteractions(fileService);
+    }
+
+    @Test
+    void createEvent_WithImages_ReturnsCreateEventDtoResponse() {
+        List<MultipartFile> images = new ArrayList<>();
+        MultipartFile image = mock(MultipartFile.class);
+        when(image.getOriginalFilename()).thenReturn("image1.jpg");
+        when(fileService.upload(image)).thenReturn("path/to/image1.jpg");
+        images.add(image);
+
+        Tag tag = ModelUtils.getEventTag();
+        Event event = ModelUtils.getEvent();
+        event.setTags(Set.of(tag));
+
+        when(userRepo.findById(user.getId())).thenReturn(Optional.of(user));
+        when(modelMapper.map(any(CreateEventDto.class), eq(Event.class))).thenReturn(event);
+        when(tagsRepo.findTagsByNamesAndType(anyList(), eq(TagType.EVENT))).thenReturn(List.of(tag));
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
+        when(eventDateTimeLocationService.getAllDates(event)).thenReturn(List.of(ModelUtils.getEventDateLocationDto()));
+
+        CreateEventDtoResponse response = eventService.createEvent(createEventDto, images, userVO);
+
+        assertNotNull(response);
+        assertEquals(createEventDto.getTitle(), response.getTitle());
+        assertEquals(createEventDto.getDescription(), response.getDescription());
+        assertEquals(createEventDto.getOpen(), response.getOpen());
+        assertEquals(1, response.getImages().size());
+        assertEquals("path/to/image1.jpg", response.getImages().getFirst());
+    }
+
+    @Test
+    void createEvent_TagsNotFound_ThrowsException() {
+        List<MultipartFile> images = Collections.emptyList();
+
+        when(userRepo.findById(user.getId())).thenReturn(Optional.of(user));
+        when(modelMapper.map(any(CreateEventDto.class), eq(Event.class))).thenReturn(event);
+        when(tagsRepo.findTagsByNamesAndType(anyList(), eq(TagType.EVENT))).thenReturn(Collections.emptyList());
+
+        assertThrows(TagNotFoundException.class,
+                () -> eventService.createEvent(createEventDto, images, userVO));
+
+        verify(userRepo).findById(user.getId());
+        verify(tagsRepo).findTagsByNamesAndType(anyList(), eq(TagType.EVENT));
+    }
+
 
 }
+
