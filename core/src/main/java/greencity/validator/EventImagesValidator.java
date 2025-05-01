@@ -14,13 +14,16 @@ public class EventImagesValidator implements ConstraintValidator<ValidEventImage
 
     @Override
     public boolean isValid(List<MultipartFile> files, ConstraintValidatorContext context) {
-        if (files == null || files.isEmpty() || files.size() > MAX_FILES) {
+        if (files == null || files.isEmpty()) {
+            return true;
+        }
+
+        if (files.size() > MAX_FILES) {
             return false;
         }
 
-
         for (MultipartFile file : files) {
-            if (file == null||file.getSize() > MAX_SIZE_BYTES){
+            if (file == null || file.getSize() > MAX_SIZE_BYTES) {
                 return false;
             }
 

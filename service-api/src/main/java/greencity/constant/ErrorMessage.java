@@ -136,6 +136,7 @@ public final class ErrorMessage {
     public static final String EVENT_NOT_FOUND_BY_ID = "Event does not exist with id: ";
     public static final String CANNOT_EDIT_PAST_EVENT = "Cannot edit past events";
     public static final String CANNOT_FOUND_MAIN_PHOTO_EVENT = "Main image not found among uploaded images";
+    public static final String MAX_PHOTO_EVENT = "The number of photos cannot exceed 5";
 
 
     private ErrorMessage() {

@@ -37,7 +37,7 @@ public class UpdateEventDtoRequest {
     )
     private String mainImage;
 
-    @Size(min = 1, max = 5, message = "Images must be more than 1 and smaller than 6")
+    @Size( max = 5, message = "Images must be >= 0 and smaller than 6")
     private List<String> images;
     @NotEmpty(message = "The tags of event can not be empty")
     private List<String> tags;
