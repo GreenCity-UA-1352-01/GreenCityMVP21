@@ -1,5 +1,6 @@
 package greencity.dto.notification;
 
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import java.time.ZonedDateTime;
 import lombok.*;
@@ -18,4 +19,5 @@ public class NotificationResponseDto {
     private NotificationStatus status;
     private Long receiverId;
     private Long initiatorId;
+    private NotificationOrigin origin;
 }
