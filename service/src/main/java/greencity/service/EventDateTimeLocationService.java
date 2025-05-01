@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,5 +92,12 @@ public class EventDateTimeLocationService {
                 .collect(Collectors.toSet());
 
         event.getDateTimes().removeIf(eventDTL -> !ids.contains(eventDTL.getId()));
+    }
+    public void isFutureEvent (List<EventDateTimeLocation> dtoList){
+        boolean isFutureEvent = dtoList.stream()
+                .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(ZonedDateTime.now()));
+        if (!isFutureEvent) {
+            throw new BadRequestException(ErrorMessage.CANNOT_EDIT_PAST_EVENT);
+        }
     }
 }

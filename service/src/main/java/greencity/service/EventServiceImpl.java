@@ -57,12 +57,8 @@ public class EventServiceImpl implements EventService {
     public UpdateEventDtoResponse updateEvent(UpdateEventDtoRequest updateEventDtoRequest,
                                               List<MultipartFile> images, UserVO user) {
         Event event = getEventById(updateEventDtoRequest.getId());
-        boolean hasFutureEvent = event.getDateTimes().stream()
-                .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(ZonedDateTime.now()));
 
-        if (!hasFutureEvent) {
-            throw new BadRequestException(ErrorMessage.CANNOT_EDIT_PAST_EVENT);
-        }
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
 
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
