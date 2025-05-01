@@ -1,7 +1,8 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
-import greencity.dto.friend.FriendCardDtoResponse;
+import greencity.dto.friend.EcoFriendProfileDto;
+import greencity.dto.friend.EcoFriendsResponse;
 import greencity.dto.user.UserVO;
 import greencity.service.FriendService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,8 +21,15 @@ public class FriendController {
     private final FriendService friendService;
 
     @GetMapping
-    public ResponseEntity<List<FriendCardDtoResponse>> getAllFriends(@Parameter(hidden = true) @CurrentUser UserVO user) {
-        List<FriendCardDtoResponse> friends = friendService.getAllFriendsForUser(user.getId());
+    public ResponseEntity<List<EcoFriendsResponse>> getAllFriends(@Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        List<EcoFriendsResponse> friends = friendService.getAllFriendsForUser(userVO.getId());
         return ResponseEntity.ok(friends);
+    }
+
+    @GetMapping("/friend/{friendId}")
+    public ResponseEntity<EcoFriendProfileDto> getFriendProfile(@PathVariable Long friendId,
+                                                                @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        EcoFriendProfileDto profile = friendService.getFriendProfile(userVO.getId(), friendId);
+        return ResponseEntity.ok(profile);
     }
 }

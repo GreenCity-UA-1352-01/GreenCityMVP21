@@ -1,10 +1,12 @@
 package greencity.service;
 
-import greencity.dto.friend.FriendCardDtoResponse;
+import greencity.dto.friend.EcoFriendProfileDto;
+import greencity.dto.friend.EcoFriendsResponse;
 
 import java.util.List;
 
 public interface FriendService {
-    List<FriendCardDtoResponse> getAllFriendsForUser(Long userId);
+    List<EcoFriendsResponse> getAllFriendsForUser(Long userId);
 
+    EcoFriendProfileDto getFriendProfile(Long userId, Long friendId);
 }

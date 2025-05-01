@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FriendCardDtoResponse {
+public class EcoFriendsResponse {
 
     private Long id;
     private String name;
