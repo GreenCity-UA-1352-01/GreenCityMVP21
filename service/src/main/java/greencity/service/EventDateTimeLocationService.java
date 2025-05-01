@@ -1,6 +1,7 @@
 package greencity.service;
 
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.entity.Event;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +78,7 @@ public class EventDateTimeLocationService {
                         .orElseThrow(() -> new NotFoundException("DateTimeLocation not found with id: " + dto.getId()));
 
                 if (!entity.getEvent().getId().equals(event.getId())) {
-                    throw new BadRequestException("This session does not belong to this event");
+                    throw new BadRequestException(ErrorMessage.WRONG_EVENT_ID);
                 }
             }
         }
