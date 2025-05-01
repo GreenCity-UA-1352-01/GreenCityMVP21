@@ -75,6 +75,7 @@ public class EventServiceImpl implements EventService {
                 updateEventDtoRequest.getDateTimes());
         updateEventTags(event, updateEventDtoRequest.getTags());
         updateEventImages(event, images, updateEventDtoRequest);
+
         eventRepository.save(event);
 
         return modelMapper.map(event, UpdateEventDtoResponse.class);

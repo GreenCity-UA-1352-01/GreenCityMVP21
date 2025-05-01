@@ -63,7 +63,8 @@ public class EventController {
     @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UpdateEventDtoResponse> update(
             @Valid @RequestPart UpdateEventDtoRequest updateEventDtoRequest,
-            @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)") @ValidEventImages
+            @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)")
+            @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity.ok(eventService.updateEvent(updateEventDtoRequest, images, user));
