@@ -1,5 +1,6 @@
 package greencity.dto.event;
 
+import greencity.annotations.UniqueSessionDates;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.eventimage.EventImageRequestDto;
 import greencity.dto.tag.TagUaEnDto;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class UpdateEventDtoRequest {
     @NotNull
     @Min(1)
@@ -28,6 +30,7 @@ public class UpdateEventDtoRequest {
 
     @NotEmpty(message = "The sessions of event can not be empty")
     @Valid
+    @UniqueSessionDates
     private List<EventDateTimeLocationRequestDto> dateTimes;
 
     @NotBlank(message = "Image path can not be empty")
