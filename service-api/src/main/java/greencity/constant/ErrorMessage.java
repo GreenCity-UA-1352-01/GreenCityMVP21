@@ -138,6 +138,7 @@ public final class ErrorMessage {
     public static final String CANNOT_FOUND_MAIN_PHOTO_EVENT = "Main image not found among uploaded images";
     public static final String MAX_PHOTO_EVENT = "The number of photos cannot exceed 5";
     public static final String WRONG_EVENT_ID = "This session does not belong to this event";
+    public static final String START_DATE_TIME_AFTER_END_DATE_TIME = "StartDateTime should be before EndDateTime";
 
 
     private ErrorMessage() {

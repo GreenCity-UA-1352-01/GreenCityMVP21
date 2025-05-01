@@ -52,6 +52,7 @@ public class EventDateTimeLocationService {
 
     public void updateEventDateTimeLocation(Event event,
                                             List<EventDateTimeLocationRequestDto> dtoList) {
+        StartEndDateTimeCheck(dtoList);
         matchDateTimeWithEventCheck(event, dtoList);
         removeOldEventDateTimeLocations(event, dtoList);
 
@@ -66,11 +67,12 @@ public class EventDateTimeLocationService {
         dtoList.stream()
                 .filter(dto -> dto.getId() == null)
                 .forEach(dto -> {
-                    EventDateTimeLocation newEntity = modelMapper.map(dto, EventDateTimeLocation.class);;
+                    EventDateTimeLocation newEntity = modelMapper.map(dto, EventDateTimeLocation.class);
+                    ;
                     newEntity.setEvent(event);
                     event.getDateTimes().add(newEntity);
                 });
-        }
+    }
 
     private void matchDateTimeWithEventCheck(Event event, List<EventDateTimeLocationRequestDto> dtoList) {
         for (EventDateTimeLocationRequestDto dto : dtoList) {
@@ -93,11 +95,20 @@ public class EventDateTimeLocationService {
 
         event.getDateTimes().removeIf(eventDTL -> !ids.contains(eventDTL.getId()));
     }
-    public void isFutureEvent (List<EventDateTimeLocation> dtoList){
+
+    public void isFutureEvent(List<EventDateTimeLocation> dtoList) {
         boolean isFutureEvent = dtoList.stream()
                 .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(ZonedDateTime.now()));
         if (!isFutureEvent) {
             throw new BadRequestException(ErrorMessage.CANNOT_EDIT_PAST_EVENT);
+        }
+    }
+
+    public void StartEndDateTimeCheck(List<EventDateTimeLocationRequestDto> dtoList) {
+        boolean isFutureEvent = dtoList.stream()
+                .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(dateTime.getEndDateTime()));
+        if (isFutureEvent) {
+            throw new BadRequestException(ErrorMessage.START_DATE_TIME_AFTER_END_DATE_TIME);
         }
     }
 }
