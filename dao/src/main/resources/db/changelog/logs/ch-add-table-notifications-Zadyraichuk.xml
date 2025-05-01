@@ -50,4 +50,13 @@
             <dropTable tableName="notification_counter"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="addObjectLinkColumnToNotificationsZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addColumn tableName="notifications">
+            <column name="object_link" type="VARCHAR(300)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="notifications" columnName="object_link"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import lombok.*;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Builder
