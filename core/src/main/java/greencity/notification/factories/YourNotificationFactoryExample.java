@@ -1,18 +1,23 @@
 package greencity.notification.factories;
 
+//import greencity.annotations.NotificationHandler;
 //import greencity.dto.notification.NotificationRequestDto;
 //import greencity.dto.user.UserVO;
 //import greencity.notification.NotificationEventFactory;
 //import java.lang.reflect.Method;
 //import java.time.ZonedDateTime;
+//import java.util.Arrays;
 //import org.springframework.stereotype.Component;
-
+//
 //@Component
+//@NotificationHandler
 //public class YourNotificationFactoryExample implements NotificationEventFactory {
 //    @Override
 //    public boolean supports(Method method) {
-//        return method.getDeclaringClass() instanceof YourControllerClassExample.class
-//            && method.getName().equals("methodInYourControllerExample");
+//        Class<?>[] expectedParameterTypes = {ParamClass.class, ParamClass.class};
+//        return method.getDeclaringClass().equals(YourControllerClassExample.class)
+//            && method.getName().equals("methodInYourControllerExample")
+//            && Arrays.equals(expectedParameterTypes, method.getParameterTypes());
 //    }
 //
 //    @Override
