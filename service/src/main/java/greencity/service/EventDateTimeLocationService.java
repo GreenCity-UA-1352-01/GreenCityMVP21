@@ -106,11 +106,11 @@ public class EventDateTimeLocationService {
 
     public void StartEndDateTimeCheck(List<EventDateTimeLocationRequestDto> dtoList) {
         boolean isFutureEvent = dtoList.stream()
-                .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(dateTime.getEndDateTime())
-                        || dateTime.getStartDateTime().equals(dateTime.getEndDateTime()));
+                .anyMatch(dateTime -> dateTime.getStartDateTime().
+                        isAfter(dateTime.getEndDateTime()) ||
+                        dateTime.getStartDateTime().equals(dateTime.getEndDateTime()));
         if (isFutureEvent) {
             throw new BadRequestException(ErrorMessage.START_DATE_TIME_AFTER_END_DATE_TIME);
         }
-
     }
 }
