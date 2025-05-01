@@ -7,11 +7,16 @@ import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.Tag;
 import greencity.entity.User;
+import greencity.entity.EventImage;
+import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.TagNotFoundException;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,12 +50,22 @@ class EventServiceImplTest {
     @InjectMocks
     private EventServiceImpl eventService;
 
-    private final CreateEventDto createEventDto = ModelUtils.getCreateEventDto();
-    private final CreateEventDtoResponse expectedResponse = ModelUtils.getCreateEventDtoResponse();
-    private final User user = ModelUtils.getUser();
-    private final UserVO userVO = ModelUtils.getUserVO();
-    private final Event event = ModelUtils.getEvent();
+    private CreateEventDto createEventDto;
+    private CreateEventDtoResponse expectedResponse;
+    private User user;
+    private UserVO userVO;
+    private Event event;
 
+    @BeforeEach
+    void setUp() {
+        createEventDto = ModelUtils.getCreateEventDto();
+        expectedResponse = ModelUtils.getCreateEventDtoResponse();
+        user = ModelUtils.getUser();
+        userVO = ModelUtils.getUserVO();
+        event = ModelUtils.getEvent();
+        event.setInitiator(user);
+    }
+  
     @Test
     void createEvent_ReturnsCreateEventDtoResponse() {
         List<MultipartFile> images = Collections.emptyList();
@@ -124,6 +139,87 @@ class EventServiceImplTest {
         verify(tagsRepo).findTagsByNamesAndType(anyList(), eq(TagType.EVENT));
     }
 
+    @Test
+    void testDeleteById_withNotExistedUserId_shouldThrowException() {
+        when(eventRepository.findById(anyLong())).thenThrow(NotFoundException.class);
+
+        assertThrows(NotFoundException.class, () ->
+            eventService.deleteById(event.getId(), userVO));
+
+        verify(eventRepository).findById(event.getId());
+        verify(eventRepository, never()).deleteById(event.getId());
+    }
+
+    @Test
+    void testDeleteById_withNotOwner_shouldThrowException() {
+        Event actual = ModelUtils.getEventWithoutImages();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
+        userVO.setId(userVO.getId() + 1);
+
+        assertThrows(UserHasNoPermissionToAccessException.class, () ->
+            eventService.deleteById(actual.getId(), userVO));
+
+        verify(eventRepository).findById(actual.getId());
+        verify(eventRepository, never()).deleteById(actual.getId());
+    }
+
+    @Test
+    void testDeleteById_withOwner() {
+        Event actual = ModelUtils.getEventWithoutImages();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
+
+        assertDoesNotThrow(() -> eventService.deleteById(actual.getId(), userVO));
+
+        verify(eventRepository).findById(actual.getId());
+        verify(eventRepository).deleteById(actual.getId());
+    }
+
+    @Test
+    void testDeleteById_withAdmin() {
+        Event actual = ModelUtils.getEventWithoutImages();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
+        userVO.setId(userVO.getId() + 1);
+        userVO.setRole(Role.ROLE_ADMIN);
+
+        assertDoesNotThrow(() -> eventService.deleteById(actual.getId(), userVO));
+
+        verify(eventRepository).findById(actual.getId());
+        verify(eventRepository).deleteById(actual.getId());
+    }
+
+    @Test
+    void testDeleteById_withPictures() {
+        Event actual = ModelUtils.getEventWithoutImages();
+        EventImage eventImage = EventImage.builder()
+            .id(1L)
+            .event(actual)
+            .imagePath("test")
+            .build();
+        actual.setMainImage(eventImage);
+        actual.getEventImages().add(eventImage);
+
+        when(eventRepository.findById(anyLong()))
+            .thenReturn(Optional.ofNullable(actual));
+        doNothing().when(fileService).delete(anyString());
+
+        eventService.deleteById(actual.getId(), userVO);
+
+        verify(fileService, atLeast(1)).delete(anyString());
+    }
+
+    @Test
+    void testDeleteById_withoutPictures() {
+        Event actual = ModelUtils.getEventWithoutImages();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
+
+        eventService.deleteById(actual.getId(), userVO);
+
+        verify(fileService, never()).delete(anyString());
+    }
 
 }
 

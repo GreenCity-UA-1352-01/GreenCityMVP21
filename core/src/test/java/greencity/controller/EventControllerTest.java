@@ -7,12 +7,12 @@ import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
 import greencity.service.UserService;
-import greencity.validator.TimeRangeValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -23,6 +23,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -36,12 +37,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration
 @Import(SecurityConfig.class)
-public class EventControllerTest {
+class EventControllerTest {
     private MockMvc mockMvc;
 
     @Mock
@@ -86,13 +89,7 @@ public class EventControllerTest {
                   "allDay": false
                 }
               ],
-              "tags": [
-                {
-                  "id": 1,
-                  "nameUa": "Еко",
-                  "nameEn": "Eco"
-                }
-              ],
+              "tags": ["Еко"],
               "online": false,
               "initiativeTypes": ["EDUCATIONAL"]
             }
@@ -152,33 +149,49 @@ public class EventControllerTest {
     @Test
     void createEvent_BadRequest_WhenTitleIsBlank() throws Exception {
         String invalidJson = """
-                    {
-                      "title": "  ",
-                      "description": "Valid description with enough characters.",
-                      "mainImage": "img.jpg",
-                      "open": true,
-                      "dates": [{
-                        "startDateTime": "2025-05-01T10:00:00Z",
-                        "endDateTime": "2025-05-01T12:00:00Z",
-                        "location": "Lviv",
-                        "onlineLink": null,
-                        "allDay": false
-                      }],
-                      "tags": [],
-                      "online": false,
-                      "initiativeTypes": ["EDUCATIONAL"]
-                    }
-                """;
+                {
+                  "title": "  ",
+                  "description": "Valid description with enough characters.",
+                  "mainImage": "img.jpg",
+                  "open": true,
+                  "dates": [{
+                    "startDateTime": "2025-05-01T10:00:00Z",
+                    "endDateTime": "2025-05-01T12:00:00Z",
+                    "location": "Lviv",
+                    "onlineLink": null,
+                    "allDay": false
+                  }],
+                  "tags": [],
+                  "online": false,
+                  "initiativeTypes": ["EDUCATIONAL"]
+                }
+            """;
 
         MockMultipartFile invalidPart = new MockMultipartFile(
-                "createEventDto", "dto.json", "application/json", invalidJson.getBytes()
+            "createEventDto", "dto.json", "application/json", invalidJson.getBytes()
         );
 
         mockMvc.perform(multipart("/events/create")
-                        .file(invalidPart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .principal(principal))
-                .andExpect(status().isBadRequest());
+                .file(invalidPart)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON)
+                .principal(principal))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+        // This will simulate an authenticated user
+    void deleteEvent_success() throws Exception {
+        Long eventId = 1L;
+
+        doNothing().when(eventService).deleteById(any(), any());
+
+        mockMvc.perform(delete("/events/{id}", eventId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // Verify that the service was called
+        Mockito.verify(eventService).deleteById(any(), any());
     }
 }

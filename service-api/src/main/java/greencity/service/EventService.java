@@ -9,8 +9,7 @@ import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 
 public interface EventService {
-
-    public CreateEventDtoResponse createEvent(CreateEventDto dto, List<MultipartFile> images, UserVO userVO);
+    CreateEventDtoResponse createEvent(CreateEventDto dto, List<MultipartFile> images, UserVO userVO);
 
     UpdateEventDtoResponse getUpdateEventDto(Long id);
 
@@ -20,5 +19,17 @@ public interface EventService {
      * @param updateEventDtoRequest - instance of {@link UpdateEventDtoRequest}.
      * @return instance of {@link UpdateEventDtoResponse};=.
      */
-    UpdateEventDtoResponse updateEvent(UpdateEventDtoRequest updateEventDtoRequest, List<MultipartFile> images, UserVO user);
+    UpdateEventDtoResponse updateEvent(UpdateEventDtoRequest updateEventDtoRequest,
+                                       List<MultipartFile> images,
+                                       UserVO user);
+
+    /**
+     * Deletes an event by its ID.
+     *
+     * @param id   the ID of the event to be deleted
+     * @param user the user requesting the deletion
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    void deleteById(Long id, UserVO user);
 }

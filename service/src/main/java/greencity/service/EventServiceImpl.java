@@ -10,6 +10,7 @@ import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class EventServiceImpl implements EventService {
-
     private final UserRepo userRepo;
     private final TagsRepo tagsRepo;
     private final EventRepository eventRepository;
@@ -191,5 +190,34 @@ public class EventServiceImpl implements EventService {
     private User getUserById(Long id) {
         return userRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+    }
+
+    /**
+     * {@inheritDoc}
+     * Method check user is owner of event or has ADMIN role.
+     * All images related to event will be deleted from external file storage.
+     *
+     * @param id   the ID of the event to be deleted
+     * @param user the user requesting the deletion
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    @Transactional
+    public void deleteById(Long id, UserVO user) {
+        Event event = eventRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+
+        if (!event.getInitiator().getId().equals(user.getId()) && user.getRole() != Role.ROLE_ADMIN) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+
+        eventRepository.deleteById(id);
+
+        if (event.getMainImage() != null) {
+            fileService.delete(event.getMainImage().getImagePath());
+        }
+        event.getEventImages()
+            .forEach(image -> fileService.delete(image.getImagePath()));
     }
 }

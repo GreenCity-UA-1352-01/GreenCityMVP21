@@ -744,4 +744,40 @@ public class ModelUtils {
                 .build();
 
     }
+
+    public static Event getEventWithoutImages() {
+        Event event = getEventWithoutDates();
+        List<EventDateTimeLocation> dateTimes = getEventDateTimeLocationsWithoutEvent();
+        event.setDateTimes(dateTimes);
+        dateTimes.forEach(dateTime -> dateTime.setEvent(event));
+        return event;
+    }
+
+    private static Event getEventWithoutDates() {
+        return Event.builder()
+            .id(1L)
+            .title("test")
+            .description("test")
+            .initiator(getUser())
+            .tags(Set.copyOf(getTags()))
+            .isOpen(true)
+            .build();
+    }
+
+    private static List<EventDateTimeLocation> getEventDateTimeLocationsWithoutEvent() {
+        return Arrays.asList(
+            EventDateTimeLocation.builder()
+                .id(1L)
+                .startDateTime(ZonedDateTime.now().minusDays(1).minusHours(1))
+                .endDateTime(ZonedDateTime.now().minusDays(1))
+                .location("test")
+                .build(),
+            EventDateTimeLocation.builder()
+                .id(2L)
+                .startDateTime(ZonedDateTime.now().plusDays(1))
+                .endDateTime(ZonedDateTime.now().plusDays(1).plusHours(1))
+                .link("test")
+                .build()
+        );
+    }
 }

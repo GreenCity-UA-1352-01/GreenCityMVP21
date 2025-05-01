@@ -30,6 +30,7 @@ public class Event {
         fetch = FetchType.LAZY,
         orphanRemoval = true
     )
+    @Builder.Default
     private List<EventDateTimeLocation> dateTimes = new ArrayList<>();
 
     @Column(name = "description", nullable = false)
@@ -49,6 +50,7 @@ public class Event {
             fetch = FetchType.LAZY,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<EventImage> eventImages = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -57,9 +59,11 @@ public class Event {
         joinColumns = @JoinColumn(name = "event_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @Builder.Default
     private Set<Tag> tags = new HashSet<>();
 
     @Column(name = "is_open", nullable = false)
+    @Builder.Default
     private boolean isOpen = true;
 
 

@@ -155,4 +155,24 @@
             <dropTable tableName="events_attenders"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="modifyEventsConstraintsZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addPrimaryKey tableName="events_tags" columnNames="event_id, tag_id" constraintName="PK_events_tags"/>
+        <dropForeignKeyConstraint baseTableName="event_images" constraintName="FK_event_images_event_id"/>
+        <addForeignKeyConstraint baseTableName="event_images"
+                                 baseColumnNames="event_id"
+                                 constraintName="FK_event_images_event_id"
+                                 referencedTableName="events"
+                                 referencedColumnNames="id"
+                                 deleteCascade="true"/>
+        <rollback>
+            <dropPrimaryKey tableName="events_tags" constraintName="PK_events_tags"/>
+            <dropForeignKeyConstraint baseTableName="event_images" constraintName="FK_event_images_event_id"/>
+            <addForeignKeyConstraint baseTableName="event_images"
+                                     baseColumnNames="event_id"
+                                     constraintName="FK_event_images_event_id"
+                                     referencedTableName="events"
+                                     referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
