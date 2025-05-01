@@ -26,6 +26,9 @@ public class Notification {
     @Column(name = "object_name")
     private String objectName;
 
+    @Column(name = "object_link")
+    private String objectLink;
+
     @Column(name = "creation_date", nullable = false)
     private ZonedDateTime creationDate;
 

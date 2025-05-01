@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import lombok.*;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Builder
@@ -18,7 +18,9 @@ public class NotificationRequestDto {
     @NotEmpty
     private String objectName;
 
-    @NotEmpty
+    private String objectLink;
+
+    @NotNull
     private ZonedDateTime creationDate;
 
     @NotEmpty
