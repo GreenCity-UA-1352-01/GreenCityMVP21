@@ -19,7 +19,6 @@ public class EventDateTimeLocationRequestDto {
 
     @NotNull(message = "The start date time of event can not be empty")
     private ZonedDateTime startDateTime;
-
     @NotNull(message = "The end date time of event can not be empty")
     private ZonedDateTime endDateTime;
 

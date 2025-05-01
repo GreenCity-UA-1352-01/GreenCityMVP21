@@ -43,7 +43,7 @@ public class EventController {
     public ResponseEntity<CreateEventDtoResponse> createEvent(
             @Valid @RequestPart("event") CreateEventDto createEventDto,
             @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)")
-//            @ImageValidation
+            @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
 
