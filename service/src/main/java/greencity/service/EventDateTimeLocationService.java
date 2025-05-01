@@ -57,8 +57,7 @@ public class EventDateTimeLocationService {
                 .collect(Collectors.toMap(EventDateTimeLocationRequestDto::getId, Function.identity()));
         List<EventDateTimeLocation> existingEntities = evDateTimeLocRepo.findAllById(dtoById.keySet());
         for (EventDateTimeLocation entity : existingEntities) {
-            EventDateTimeLocationRequestDto dto = dtoById.get(entity.getId());
-            modelMapper.map(dto, entity);
+            modelMapper.map(dtoById.get(entity.getId()), entity);
             entity.setEvent(event);
         }
         dtoList.stream()
@@ -81,11 +80,6 @@ public class EventDateTimeLocationService {
                 }
             }
         }
-        Set<Long> ids = dtoList.stream()
-                .map(EventDateTimeLocationRequestDto::getId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        event.getDateTimes().removeIf(eventDTL -> !ids.contains(eventDTL.getId()));
     }
 
     public void removeOldEventDateTimeLocations(Event event, List<EventDateTimeLocationRequestDto> dtoList) {
