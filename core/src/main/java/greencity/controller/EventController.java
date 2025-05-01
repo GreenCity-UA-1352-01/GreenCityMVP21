@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
-import greencity.constant.SwaggerExampleModel;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.user.UserVO;
@@ -34,13 +33,14 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class EventController {
     private final EventService eventService;
+
     @Operation(summary = "Create a new event")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<CreateEventDtoResponse> createEvent(
@@ -49,7 +49,6 @@ public class EventController {
             @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
-
         CreateEventDtoResponse response = eventService.createEvent(createEventDto, images, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -57,14 +56,14 @@ public class EventController {
 
     @Operation(summary = "Update events")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Event successfully updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Event not found")
+        @ApiResponse(responseCode = "200", description = "Event successfully updated"),
+        @ApiResponse(responseCode = "400", description = "Invalid request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Event not found")
     })
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.MULTIPART_FORM_DATA_VALUE})
+        MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UpdateEventDtoResponse> update(
             @Valid @RequestPart UpdateEventDtoRequest updateEventDtoRequest,
             @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)") @ValidEventImages

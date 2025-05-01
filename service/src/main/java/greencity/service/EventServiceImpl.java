@@ -19,9 +19,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class EventServiceImpl implements EventService {
-
     private final UserRepo userRepo;
     private final TagsRepo tagsRepo;
     private final EventRepository eventRepository;
@@ -195,7 +192,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
     }
 
-      /**
+    /**
      * {@inheritDoc}
      * Method check user is owner of event or has ADMIN role.
      * All images related to event will be deleted from external file storage.

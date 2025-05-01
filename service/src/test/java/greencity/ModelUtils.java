@@ -745,7 +745,7 @@ public class ModelUtils {
 
     }
 
-    public static Event getEvent() {
+    public static Event getEventWithoutImages() {
         Event event = getEventWithoutDates();
         List<EventDateTimeLocation> dateTimes = getEventDateTimeLocationsWithoutEvent();
         event.setDateTimes(dateTimes);
@@ -758,6 +758,7 @@ public class ModelUtils {
             .id(1L)
             .title("test")
             .description("test")
+            .initiator(getUser())
             .tags(Set.copyOf(getTags()))
             .isOpen(true)
             .build();

@@ -152,60 +152,71 @@ class EventServiceImplTest {
 
     @Test
     void testDeleteById_withNotOwner_shouldThrowException() {
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(event));
+        Event actual = ModelUtils.getEventWithoutImages();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
         userVO.setId(userVO.getId() + 1);
 
         assertThrows(UserHasNoPermissionToAccessException.class, () ->
-            eventService.deleteById(event.getId(), userVO));
+            eventService.deleteById(actual.getId(), userVO));
 
-        verify(eventRepository).findById(event.getId());
-        verify(eventRepository, never()).deleteById(event.getId());
+        verify(eventRepository).findById(actual.getId());
+        verify(eventRepository, never()).deleteById(actual.getId());
     }
 
     @Test
     void testDeleteById_withOwner() {
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(event));
+        Event actual = ModelUtils.getEventWithoutImages();
 
-        assertDoesNotThrow(() -> eventService.deleteById(event.getId(), userVO));
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
 
-        verify(eventRepository).findById(event.getId());
-        verify(eventRepository).deleteById(event.getId());
+        assertDoesNotThrow(() -> eventService.deleteById(actual.getId(), userVO));
+
+        verify(eventRepository).findById(actual.getId());
+        verify(eventRepository).deleteById(actual.getId());
     }
 
     @Test
     void testDeleteById_withAdmin() {
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(event));
+        Event actual = ModelUtils.getEventWithoutImages();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
         userVO.setId(userVO.getId() + 1);
         userVO.setRole(Role.ROLE_ADMIN);
 
-        assertDoesNotThrow(() -> eventService.deleteById(event.getId(), userVO));
+        assertDoesNotThrow(() -> eventService.deleteById(actual.getId(), userVO));
 
-        verify(eventRepository).findById(event.getId());
-        verify(eventRepository).deleteById(event.getId());
+        verify(eventRepository).findById(actual.getId());
+        verify(eventRepository).deleteById(actual.getId());
     }
 
     @Test
     void testDeleteById_withPictures() {
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(event));
-        doNothing().when(fileService).delete(anyString());
+        Event actual = ModelUtils.getEventWithoutImages();
         EventImage eventImage = EventImage.builder()
             .id(1L)
-            .event(event)
+            .event(actual)
             .imagePath("test")
             .build();
-        event.setMainImage(eventImage);
-        event.getEventImages().add(eventImage);
+        actual.setMainImage(eventImage);
+        actual.getEventImages().add(eventImage);
 
-        eventService.deleteById(event.getId(), userVO);
+        when(eventRepository.findById(anyLong()))
+            .thenReturn(Optional.ofNullable(actual));
+        doNothing().when(fileService).delete(anyString());
+
+        eventService.deleteById(actual.getId(), userVO);
 
         verify(fileService, atLeast(1)).delete(anyString());
     }
 
     @Test
     void testDeleteById_withoutPictures() {
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(event));
+        Event actual = ModelUtils.getEventWithoutImages();
 
-        eventService.deleteById(event.getId(), userVO);
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.ofNullable(actual));
+
+        eventService.deleteById(actual.getId(), userVO);
 
         verify(fileService, never()).delete(anyString());
     }
