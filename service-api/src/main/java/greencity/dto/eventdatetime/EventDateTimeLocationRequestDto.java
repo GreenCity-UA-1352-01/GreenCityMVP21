@@ -1,8 +1,6 @@
 package greencity.dto.eventdatetime;
 
-import greencity.annotations.UniqueSessionDates;
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
