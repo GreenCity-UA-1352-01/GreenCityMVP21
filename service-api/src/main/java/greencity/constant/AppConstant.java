@@ -19,6 +19,7 @@ public final class AppConstant {
     public static final String DEFAULT_HABIT_IMAGE =
         "https://csb10032000a548f571.blob.core.windows.net/allfiles/8f09887c-2fbf-4ee1-95fc-6763a1873b93EventDefaultImage.png";
 
+    public static final int ALL_FRIENDS_RESPONSE_SIZE = 6;
     private AppConstant() {
     }
 }
