@@ -137,13 +137,12 @@ public final class ErrorMessage {
     public static final String EVENT_NOT_FOUND_BY_ID = "Event not found by id: ";
     public static final String CANNOT_EDIT_PAST_EVENT = "Cannot edit past events";
     public static final String CANNOT_FOUND_MAIN_PHOTO_EVENT = "Main image not found among uploaded images";
-
-    public static final String EVENT_ALL_DAY_START_IN_PAST = "All-day event cannot start in the past";
     public static final String EVENT_START_MUST_BE_IN_FUTURE = "Start time must be in the future";
     public static final String EVENT_END_BEFORE_START = "End time must be after start time";
     public static final String EVENT_START_DATE_IS_NULL = "Start date/time must not be null";
     public static final String EVENT_END_DATE_IS_NULL = "End date/time must not be null";
     public static final String THE_SAME_DATES = "You can't enter the same date for two days";
+    public static final String EVENT_END_MUST_BE_IN_FUTURE = "End time must be in the future";
 
     private ErrorMessage() {
     }

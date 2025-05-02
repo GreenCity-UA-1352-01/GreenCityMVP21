@@ -18,7 +18,6 @@ public class EventDateLocationDtoMapper extends AbstractConverter<EventDateTimeL
                 .endDateTime(entity.getEndDateTime())
                 .location(entity.getLocation())
                 .onlineLink(entity.getLink())
-                .allDay(false) // you can add your logic here later
                 .build();
     }
 }

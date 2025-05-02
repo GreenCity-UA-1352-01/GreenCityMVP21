@@ -117,8 +117,7 @@ class EventControllerTest {
                                 ZonedDateTime.parse("2025-05-01T10:00:00Z"),
                                 ZonedDateTime.parse("2025-05-01T12:00:00Z"),
                                 "Lviv",
-                                null,
-                                false
+                                null
                         )
                 ))
                 .images(List.of("image.jpg"))

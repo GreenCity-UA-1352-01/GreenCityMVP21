@@ -25,5 +25,4 @@ public class EventDateLocationDto {
             message = "Please add a link to the event. The link must start with http(s)://"
     )
     private String onlineLink;
-    private boolean allDay;
 }

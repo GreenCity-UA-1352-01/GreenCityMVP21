@@ -719,7 +719,6 @@ public class ModelUtils {
                 .startDateTime(FIXED_EVENT_START)
                 .endDateTime(FIXED_EVENT_END)
                 .location("location")
-                .allDay(false)
                 .build();
     }
 
