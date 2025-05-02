@@ -34,7 +34,6 @@ public final class ErrorMessage {
     public static final String TAG_NOT_FOUND = "Tag not found by id : ";
     public static final String TAGS_NOT_FOUND = "There should be at least one valid tag";
     public static final String DUPLICATED_TAG = "Tags should be unique";
-    public static final String INVALID_TAG_TYPE = "Invalid tag type.";
     public static final String INVALID_NUM_OF_TAGS =
             "Invalid tags. You must have less than " + ServiceValidationConstants.MAX_AMOUNT_OF_TAGS + " tags";
     public static final String FACT_OF_THE_DAY_NOT_FOUND = "The fact of the day not found: ";
@@ -143,6 +142,10 @@ public final class ErrorMessage {
     public static final String EVENT_END_DATE_IS_NULL = "End date/time must not be null";
     public static final String THE_SAME_DATES = "You can't enter the same date for two days";
     public static final String EVENT_END_MUST_BE_IN_FUTURE = "End time must be in the future";
+    public static final String MAX_PHOTO_EVENT = "The number of photos cannot exceed 5";
+    public static final String WRONG_EVENT_ID = "This session does not belong to this event";
+    public static final String START_DATE_TIME_AFTER_END_DATE_TIME = "StartDateTime should be before EndDateTime";
+
 
     private ErrorMessage() {
     }

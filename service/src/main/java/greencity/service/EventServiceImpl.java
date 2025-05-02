@@ -21,10 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,32 +55,26 @@ public class EventServiceImpl implements EventService {
     public UpdateEventDtoResponse updateEvent(UpdateEventDtoRequest updateEventDtoRequest,
                                               List<MultipartFile> images, UserVO user) {
         Event event = getEventById(updateEventDtoRequest.getId());
-        boolean hasFutureEvent = event.getDateTimes().stream()
-                .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(ZonedDateTime.now()));
 
-        if (!hasFutureEvent) {
-            throw new BadRequestException(ErrorMessage.CANNOT_EDIT_PAST_EVENT);
-        }
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
 
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
-
 
         event.setTitle(updateEventDtoRequest.getTitle());
         event.setDescription(updateEventDtoRequest.getDescription());
         event.setOpen(updateEventDtoRequest.isOpen());
         eventDateTimeLocationService.updateEventDateTimeLocation(event,
                 updateEventDtoRequest.getDateTimes());
-
         updateEventTags(event, updateEventDtoRequest.getTags());
-        updateEventImages(event, images, updateEventDtoRequest.getMainImage());
+        updateEventImages(event, images, updateEventDtoRequest);
 
         eventRepository.save(event);
 
         return modelMapper.map(event, UpdateEventDtoResponse.class);
     }
-    
+
     private List<String> tagsConverter(Event event) {
         return event.getTags().stream()
                 .flatMap(t -> t.getTagTranslations().stream())
@@ -145,34 +136,86 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void updateEventImages(Event event, List<MultipartFile> images, String mainImageFilename) {
-        MultipartFile mainImageFile = images.stream()
-                .filter(file -> file.getOriginalFilename() != null && file.getOriginalFilename().equals(mainImageFilename))
-                .findFirst()
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT));
-
-        event.getEventImages().forEach(img -> {
-            fileService.delete(img.getImagePath());
-        });
-        event.getEventImages().clear();
-
-        List<EventImage> eventImages = new ArrayList<>();
-
-        for (MultipartFile file : images) {
-            EventImage eventImage = new EventImage();
-            String uploadedPath = fileService.upload(file);
-            eventImage.setImagePath(uploadedPath);
-            eventImage.setEvent(event);
-            eventImages.add(eventImage);
+    private void updateEventImages(Event event, List<MultipartFile> newImages, UpdateEventDtoRequest dto) {
+        Set<String> keepOld = new HashSet<>();
+        if (dto.getImages() != null) {
+            dto.getImages().forEach(img -> keepOld.add(getFileNameFromUrl(img)));
         }
 
-        EventImage mainImage = eventImages.stream()
-                .filter(img -> img.getImagePath().endsWith(mainImageFile.getOriginalFilename()))
-                .findFirst()
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT));
+        String mainImageName = dto.getMainImage();
+        int newImagesCount = (newImages != null) ? newImages.size() : 0;
 
-        event.getEventImages().addAll(eventImages);
-        event.setMainImage(mainImage);
+        if ((keepOld.size() + newImagesCount) > 5) {
+            throw new BadRequestException(ErrorMessage.MAX_PHOTO_EVENT);
+        }
+
+        validateMainImagePresence(keepOld, newImages, mainImageName);
+        removeMissingImages(event, keepOld);
+
+        Map<String, String> filenameToUploadedPath = new HashMap<>();
+        if (newImages != null && !newImages.isEmpty()) {
+            uploadNewImages(event, newImages, filenameToUploadedPath);
+        }
+
+        setMainImage(event, mainImageName, filenameToUploadedPath);
+    }
+
+    private void validateMainImagePresence(Set<String> keepOld, List<MultipartFile> newImages, String mainImageName) {
+        boolean inOld = keepOld.stream()
+                .anyMatch(old -> getFileNameFromUrl(old).endsWith(mainImageName));
+        boolean inNew = newImages != null && newImages.stream()
+                .anyMatch(f -> f != null && mainImageName.equals(f.getOriginalFilename()));
+
+        if (!inOld && !inNew) {
+            throw new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT);
+        }
+    }
+
+    private void removeMissingImages(Event event, Set<String> keepOld) {
+        event.getEventImages().removeIf(img -> {
+            String filename = getFileNameFromUrl(img.getImagePath());
+            if (!keepOld.contains(filename)) {
+                fileService.delete(img.getImagePath());
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void uploadNewImages(Event event, List<MultipartFile> newImages, Map<String, String> filenameToUploadedPath) {
+        for (MultipartFile file : newImages) {
+            String uploadedPath = fileService.upload(file);
+            filenameToUploadedPath.put(file.getOriginalFilename(), uploadedPath);
+
+            EventImage img = new EventImage();
+            img.setImagePath(uploadedPath);
+            img.setEvent(event);
+            event.getEventImages().add(img);
+        }
+    }
+
+    private void setMainImage(Event event, String mainImageName, Map<String, String> filenameToUploadedPath) {
+        String uploadedPath = filenameToUploadedPath.get(mainImageName);
+        if (uploadedPath != null) {
+            event.setMainImage(
+                    event.getEventImages().stream()
+                            .filter(img -> img.getImagePath().equals(uploadedPath))
+                            .findFirst()
+                            .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT)));
+            return;
+        }
+
+        event.setMainImage(
+                event.getEventImages().stream()
+                        .filter(img -> getFileNameFromUrl(img.getImagePath()).endsWith(mainImageName))
+                        .findFirst()
+                        .orElseThrow(() -> new BadRequestException(ErrorMessage.CANNOT_FOUND_MAIN_PHOTO_EVENT)));
+    }
+
+    private String getFileNameFromUrl(String urlOrPath) {
+        if (urlOrPath == null || urlOrPath.isBlank()) return "";
+        int slashIndex = urlOrPath.lastIndexOf('/');
+        return slashIndex >= 0 ? urlOrPath.substring(slashIndex + 1) : urlOrPath;
     }
 
     @Override

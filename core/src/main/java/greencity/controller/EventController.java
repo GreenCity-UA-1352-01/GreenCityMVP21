@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class EventController {
     private final EventService eventService;
-
     @Operation(summary = "Create a new event")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
@@ -49,6 +48,7 @@ public class EventController {
             @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
+
         CreateEventDtoResponse response = eventService.createEvent(createEventDto, images, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -62,11 +62,11 @@ public class EventController {
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Event not found")
     })
-    @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE,
-        MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UpdateEventDtoResponse> update(
             @Valid @RequestPart UpdateEventDtoRequest updateEventDtoRequest,
-            @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)") @ValidEventImages
+            @Parameter(description = "Event images (JPG/PNG ≤ 10MB, max 5)")
+            @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity.ok(eventService.updateEvent(updateEventDtoRequest, images, user));

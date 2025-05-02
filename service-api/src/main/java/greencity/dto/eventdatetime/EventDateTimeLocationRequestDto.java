@@ -1,7 +1,6 @@
 package greencity.dto.eventdatetime;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,9 +17,7 @@ public class EventDateTimeLocationRequestDto {
     private Long id;
 
     @NotNull(message = "The start date time of event can not be empty")
-    @FutureOrPresent(message = "The start date time of event can not be in the past")
     private ZonedDateTime startDateTime;
-
     @NotNull(message = "The end date time of event can not be empty")
     private ZonedDateTime endDateTime;
 
