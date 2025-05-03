@@ -4,12 +4,13 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.EventDateLocationDto;
+import greencity.dto.event.*;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
-import greencity.dto.habit.*;
-import greencity.dto.habitfact.*;
+import greencity.dto.eventdatetime.EventDateTimeLocationResponseDto;
+import greencity.dto.eventimage.EventImageResponseDto;
+import greencity.dto.habit.HabitAssignPropertiesDto;
+import greencity.dto.habit.HabitAssignVO;
+import greencity.dto.habitfact.HabitFactTranslationVO;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
@@ -34,7 +35,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +56,8 @@ public class ModelUtils {
     public static LocalDateTime localDateTime = LocalDateTime.now();
     public static ZonedDateTime FIXED_EVENT_START = ZonedDateTime.of(2025, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC);
     public static ZonedDateTime FIXED_EVENT_END = ZonedDateTime.of(2025, 12, 13, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime UPDATE_EVENT_START = ZonedDateTime.of(2025, 12, 14, 10, 30, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime UPDATE_EVENT_END = ZonedDateTime.of(2025, 12, 15, 12, 28, 0, 0, ZoneOffset.UTC);
 
 
     public static Tag getTag() {
@@ -60,6 +66,10 @@ public class ModelUtils {
 
     public static Tag getEventTag() {
         return new Tag(1L, TagType.EVENT, getEventTagTranslations(), Collections.emptyList(), Collections.emptySet());
+    }
+
+    public static TagVO getEventTagVO() {
+        return new TagVO(1L, TagType.EVENT, getEventTagTranslationsVO(), Collections.emptyList(), Collections.emptySet());
     }
 
     public static Tag getHabitTag() {
@@ -91,6 +101,13 @@ public class ModelUtils {
                 TagTranslation.builder().id(1L).name("Соціальний").language(getLanguageUa()).build(),
                 TagTranslation.builder().id(2L).name("Social").language(language).build(),
                 TagTranslation.builder().id(3L).name("Соціальний").language(language).build());
+    }
+
+    public static List<TagTranslationVO> getEventTagTranslationsVO() {
+        return Arrays.asList(
+                TagTranslationVO.builder().id(1L).name("Соціальний").build(),
+                TagTranslationVO.builder().id(2L).name("Social").build(),
+                TagTranslationVO.builder().id(3L).name("Соціальний").build());
     }
 
     public static TagDto getTagDto() {
@@ -748,7 +765,9 @@ public class ModelUtils {
                         .imagePath("mainImage")
                         .build())
                 .initiator(getUser())
-                .eventImages(List.of(EventImage.builder().build()))
+                .eventImages(new ArrayList<>(List.of(
+                        EventImage.builder().imagePath("https://cdn.com/file/main.jpg").build()
+                )))
                 .tags(Set.of(getEventTag()))
                 .isOpen(true)
                 .build();
@@ -789,5 +808,53 @@ public class ModelUtils {
                         .link("test")
                         .build()
         );
+    }
+
+    public static UpdateEventDtoRequest getUpdateEventDtoRequest() {
+        return UpdateEventDtoRequest.builder()
+                .id(1L)
+                .title("Update Title")
+                .description("description with more than 20 characters")
+                .dateTimes(List.of(EventDateTimeLocationRequestDto.builder()
+                        .startDateTime(UPDATE_EVENT_START)
+                        .endDateTime(UPDATE_EVENT_END)
+                        .location("Update location")
+                        .link("Update link")
+                        .build()))
+                .mainImage("UpdateMain.jpg")
+                .images(List.of(
+                        "https://cdn.com/file/second.jpg"
+                ))
+                .tags(List.of("Соціальний"))
+                .isOpen(true)
+                .build();
+    }
+
+    public static UpdateEventDtoResponse getUpdateEventDtoResponse() {
+        return UpdateEventDtoResponse.builder()
+                .id(1L)
+                .title("Update Title")
+                .description("description with more than 20 characters")
+                .dateTimes(List.of(EventDateTimeLocationResponseDto.builder()
+                        .startDateTime(UPDATE_EVENT_START)
+                        .endDateTime(UPDATE_EVENT_END)
+                        .location("Update location")
+                        .link("Update link")
+                        .build()))
+                .mainImage(EventImageResponseDto.builder()
+                        .id(1L)
+                        .imagePath("UpdateMain.jpg")
+                        .build())
+                .eventImages(List.of(EventImageResponseDto.builder()
+                                .id(1L)
+                                .imagePath("https://cdn.com/file/UpdateMain.jpg")
+                                .build(),
+                        EventImageResponseDto.builder()
+                                .id(2L)
+                                .imagePath("https://cdn.com/file/second.jpg")
+                                .build()))
+                .tags(Set.of(getEventTagVO()))
+                .isOpen(true)
+                .build();
     }
 }

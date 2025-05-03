@@ -205,8 +205,8 @@ class EventControllerTest {
     @Test
     void updateEvent_Success() throws Exception {
         UserVO userVO = getUserVO();
-        UpdateEventDtoRequest request = ModelUtils.buildValidUpdateEventDtoRequest();
-        UpdateEventDtoResponse response = ModelUtils.buildValidUpdateEventDtoResponse();
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        UpdateEventDtoResponse response = ModelUtils.getUpdateEventDtoResponse();
 
         when(userService.findByEmail(anyString())).thenReturn(userVO);
         when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
@@ -246,7 +246,7 @@ class EventControllerTest {
 
     @Test
     void updateEvent_ShouldReturnBadRequest_WhenDtoInvalid() throws Exception {
-        UpdateEventDtoRequest invalidReq = ModelUtils.buildValidUpdateEventDtoRequest();
+        UpdateEventDtoRequest invalidReq = ModelUtils.getUpdateEventDtoRequest();
         invalidReq.setDescription("short");
 
         MockMultipartFile jsonPart = new MockMultipartFile(

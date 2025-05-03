@@ -3,15 +3,18 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
+import greencity.entity.EventImage;
 import greencity.entity.Tag;
 import greencity.entity.User;
-import greencity.entity.EventImage;
 import greencity.enums.Role;
 import greencity.enums.TagType;
-import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
@@ -22,9 +25,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
@@ -65,7 +71,7 @@ class EventServiceImplTest {
         event = ModelUtils.getEvent();
         event.setInitiator(user);
     }
-  
+
     @Test
     void createEvent_ReturnsCreateEventDtoResponse() {
         List<MultipartFile> images = Collections.emptyList();
@@ -144,7 +150,7 @@ class EventServiceImplTest {
         when(eventRepository.findById(anyLong())).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () ->
-            eventService.deleteById(event.getId(), userVO));
+                eventService.deleteById(event.getId(), userVO));
 
         verify(eventRepository).findById(event.getId());
         verify(eventRepository, never()).deleteById(event.getId());
@@ -158,7 +164,7 @@ class EventServiceImplTest {
         userVO.setId(userVO.getId() + 1);
 
         assertThrows(UserHasNoPermissionToAccessException.class, () ->
-            eventService.deleteById(actual.getId(), userVO));
+                eventService.deleteById(actual.getId(), userVO));
 
         verify(eventRepository).findById(actual.getId());
         verify(eventRepository, never()).deleteById(actual.getId());
@@ -194,15 +200,15 @@ class EventServiceImplTest {
     void testDeleteById_withPictures() {
         Event actual = ModelUtils.getEventWithoutImages();
         EventImage eventImage = EventImage.builder()
-            .id(1L)
-            .event(actual)
-            .imagePath("test")
-            .build();
+                .id(1L)
+                .event(actual)
+                .imagePath("test")
+                .build();
         actual.setMainImage(eventImage);
         actual.getEventImages().add(eventImage);
 
         when(eventRepository.findById(anyLong()))
-            .thenReturn(Optional.ofNullable(actual));
+                .thenReturn(Optional.ofNullable(actual));
         doNothing().when(fileService).delete(anyString());
 
         eventService.deleteById(actual.getId(), userVO);
@@ -219,6 +225,54 @@ class EventServiceImplTest {
         eventService.deleteById(actual.getId(), userVO);
 
         verify(fileService, never()).delete(anyString());
+    }
+
+    @Test
+    void updateEvent_Success() {
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        UserVO user = ModelUtils.getUserVO();
+        Event event = ModelUtils.getEvent();
+        event.setId(request.getId());
+        Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
+        when(modelMapper.map(eq(event), eq(UpdateEventDtoResponse.class)))
+                .thenReturn(ModelUtils.getUpdateEventDtoResponse());
+        when(fileService.upload(any())).thenReturn("https://cdn.com/file/UpdateMain.jpg");
+
+        MultipartFile mockFile = new MockMultipartFile(
+                "images",
+                "UpdateMain.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "dummy content".getBytes()
+        );
+
+
+        UpdateEventDtoResponse result = eventService.updateEvent(request, List.of(mockFile), user);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Update Title", result.getTitle());
+        assertEquals("description with more than 20 characters", result.getDescription());
+        assertTrue(result.isOpen());
+        assertNotNull(result.getMainImage());
+        assertEquals("UpdateMain.jpg", result.getMainImage().getImagePath());
+        assertEquals(2, result.getEventImages().size());
+        assertEquals("https://cdn.com/file/UpdateMain.jpg", result.getEventImages().get(0).getImagePath());
+        assertEquals("https://cdn.com/file/second.jpg", result.getEventImages().get(1).getImagePath());
+        assertEquals(1, result.getDateTimes().size());
+        assertEquals("Update location", result.getDateTimes().getFirst().getLocation());
+        assertEquals("Update link", result.getDateTimes().getFirst().getLink());
+        assertEquals(ZonedDateTime.parse("2025-12-14T10:30Z"), result.getDateTimes().getFirst().getStartDateTime());
+        assertEquals(ZonedDateTime.parse("2025-12-15T12:28Z"), result.getDateTimes().getFirst().getEndDateTime());
+        assertEquals(1, result.getTags().size());
+        TagVO tag = result.getTags().iterator().next();
+        assertEquals("Соціальний", tag.getTagTranslations().getFirst().getName());
+        verify(eventDateTimeLocationService).isFutureEvent(any());
+        verify(eventDateTimeLocationService).updateEventDateTimeLocation(eq(event), any());
+        verify(fileService).upload(mockFile);
+        verify(eventRepository).save(event);
     }
 
 }

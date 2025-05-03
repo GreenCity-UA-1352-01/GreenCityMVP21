@@ -408,7 +408,7 @@ public class ModelUtils {
         return new TagVO(1L, TagType.EVENT, getTagTranslationsVO(), null, null);
     }
 
-    public static UpdateEventDtoRequest buildValidUpdateEventDtoRequest() {
+    public static UpdateEventDtoRequest getUpdateEventDtoRequest() {
         return UpdateEventDtoRequest.builder()
                 .id(1L)
                 .title("title")
@@ -428,7 +428,7 @@ public class ModelUtils {
                 .build();
     }
 
-    public static UpdateEventDtoResponse buildValidUpdateEventDtoResponse() {
+    public static UpdateEventDtoResponse getUpdateEventDtoResponse() {
         return UpdateEventDtoResponse.builder()
                 .id(1L)
                 .title("title")
