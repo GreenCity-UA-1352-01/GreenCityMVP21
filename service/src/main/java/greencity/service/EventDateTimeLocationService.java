@@ -52,7 +52,7 @@ public class EventDateTimeLocationService {
 
     public void updateEventDateTimeLocation(Event event,
                                             List<EventDateTimeLocationRequestDto> dtoList) {
-        StartEndDateTimeCheck(dtoList);
+        checkStartEndDates(dtoList);
         matchDateTimeWithEventCheck(event, dtoList);
         removeOldEventDateTimeLocations(event, dtoList);
 
@@ -104,7 +104,7 @@ public class EventDateTimeLocationService {
         }
     }
 
-    public void StartEndDateTimeCheck(List<EventDateTimeLocationRequestDto> dtoList) {
+    public void checkStartEndDates(List<EventDateTimeLocationRequestDto> dtoList) {
         boolean isFutureEvent = dtoList.stream()
                 .anyMatch(dateTime -> dateTime.getStartDateTime().
                         isAfter(dateTime.getEndDateTime()) ||
