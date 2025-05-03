@@ -7,6 +7,7 @@ import greencity.dto.econewscomment.*;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.event.EventDateLocationDto;
+import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
@@ -56,6 +57,7 @@ public class ModelUtils {
     public static Tag getTag() {
         return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
     }
+
     public static Tag getEventTag() {
         return new Tag(1L, TagType.EVENT, getEventTagTranslations(), Collections.emptyList(), Collections.emptySet());
     }
@@ -722,6 +724,15 @@ public class ModelUtils {
                 .build();
     }
 
+    public static EventDateTimeLocationRequestDto getEventDateTimeLocationRequestDto() {
+        return EventDateTimeLocationRequestDto.builder()
+                .id(1L)
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+    }
+
     public static Event getEvent() {
         return Event.builder()
                 .title("title")
@@ -754,29 +765,29 @@ public class ModelUtils {
 
     private static Event getEventWithoutDates() {
         return Event.builder()
-            .id(1L)
-            .title("test")
-            .description("test")
-            .initiator(getUser())
-            .tags(Set.copyOf(getTags()))
-            .isOpen(true)
-            .build();
+                .id(1L)
+                .title("test")
+                .description("test")
+                .initiator(getUser())
+                .tags(Set.copyOf(getTags()))
+                .isOpen(true)
+                .build();
     }
 
     private static List<EventDateTimeLocation> getEventDateTimeLocationsWithoutEvent() {
         return Arrays.asList(
-            EventDateTimeLocation.builder()
-                .id(1L)
-                .startDateTime(ZonedDateTime.now().minusDays(1).minusHours(1))
-                .endDateTime(ZonedDateTime.now().minusDays(1))
-                .location("test")
-                .build(),
-            EventDateTimeLocation.builder()
-                .id(2L)
-                .startDateTime(ZonedDateTime.now().plusDays(1))
-                .endDateTime(ZonedDateTime.now().plusDays(1).plusHours(1))
-                .link("test")
-                .build()
+                EventDateTimeLocation.builder()
+                        .id(1L)
+                        .startDateTime(ZonedDateTime.now().minusDays(1).minusHours(1))
+                        .endDateTime(ZonedDateTime.now().minusDays(1))
+                        .location("test")
+                        .build(),
+                EventDateTimeLocation.builder()
+                        .id(2L)
+                        .startDateTime(ZonedDateTime.now().plusDays(1))
+                        .endDateTime(ZonedDateTime.now().plusDays(1).plusHours(1))
+                        .link("test")
+                        .build()
         );
     }
 }
