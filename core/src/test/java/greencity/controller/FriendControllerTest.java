@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.GreenCityApplication;
 import greencity.config.SecurityConfig;
 import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.security.jwt.JwtTool;
 import greencity.service.FriendService;
 import greencity.service.UserService;
@@ -54,6 +55,27 @@ public class FriendControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService, times(1)).findByEmail(email);
+        verify(friendService, times(1)).removeFriend(userVO.getId(), friendId);
+    }
+
+    @Test
+    @WithMockUser(username = "vovasaenco@ukr.net")
+    public void removeFriend_FriendshipNotExists_NotFoundExceptionThrown() throws Exception {
+
+        long friendId = 1L;
+        String email = "vovasaenco@ukr.net";
+
+        UserVO userVO = new UserVO();
+        userVO.setId(123L);
+
+        when(userService.findByEmail(email)).thenReturn(userVO);
+
+        doThrow(new NotFoundException("Friendship not found"))
+                .when(friendService).removeFriend(userVO.getId(), friendId);
+
+        mockMvc.perform(delete("/friends/" + friendId))
+                .andExpect(status().isNotFound());
+
         verify(friendService, times(1)).removeFriend(userVO.getId(), friendId);
     }
 }
