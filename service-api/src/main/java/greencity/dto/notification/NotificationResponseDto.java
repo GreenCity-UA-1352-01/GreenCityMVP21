@@ -1,5 +1,6 @@
 package greencity.dto.notification;
 
+import greencity.enums.NotificationStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +27,7 @@ public class NotificationResponseDto {
     private ZonedDateTime creationDate;
 
     @NotEmpty
-    private String status;
+    private NotificationStatus status;
 
     @NotNull
     @Min(1)
