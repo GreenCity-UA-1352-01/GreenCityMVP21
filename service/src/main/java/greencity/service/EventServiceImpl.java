@@ -1,9 +1,15 @@
 package greencity.service;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.*;
+import greencity.dto.event.CreateEventDto;
+import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
-import greencity.entity.*;
+import greencity.entity.Event;
+import greencity.entity.EventImage;
+import greencity.entity.Tag;
+import greencity.entity.User;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.Role;
 import greencity.enums.TagType;
@@ -16,10 +22,11 @@ import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,8 +78,10 @@ public class EventServiceImpl implements EventService {
         updateEventImages(event, images, updateEventDtoRequest);
 
         eventRepository.save(event);
-
-        return modelMapper.map(event, UpdateEventDtoResponse.class);
+        System.out.println(event);
+        UpdateEventDtoResponse response = modelMapper.map(event, UpdateEventDtoResponse.class);
+        System.out.println(response);
+        return response;
     }
 
     private List<String> tagsConverter(Event event) {
@@ -242,14 +251,13 @@ public class EventServiceImpl implements EventService {
      *
      * @param id   the ID of the event to be deleted
      * @param user the user requesting the deletion
-     *
      * @author Rostyslav Zadyraichuk
      */
     @Override
     @Transactional
     public void deleteById(Long id, UserVO user) {
         Event event = eventRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
 
         if (!event.getInitiator().getId().equals(user.getId()) && user.getRole() != Role.ROLE_ADMIN) {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
@@ -261,6 +269,6 @@ public class EventServiceImpl implements EventService {
             fileService.delete(event.getMainImage().getImagePath());
         }
         event.getEventImages()
-            .forEach(image -> fileService.delete(image.getImagePath()));
+                .forEach(image -> fileService.delete(image.getImagePath()));
     }
 }

@@ -5,14 +5,14 @@ import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
+import greencity.dto.eventimage.EventImageResponseDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
-import greencity.entity.Event;
-import greencity.entity.EventImage;
-import greencity.entity.Tag;
-import greencity.entity.User;
+import greencity.entity.*;
 import greencity.enums.Role;
 import greencity.enums.TagType;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
@@ -228,18 +228,103 @@ class EventServiceImplTest {
     }
 
     @Test
-    void updateEvent_Success() {
+    void updateEvent_Success_WithoutNewImages() {
+        ModelMapper modelMapper2 = new ModelMapper();
+        EventServiceImpl eventService2 = new EventServiceImpl(
+                userRepo,
+                tagsRepo,
+                eventRepository,
+                fileService,
+                eventDateTimeLocationService,
+                modelMapper2
+        );
+
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
         UserVO user = ModelUtils.getUserVO();
         Event event = ModelUtils.getEvent();
         event.setId(request.getId());
+        event.getDateTimes().getFirst().setId(1L);
+
+        request.setMainImage("second.jpg");
+        request.setImages(List.of("https://cdn.com/file/second.jpg"));
+
+        event.setEventImages(new ArrayList<>(List.of(
+                EventImage.builder().imagePath("https://cdn.com/file/second.jpg").build()
+        )));
+        event.setMainImage(EventImage.builder().imagePath("second.jpg").build());
+
         Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
-        when(modelMapper.map(eq(event), eq(UpdateEventDtoResponse.class)))
-                .thenReturn(ModelUtils.getUpdateEventDtoResponse());
-        when(fileService.upload(any())).thenReturn("https://cdn.com/file/UpdateMain.jpg");
+        doAnswer(invocation -> {
+            Event evt = invocation.getArgument(0);
+            List<EventDateTimeLocationRequestDto> newDates = invocation.getArgument(1);
+
+            List<EventDateTimeLocation> updatedDates = newDates.stream()
+                    .map(dto -> EventDateTimeLocation.builder()
+                            .startDateTime(dto.getStartDateTime())
+                            .endDateTime(dto.getEndDateTime())
+                            .location(dto.getLocation())
+                            .link(dto.getLink())
+                            .build())
+                    .toList();
+
+            evt.setDateTimes(updatedDates);
+            return null;
+        }).when(eventDateTimeLocationService).updateEventDateTimeLocation(any(), any());
+        UpdateEventDtoResponse result = eventService2.updateEvent(request, null, user);
+        System.out.println(result);
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Update Title", result.getTitle());
+        assertEquals("description with more than 20 characters", result.getDescription());
+        assertTrue(result.isOpen());
+        assertNotNull(result.getMainImage());
+        assertEquals("https://cdn.com/file/second.jpg", result.getMainImage().getImagePath());
+        assertEquals(1, result.getEventImages().size());
+        assertEquals("https://cdn.com/file/second.jpg", result.getEventImages().getFirst().getImagePath());
+        assertEquals(1, result.getDateTimes().size());
+        assertEquals("Update location", result.getDateTimes().getFirst().getLocation());
+        assertEquals("Update link", result.getDateTimes().getFirst().getLink());
+        assertEquals(ZonedDateTime.parse("2026-12-14T10:30Z"), result.getDateTimes().getFirst().getStartDateTime());
+        assertEquals(ZonedDateTime.parse("2026-12-15T12:28Z"), result.getDateTimes().getFirst().getEndDateTime());
+        assertEquals(1, result.getTags().size());
+        TagVO tag = result.getTags().iterator().next();
+        assertEquals("Соціальний", tag.getTagTranslations().getFirst().getName());
+
+        verify(eventDateTimeLocationService).isFutureEvent(any());
+        verify(eventDateTimeLocationService).updateEventDateTimeLocation(eq(event), any());
+        verify(eventRepository).save(event);
+    }
+
+    @Test
+    void updateEvent_Success_WithNewImages() {
+        ModelMapper modelMapper2 = new ModelMapper();
+        EventServiceImpl eventService2 = new EventServiceImpl(
+                userRepo,
+                tagsRepo,
+                eventRepository,
+                fileService,
+                eventDateTimeLocationService,
+                modelMapper2
+        );
+
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        UserVO user = ModelUtils.getUserVO();
+        Event event = ModelUtils.getEvent();
+        event.setId(request.getId());
+        event.getDateTimes().getFirst().setId(1L);
+
+
+        request.setImages(List.of(""));
+
+
+        Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
+
 
         MultipartFile mockFile = new MockMultipartFile(
                 "images",
@@ -248,31 +333,158 @@ class EventServiceImplTest {
                 "dummy content".getBytes()
         );
 
+        when(fileService.upload(mockFile)).thenReturn("https://cdn.com/file/UpdateMain.jpg");
 
-        UpdateEventDtoResponse result = eventService.updateEvent(request, List.of(mockFile), user);
+        UpdateEventDtoResponse result = eventService2.updateEvent(request, List.of(mockFile), user);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        assertEquals("Update Title", result.getTitle());
-        assertEquals("description with more than 20 characters", result.getDescription());
-        assertTrue(result.isOpen());
         assertNotNull(result.getMainImage());
-        assertEquals("UpdateMain.jpg", result.getMainImage().getImagePath());
-        assertEquals(2, result.getEventImages().size());
+        assertEquals("https://cdn.com/file/UpdateMain.jpg", result.getMainImage().getImagePath());
+        assertEquals(1, result.getEventImages().size());
         assertEquals("https://cdn.com/file/UpdateMain.jpg", result.getEventImages().get(0).getImagePath());
-        assertEquals("https://cdn.com/file/second.jpg", result.getEventImages().get(1).getImagePath());
-        assertEquals(1, result.getDateTimes().size());
-        assertEquals("Update location", result.getDateTimes().getFirst().getLocation());
-        assertEquals("Update link", result.getDateTimes().getFirst().getLink());
-        assertEquals(ZonedDateTime.parse("2025-12-14T10:30Z"), result.getDateTimes().getFirst().getStartDateTime());
-        assertEquals(ZonedDateTime.parse("2025-12-15T12:28Z"), result.getDateTimes().getFirst().getEndDateTime());
         assertEquals(1, result.getTags().size());
         TagVO tag = result.getTags().iterator().next();
         assertEquals("Соціальний", tag.getTagTranslations().getFirst().getName());
+
         verify(eventDateTimeLocationService).isFutureEvent(any());
         verify(eventDateTimeLocationService).updateEventDateTimeLocation(eq(event), any());
         verify(fileService).upload(mockFile);
         verify(eventRepository).save(event);
+    }
+
+    @Test
+    void updateEvent_ThrowsBadRequest_WhenTooManyImages() {
+        ModelMapper modelMapper2 = new ModelMapper();
+        EventServiceImpl eventService2 = new EventServiceImpl(
+                userRepo,
+                tagsRepo,
+                eventRepository,
+                fileService,
+                eventDateTimeLocationService,
+                modelMapper2
+        );
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        UserVO user = ModelUtils.getUserVO();
+        Event event = ModelUtils.getEvent();
+        event.setId(request.getId());
+
+        request.setImages(List.of(
+                "https://cdn.com/file/old1.jpg",
+                "https://cdn.com/file/old2.jpg",
+                "https://cdn.com/file/old3.jpg",
+                "https://cdn.com/file/old4.jpg"
+        ));
+
+        List<MultipartFile> newImages = List.of(
+                new MockMultipartFile("images", "new1.jpg", MediaType.IMAGE_JPEG_VALUE, "data".getBytes()),
+                new MockMultipartFile("images", "new2.jpg", MediaType.IMAGE_JPEG_VALUE, "data".getBytes())
+        );
+        Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
+
+        assertThrows(BadRequestException.class,
+                () -> eventService2.updateEvent(request, newImages, user));
+
+        verify(eventRepository).findById(1L);
+    }
+
+    @Test
+    void updateEvent_ThrowsBadRequest_WhenMainImageMissing() {
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        request.setMainImage("nonexistent.jpg");
+
+        request.setImages(List.of("https://cdn.com/file/old1.jpg"));
+
+        List<MultipartFile> newImages = List.of(
+                new MockMultipartFile("images", "new1.jpg", MediaType.IMAGE_JPEG_VALUE, "data".getBytes())
+        );
+
+        UserVO user = ModelUtils.getUserVO();
+        Event event = ModelUtils.getEvent();
+        event.setId(request.getId());
+        Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
+
+        assertThrows(BadRequestException.class,
+                () -> eventService.updateEvent(request, newImages, user));
+    }
+
+    @Test
+    void updateEvent_ThrowsBadRequest_WhenImageFormatInvalid() {
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        request.setMainImage("invalid.gif");
+        request.setImages(List.of());
+
+        List<MultipartFile> newImages = List.of(
+                new MockMultipartFile("images", "invalid.gif", "image/gif", "data".getBytes())
+        );
+
+        UserVO user = ModelUtils.getUserVO();
+        Event event = ModelUtils.getEvent();
+        event.setId(request.getId());
+        Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
+
+        assertThrows(BadRequestException.class,
+                () -> eventService.updateEvent(request, newImages, user));
+    }
+
+    @Test
+    void updateEvent_ShouldRemoveImages_ThatAreMissingInRequest() {
+        ModelMapper modelMapper2 = new ModelMapper();
+        EventServiceImpl service = new EventServiceImpl(
+                userRepo, tagsRepo, eventRepository, fileService, eventDateTimeLocationService, modelMapper2
+        );
+        UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
+        request.setImages(List.of(
+                "https://cdn.com/file/img1.jpg",
+                "https://cdn.com/file/img3.jpg",
+                "https://cdn.com/file/img5.jpg"
+        ));
+        request.setMainImage("img1.jpg");
+
+        UserVO user = ModelUtils.getUserVO();
+        Event event = ModelUtils.getEvent();
+        event.setId(request.getId());
+
+        List<EventImage> originalImages = List.of(
+                EventImage.builder().imagePath("https://cdn.com/file/img1.jpg").build(),
+                EventImage.builder().imagePath("https://cdn.com/file/img2.jpg").build(),
+                EventImage.builder().imagePath("https://cdn.com/file/img3.jpg").build(),
+                EventImage.builder().imagePath("https://cdn.com/file/img4.jpg").build(),
+                EventImage.builder().imagePath("https://cdn.com/file/img5.jpg").build()
+        );
+        event.setEventImages(new ArrayList<>(originalImages));
+
+        Set<Tag> tagSet = Set.of(ModelUtils.getEventTag());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(tagsRepo.findTagsByNamesAndType(any(), any())).thenReturn(new ArrayList<>(tagSet));
+
+
+        UpdateEventDtoResponse result = service.updateEvent(request, null, user);
+
+        // then
+        assertEquals(3, result.getEventImages().size());
+        List<String> expectedPaths = List.of(
+                "https://cdn.com/file/img1.jpg",
+                "https://cdn.com/file/img3.jpg",
+                "https://cdn.com/file/img5.jpg"
+        );
+        List<String> actualPaths = result.getEventImages().stream()
+                .map(EventImageResponseDto::getImagePath)
+                .toList();
+
+        assertTrue(actualPaths.containsAll(expectedPaths));
+        assertFalse(actualPaths.contains("https://cdn.com/file/img2.jpg"));
+        assertFalse(actualPaths.contains("https://cdn.com/file/img4.jpg"));
     }
 
 }

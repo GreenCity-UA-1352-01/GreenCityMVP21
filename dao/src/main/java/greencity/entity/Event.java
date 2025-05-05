@@ -1,11 +1,12 @@
 package greencity.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import lombok.*;
 
 @Entity
 @Table(name = "events")
@@ -15,7 +16,7 @@ import lombok.*;
 @Setter
 @Builder
 @EqualsAndHashCode(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
-@ToString(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
+@ToString//(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,10 +26,10 @@ public class Event {
     private String title;
 
     @OneToMany(
-        mappedBy = "event",
-        cascade = CascadeType.ALL,
-        fetch = FetchType.LAZY,
-        orphanRemoval = true
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
     )
     @Builder.Default
     private List<EventDateTimeLocation> dateTimes = new ArrayList<>();
@@ -55,9 +56,9 @@ public class Event {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-        name = "events_tags",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id")
+            name = "events_tags",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @Builder.Default
     private Set<Tag> tags = new HashSet<>();

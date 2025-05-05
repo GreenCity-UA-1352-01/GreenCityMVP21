@@ -4,10 +4,11 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.*;
+import greencity.dto.event.CreateEventDto;
+import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.EventDateLocationDto;
+import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
-import greencity.dto.eventdatetime.EventDateTimeLocationResponseDto;
-import greencity.dto.eventimage.EventImageResponseDto;
 import greencity.dto.habit.HabitAssignPropertiesDto;
 import greencity.dto.habit.HabitAssignVO;
 import greencity.dto.habitfact.HabitFactTranslationVO;
@@ -56,8 +57,8 @@ public class ModelUtils {
     public static LocalDateTime localDateTime = LocalDateTime.now();
     public static ZonedDateTime FIXED_EVENT_START = ZonedDateTime.of(2025, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC);
     public static ZonedDateTime FIXED_EVENT_END = ZonedDateTime.of(2025, 12, 13, 22, 0, 0, 0, ZoneOffset.UTC);
-    public static ZonedDateTime UPDATE_EVENT_START = ZonedDateTime.of(2025, 12, 14, 10, 30, 0, 0, ZoneOffset.UTC);
-    public static ZonedDateTime UPDATE_EVENT_END = ZonedDateTime.of(2025, 12, 15, 12, 28, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime UPDATE_EVENT_START = ZonedDateTime.of(2026, 12, 14, 10, 30, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime UPDATE_EVENT_END = ZonedDateTime.of(2026, 12, 15, 12, 28, 0, 0, ZoneOffset.UTC);
 
 
     public static Tag getTag() {
@@ -816,6 +817,7 @@ public class ModelUtils {
                 .title("Update Title")
                 .description("description with more than 20 characters")
                 .dateTimes(List.of(EventDateTimeLocationRequestDto.builder()
+                        .id(1L)
                         .startDateTime(UPDATE_EVENT_START)
                         .endDateTime(UPDATE_EVENT_END)
                         .location("Update location")
@@ -823,38 +825,11 @@ public class ModelUtils {
                         .build()))
                 .mainImage("UpdateMain.jpg")
                 .images(List.of(
-                        "https://cdn.com/file/second.jpg"
+                        "https://csb10032000a548f571.blob.core.windows.net/allfiles/e04cc9f5-4fc5-438d-9dfe-48dc80a86704cute-cat-indoors.jpg"
                 ))
                 .tags(List.of("Соціальний"))
                 .isOpen(true)
                 .build();
     }
 
-    public static UpdateEventDtoResponse getUpdateEventDtoResponse() {
-        return UpdateEventDtoResponse.builder()
-                .id(1L)
-                .title("Update Title")
-                .description("description with more than 20 characters")
-                .dateTimes(List.of(EventDateTimeLocationResponseDto.builder()
-                        .startDateTime(UPDATE_EVENT_START)
-                        .endDateTime(UPDATE_EVENT_END)
-                        .location("Update location")
-                        .link("Update link")
-                        .build()))
-                .mainImage(EventImageResponseDto.builder()
-                        .id(1L)
-                        .imagePath("UpdateMain.jpg")
-                        .build())
-                .eventImages(List.of(EventImageResponseDto.builder()
-                                .id(1L)
-                                .imagePath("https://cdn.com/file/UpdateMain.jpg")
-                                .build(),
-                        EventImageResponseDto.builder()
-                                .id(2L)
-                                .imagePath("https://cdn.com/file/second.jpg")
-                                .build()))
-                .tags(Set.of(getEventTagVO()))
-                .isOpen(true)
-                .build();
-    }
 }
