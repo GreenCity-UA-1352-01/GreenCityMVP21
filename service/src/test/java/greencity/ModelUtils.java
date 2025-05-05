@@ -837,4 +837,15 @@ public class ModelUtils {
             .status(NotificationStatus.UNREAD)
             .build();
     }
+
+    public static NotificationRequestDto getNotificationRequestDto() {
+        return NotificationRequestDto.builder()
+            .initiatorId(1L)
+            .receiverId(2L)
+            .objectName("test")
+            .objectLink("link")
+            .action("test")
+            .status(NotificationStatus.UNREAD)
+            .build();
+    }
 }
