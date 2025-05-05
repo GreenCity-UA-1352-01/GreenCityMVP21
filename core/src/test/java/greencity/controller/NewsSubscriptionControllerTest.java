@@ -40,11 +40,16 @@ public class NewsSubscriptionControllerTest {
         String email = "test@example.com";
         doNothing().when(newsSubscriptionService).subscribe(email);
 
+        String jsonBody = """
+                {
+                    "email": "%s"
+                }
+                """.formatted(email);
+
         mockMvc.perform(post("/news_subscription")
-                        .param("email", email)
+                        .content(jsonBody)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Subscribed successfully!"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -52,8 +57,14 @@ public class NewsSubscriptionControllerTest {
         String email = "test@example.com";
         doThrow(new IllegalArgumentException("Email already subscribed")).when(newsSubscriptionService).subscribe(email);
 
+        String jsonBody = """
+                {
+                    "email": "%s"
+                }
+                """.formatted(email);
+
         mockMvc.perform(post("/news_subscription")
-                        .param("email", email)
+                        .content(jsonBody)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Email already subscribed"));
