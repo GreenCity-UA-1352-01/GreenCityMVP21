@@ -471,7 +471,6 @@ class EventServiceImplTest {
 
         UpdateEventDtoResponse result = service.updateEvent(request, null, user);
 
-        // then
         assertEquals(3, result.getEventImages().size());
         List<String> expectedPaths = List.of(
                 "https://cdn.com/file/img1.jpg",
