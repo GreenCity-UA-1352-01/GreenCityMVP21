@@ -18,6 +18,13 @@ public class NotificationAspect {
     private final NotificationPublisher publisher;
     private final NotificationHandlerRegistry registry;
 
+    /**
+     * Publishes a notification event after the method marked by {@code @NotifyUser} returns.
+     *
+     * @param joinPoint is used for annotated method observation.
+     * @author Roman Diakov & Rostyslav Zadyraichuk
+     * @see greencity.annotations.NotifyUser
+     */
     @AfterReturning(value = "@annotation(greencity.annotations.NotifyUser)", argNames = "joinPoint")
     public void afterMethod(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();

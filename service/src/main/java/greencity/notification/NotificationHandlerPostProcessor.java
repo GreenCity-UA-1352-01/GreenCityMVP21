@@ -12,6 +12,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
+/**
+ * This class is a spring BeanPostProcessor that is responsible for registering all controllers that has
+ * {@link NotificationHandler} annotation and implements {@link NotificationEventFactory} interface to
+ * {@link NotificationHandlerRegistry}.
+ *
+ * <p>
+ * Links each controller method marked with {@link greencity.annotations.NotifyUser} to
+ * a {@link NotificationEventFactory} implementation.
+ *
+ * @author Roman Diakov & Rostyslav Zadyraichuk
+ */
 @Component
 @AllArgsConstructor
 public class NotificationHandlerPostProcessor implements BeanPostProcessor {
