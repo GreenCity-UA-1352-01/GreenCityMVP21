@@ -10,8 +10,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NotificationRepo extends JpaRepository<Notification, Long> {
-    @Modifying
-    @Query("UPDATE Notification n SET n.status = :status WHERE n.id = :id")
-    int updateStatusById(@Param("id") Long id, @Param("status") NotificationStatus status);
 
 }
