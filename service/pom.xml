@@ -147,6 +147,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+
         <!--Google geocoding Api dependency-->
         <dependency>
             <groupId>com.google.maps</groupId>
