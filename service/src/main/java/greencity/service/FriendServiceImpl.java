@@ -68,6 +68,8 @@ public class FriendServiceImpl implements FriendService {
      *
      * @param currentUserId the ID of the user who is adding a friend
      * @param friendId      the ID of the user to add as a friend
+     *
+     * @author Rostyslav Zadyraichuk
      */
     @Override
     @Transactional
