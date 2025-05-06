@@ -9,15 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface FriendRepo extends JpaRepository<Friend, Long> {
     @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND f.status = 'FRIEND'")
     Page<User> findAllFriendsByUserId(Long userId, Pageable pageable);
 
-    @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND f.friend.id = :friendId AND f.status = 'FRIEND'")
-    Optional<User> findFriendByUserIdAndFriendId(Long userId, Long friendId);
+    @Query("SELECT COUNT(f) > 0 FROM Friend f WHERE f.user.id = :userId AND f.friend.id = :friendId AND f.status = 'FRIEND'")
+    boolean isFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     @Query(value = """
     SELECT COUNT(*) 
@@ -52,5 +50,4 @@ public interface FriendRepo extends JpaRepository<Friend, Long> {
     @Query(value = "SELECT COUNT(ha.id) FROM HabitAssign ha "
             + "WHERE upper(ha.status) = 'ACQUIRED' AND ha.user.id = :userId")
     int countHabitAssignsByUserFriendIdAndStatusAcquired(@Param("userId") Long userId);
-
 }
