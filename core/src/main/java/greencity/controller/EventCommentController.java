@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
@@ -36,6 +37,7 @@ public class EventCommentController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("{eventId}")
+    @NotifyUser
     public ResponseEntity<AddEventCommentDtoResponse> save(@PathVariable Long eventId,
                                                            @Valid @RequestBody AddEventCommentDtoRequest comment,
                                                            @Parameter(hidden = true) @CurrentUser UserVO user) {

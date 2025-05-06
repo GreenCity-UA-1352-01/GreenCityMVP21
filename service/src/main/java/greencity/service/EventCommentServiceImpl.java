@@ -1,6 +1,5 @@
 package greencity.service;
 
-import greencity.annotations.NotifyUser;
 import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.EventVO;
@@ -17,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import static greencity.constant.AppConstant.AUTHORIZATION;
 
 @Service
@@ -38,6 +38,7 @@ public class EventCommentServiceImpl implements EventCommentService {
      * @author Rostyslav Zadyraichuk
      */
     @Override
+    @Transactional
     public AddEventCommentDtoResponse save(Long eventId,
                                            AddEventCommentDtoRequest comment,
                                            UserVO userVO) {

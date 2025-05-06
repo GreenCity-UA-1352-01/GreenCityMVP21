@@ -22,6 +22,9 @@ public class NotificationPublisher {
         if (event == null) {
             throw new IllegalArgumentException("Notification event must not be null");
         }
-        publisher.publishEvent(event);
+
+        if (!event.getReceiverId().equals(event.getInitiatorId())) {
+            publisher.publishEvent(event);
+        }
     }
 }
