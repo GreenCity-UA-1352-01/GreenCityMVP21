@@ -1,10 +1,7 @@
 package greencity.service;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventImage;
@@ -115,7 +112,6 @@ public class EventServiceImpl implements EventService {
                 .createdDateTime(ZonedDateTime.now())
                 .build();
     }
-
 
     private void updateEventTags(Event event, List<String> tags) {
         Set<Tag> updateTags = new HashSet<>(tagsRepo.findTagsByNamesAndType(

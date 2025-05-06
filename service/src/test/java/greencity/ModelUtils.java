@@ -4,10 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.*;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
@@ -37,8 +34,6 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
-
 import static greencity.enums.UserStatus.ACTIVATED;
 
 public class ModelUtils {
@@ -825,17 +820,6 @@ public class ModelUtils {
                 .tags(List.of("Соціальний"))
                 .isOpen(true)
                 .build();
-    }
-
-    public static NotificationRequestDto getNotificationRequestDto() {
-        return NotificationRequestDto.builder()
-            .initiatorId(1L)
-            .receiverId(2L)
-            .objectName("test")
-            .objectLink("link")
-            .action("test")
-            .status(NotificationStatus.UNREAD)
-            .build();
     }
 
     public static NotificationRequestDto getNotificationRequestDto() {
