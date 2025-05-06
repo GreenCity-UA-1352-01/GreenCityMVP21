@@ -1,6 +1,6 @@
 package greencity.dto.eventcomment;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import lombok.*;
 
 @Getter
@@ -12,5 +12,5 @@ public class AddEventCommentDtoResponse {
     private Long id;
     private EventCommentAuthorDto author;
     private String text;
-    private LocalDateTime modifiedDate;
+    private ZonedDateTime modifiedDate;
 }

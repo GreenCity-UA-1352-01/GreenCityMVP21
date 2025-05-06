@@ -2,13 +2,14 @@ package greencity.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "event_comment")
@@ -18,6 +19,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"comments", "usersLiked"})
+@EntityListeners(AuditingEntityListener.class)
 public class EventComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +31,11 @@ public class EventComment {
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private ZonedDateTime createdDate;
+    private LocalDateTime createdDate;
 
     @LastModifiedDate
     @Column(name = "modified_date", nullable = false)
-    private ZonedDateTime modifiedDate;
+    private LocalDateTime modifiedDate;
 
     @ManyToOne
     @JoinColumn(name = "parent_comment_id")

@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.annotations.NotifyUser;
 import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.EventVO;

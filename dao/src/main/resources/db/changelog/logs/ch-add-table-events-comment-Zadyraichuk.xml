@@ -33,7 +33,7 @@
                                  baseColumnNames="parent_comment_id"
                                  constraintName="FK_event_comment_parent_id"
                                  onDelete="CASCADE"
-                                 referencedTableName="events_comment"
+                                 referencedTableName="event_comment"
                                  referencedColumnNames="id"/>
 
         <addForeignKeyConstraint baseTableName="event_comment"
