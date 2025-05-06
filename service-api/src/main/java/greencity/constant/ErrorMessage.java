@@ -141,7 +141,6 @@ public final class ErrorMessage {
     public static final String EVENT_START_DATE_IS_NULL = "Start date/time must not be null";
     public static final String EVENT_END_DATE_IS_NULL = "End date/time must not be null";
     public static final String THE_SAME_DATES = "You can't enter the same date for two days";
-    public static final String EVENT_END_MUST_BE_IN_FUTURE = "End time must be in the future";
     public static final String MAX_PHOTO_EVENT = "The number of photos cannot exceed 5";
     public static final String WRONG_EVENT_ID = "This session does not belong to this event";
     public static final String START_DATE_TIME_AFTER_END_DATE_TIME = "StartDateTime should be before EndDateTime";

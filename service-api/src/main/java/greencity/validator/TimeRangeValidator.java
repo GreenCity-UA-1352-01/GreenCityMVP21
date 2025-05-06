@@ -40,10 +40,6 @@ public class TimeRangeValidator implements ConstraintValidator<ValidTimeRange, E
             throw new InvalidEventDateException(ErrorMessage.EVENT_END_BEFORE_START);
         }
 
-        if (!end.isAfter(now)) {
-            throw new InvalidEventDateException(ErrorMessage.EVENT_END_MUST_BE_IN_FUTURE);
-        }
-
         return true;
     }
 }
