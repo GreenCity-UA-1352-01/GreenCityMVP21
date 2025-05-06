@@ -1,0 +1,30 @@
+{
+  "title": "Event 1",
+  "description": "New Perfect Event! This is a longer description to meet the length requirement.",
+  "titleImage": "title.jpg",
+  "open": true,
+  "dates": [
+    {
+      "startDateTime": "2025-04-25T13:31:18.318Z",
+      "endDateTime": "2025-04-25T13:32:18.318Z",
+      "location": "Location",
+      "onlineLink": "http://link.com",
+      "allDay": true
+    }
+  ],
+  "additionalImages": [
+    "additional_image.jpg"
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "nameUa": "string",
+      "nameEn": "string"
+    }
+  ],
+  "place": true,
+  "online": true,
+  "initiativeTypes": [
+    "Eco Education"
+  ]
+}

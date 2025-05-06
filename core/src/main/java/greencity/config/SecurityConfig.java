@@ -201,6 +201,7 @@ public class SecurityConfig {
                                 "/habit/{habitId}/friends/profile-pictures")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.POST,
+                                "/events/create",
                                 "/category",
                                 "/econews",
                                 "/econews/like",
@@ -225,6 +226,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,
                                 "/habit/statistic/{id}",
                                 "/econews/update",
+                                "/events/update",
                                 "/ownSecurity",
                                 "/user/profile",
                                 HABIT_ASSIGN_ID + "/update-habit-duration",
@@ -254,7 +256,8 @@ public class SecurityConfig {
                                 "/favorite_place/{placeId}",
                                 "/social-networks",
                                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
-                                USER_SHOPPING_LIST + "/user-shopping-list-items")
+                                USER_SHOPPING_LIST + "/user-shopping-list-items",
+                                "/event/{id}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.GET,
                                 "/newsSubscriber",
