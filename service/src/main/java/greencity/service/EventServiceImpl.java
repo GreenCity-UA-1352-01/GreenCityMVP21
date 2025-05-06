@@ -267,4 +267,19 @@ public class EventServiceImpl implements EventService {
         event.getEventImages()
                 .forEach(image -> fileService.delete(image.getImagePath()));
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param id event id
+     * @return {@link EventVO} with founded event
+     * @throws NotFoundException if event not found
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    public EventVO findById(Long id) {
+        Optional<Event> eventOpt = eventRepository.findById(id);
+        Event event = eventOpt.orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+        return modelMapper.map(event, EventVO.class);
+    }
 }
