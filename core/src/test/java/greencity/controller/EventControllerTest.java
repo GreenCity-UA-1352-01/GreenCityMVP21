@@ -90,8 +90,8 @@ class EventControllerTest {
                       "open": true,
                       "dates": [
                         {
-                          "startDateTime": "2025-05-04T10:00:00Z",
-                          "endDateTime": "2025-05-05T12:00:00Z",
+                          "startDateTime": "%s",
+                          "endDateTime": "%s",
                           "location": "Lviv",
                           "onlineLink": null,
                           "allDay": false
@@ -101,7 +101,9 @@ class EventControllerTest {
                       "online": false,
                       "initiativeTypes": ["EDUCATIONAL"]
                     }
-                """;
+                """.formatted(
+                ZonedDateTime.now().plusDays(1).toString(),
+                ZonedDateTime.now().plusDays(1).plusHours(1).toString());
 
         MockMultipartFile jsonPart = new MockMultipartFile(
                 "event",
@@ -122,8 +124,8 @@ class EventControllerTest {
                 .tags(List.of("Eco"))
                 .dates(List.of(
                         new EventDateLocationDto(
-                                ZonedDateTime.parse("2025-05-01T10:00:00Z"),
-                                ZonedDateTime.parse("2025-05-01T12:00:00Z"),
+                                ZonedDateTime.now().plusDays(1),
+                                ZonedDateTime.now().plusDays(1).plusHours(1),
                                 "Lviv",
                                 null
                         )
