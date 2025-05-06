@@ -4,13 +4,11 @@ import greencity.annotations.ValidEventImages;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 public class EventImagesValidator implements ConstraintValidator<ValidEventImages, List<MultipartFile>> {
-
     private static final int MAX_FILES = 5;
-    private static final long MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+    private static final int MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
     @Override
     public boolean isValid(List<MultipartFile> files, ConstraintValidatorContext context) {
@@ -20,7 +18,7 @@ public class EventImagesValidator implements ConstraintValidator<ValidEventImage
 
 
         for (MultipartFile file : files) {
-            if (file == null||file.getSize() > MAX_SIZE_BYTES){
+            if (file == null || file.getSize() > MAX_SIZE_BYTES) {
                 return false;
             }
 
