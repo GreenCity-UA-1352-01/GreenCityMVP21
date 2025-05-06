@@ -77,9 +77,6 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
         AddEcoNewsDtoResponse addEcoNewsDtoResponse = modelMapper.map(toSave, AddEcoNewsDtoResponse.class);
         sendEmailDto(addEcoNewsDtoResponse, toSave.getAuthor());
-
-        newsNotificationService.notifySubscribers(toSave);
-
         return addEcoNewsDtoResponse;
     }
 
@@ -93,9 +90,10 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public EcoNewsGenericDto saveEcoNews(AddEcoNewsDtoRequest addEcoNewsDtoRequest, MultipartFile image, String email) {
         EcoNews toSave = genericSave(addEcoNewsDtoRequest, image, email);
 
-        EcoNewsGenericDto ecoNewsDto = getEcoNewsGenericDtoWithAllTags(toSave);
-        sendEmailDto(ecoNewsDto, toSave.getAuthor());
-        return ecoNewsDto;
+        newsNotificationService.notifySubscribers(toSave);
+
+        //        sendEmailDto(ecoNewsDto, toSave.getAuthor());
+        return getEcoNewsGenericDtoWithAllTags(toSave);
     }
 
     /**
