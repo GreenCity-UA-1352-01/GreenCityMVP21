@@ -7,18 +7,30 @@ import greencity.ModelUtils;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
+import greencity.enums.NotificationStatus;
+import greencity.repository.NotificationRepo;
 import greencity.entity.NotificationCounter;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
+import greencity.enums.NotificationStatus;
 import greencity.repository.NotificationCounterRepo;
+import greencity.service.NotificationServiceImpl;
 import greencity.repository.NotificationRepo;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -36,13 +48,15 @@ class NotificationServiceImplTest {
     }
 
     @Mock
-    private NotificationRepo notificationsRepo;
+    private NotificationRepo notificationRepo;
     @Mock
     private NotificationCounterRepo notificationCounterRepo;
     @Mock
     private NotificationMapper notificationMapper;
     @Spy
     private NotificationResponseDtoMapper notificationResponseDtoMapper;
+    @Mock
+    private ModelMapper modelMapper;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
@@ -55,7 +69,7 @@ class NotificationServiceImplTest {
         when(notificationCounterRepo.findById(NOTIFICATION_REQUEST_DTO.getReceiverId()))
             .thenReturn(Optional.of(localCounter));
         when(notificationResponseDtoMapper.convert(NOTIFICATION)).thenReturn(NOTIFICATION_RESPONSE_DTO);
-        when(notificationsRepo.save(NOTIFICATION)).thenReturn(NOTIFICATION);
+        when(notificationRepo.save(NOTIFICATION)).thenReturn(NOTIFICATION);
 
         NotificationResponseDto actual = notificationService.createNotification(NOTIFICATION_REQUEST_DTO);
 
@@ -70,12 +84,45 @@ class NotificationServiceImplTest {
         when(notificationCounterRepo.findById(NOTIFICATION_REQUEST_DTO.getReceiverId()))
             .thenReturn(Optional.empty());
         when(notificationResponseDtoMapper.convert(NOTIFICATION)).thenReturn(NOTIFICATION_RESPONSE_DTO);
-        when(notificationsRepo.save(NOTIFICATION)).thenReturn(NOTIFICATION);
+        when(notificationRepo.save(NOTIFICATION)).thenReturn(NOTIFICATION);
         when(notificationCounterRepo.save(any())).thenReturn(NOTIFICATION_COUNTER);
 
         NotificationResponseDto actual = notificationService.createNotification(NOTIFICATION_REQUEST_DTO);
 
         assertEquals(NOTIFICATION_RESPONSE_DTO, actual);
         verify(notificationCounterRepo).save(any());
+    }
+
+    @Test
+    void testGetAllNotificationsForUser_returnsMappedDtos() {
+        Long userId = 1L;
+        Notification notification = Notification.builder()
+            .id(1L)
+            .action("liked")
+            .objectName("Test News")
+            .creationDate(ZonedDateTime.now())
+            .status(NotificationStatus.UNREAD)
+            .build();
+
+        NotificationResponseDto dto = NotificationResponseDto.builder()
+            .id(1L)
+            .action("liked")
+            .objectName("Test News")
+            .creationDate(notification.getCreationDate())
+            .status("UNREAD")
+            .receiverId(userId)
+            .initiatorId(2L)
+            .build();
+
+        when(notificationRepo.findAllByReceiverIdOrderByCreationDateDesc(userId))
+            .thenReturn(List.of(notification));
+        when(modelMapper.map(notification, NotificationResponseDto.class)).thenReturn(dto);
+
+        List<NotificationResponseDto> result = notificationService.getAllNotificationsForUser(userId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(dto.getId());
+        verify(notificationRepo).findAllByReceiverIdOrderByCreationDateDesc(userId);
+        verify(modelMapper).map(notification, NotificationResponseDto.class);
     }
 }

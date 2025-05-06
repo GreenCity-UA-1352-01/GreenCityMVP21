@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
+import java.util.List;
 
 public interface NotificationService {
 
@@ -14,4 +15,6 @@ public interface NotificationService {
      * @author Rostyslav Zadyraichuk
      */
     NotificationResponseDto createNotification(NotificationRequestDto dto);
+
+    List<NotificationResponseDto> getAllNotificationsForUser(Long userId);
 }

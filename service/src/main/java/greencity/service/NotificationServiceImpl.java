@@ -12,6 +12,8 @@ import greencity.repository.NotificationRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,5 +52,15 @@ public class NotificationServiceImpl implements NotificationService {
             }
         );
         return notificationResponseDtoMapper.convert(notification);
+    }
+
+    @Override
+    public List<NotificationResponseDto> getAllNotificationsForUser(Long userId) {
+        return notificationsRepo.findAllByReceiverIdOrderByCreationDateDesc(userId).stream()
+                .map(notification -> {
+                    NotificationResponseDto dto = modelMapper.map(notification, NotificationResponseDto.class);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

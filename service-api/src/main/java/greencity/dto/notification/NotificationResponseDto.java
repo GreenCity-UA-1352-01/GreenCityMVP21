@@ -18,4 +18,7 @@ public class NotificationResponseDto {
     private NotificationStatus status;
     private Long receiverId;
     private Long initiatorId;
+
+    @NotEmpty
+    private String initiatorUsername;
 }
