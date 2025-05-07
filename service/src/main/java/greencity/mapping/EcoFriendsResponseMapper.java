@@ -2,13 +2,17 @@ package greencity.mapping;
 
 import greencity.dto.friend.EcoFriendsResponse;
 import greencity.entity.User;
+import greencity.mapping.records.FriendWithMutuals;
+import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
-public class EcoFriendsResponseMapper {
-    public EcoFriendsResponse convert(User user, int mutualFriendsCount) {
+public class EcoFriendsResponseMapper extends AbstractConverter<FriendWithMutuals, EcoFriendsResponse> {
+    @Override
+    public EcoFriendsResponse convert(FriendWithMutuals source) {
+        User user = source.user();
         return EcoFriendsResponse.builder()
                 .id(user.getId())
                 .name(user.getFirstName())
@@ -17,7 +21,7 @@ public class EcoFriendsResponseMapper {
                 .profilePicturePath(user.getProfilePicturePath())
                 .isOnline(user.getLastActivityTime() != null &&
                         user.getLastActivityTime().isAfter(LocalDateTime.now().minusMinutes(5)))
-                .mutualFriends(mutualFriendsCount)
+                .mutualFriends(source.mutualFriends())
                 .build();
     }
 }

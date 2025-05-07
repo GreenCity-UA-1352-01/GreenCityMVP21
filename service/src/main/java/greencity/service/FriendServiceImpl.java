@@ -7,6 +7,8 @@ import greencity.entity.User;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.EcoFriendProfileDtoMapper;
 import greencity.mapping.EcoFriendsResponseMapper;
+import greencity.mapping.records.FriendProfileData;
+import greencity.mapping.records.FriendWithMutuals;
 import greencity.repository.EcoNewsRepo;
 import greencity.repository.FriendRepo;
 import greencity.repository.HabitAssignRepo;
@@ -36,7 +38,8 @@ public class FriendServiceImpl implements FriendService {
         Page<User> friendsPage = friendRepository.findAllFriendsByUserId(userId, pageable);
 
         List<EcoFriendsResponse> friendDtos = friendsPage.getContent().stream()
-                .map(friend -> ecoFriendsResponseMapper.convert(friend, countMutualFriends(userId, friend.getId())))
+                .map(friend -> ecoFriendsResponseMapper.convert(
+                        new FriendWithMutuals(friend, countMutualFriends(userId, friend.getId()))))
                 .toList();
 
         return new PageableDto<>(
@@ -60,7 +63,9 @@ public class FriendServiceImpl implements FriendService {
         int habitsAcquired = friendRepository.countHabitAssignsByUserFriendIdAndStatusAcquired(friendId);
         long newsPublished = ecoNewsRepository.getAmountOfPublishedNewsByUserId(friendId);
 
-        return ecoFriendProfileDtoMapper.convert(friend, habitsInProgress, habitsAcquired, newsPublished);
+        return ecoFriendProfileDtoMapper.convert(
+                new FriendProfileData(friend, habitsInProgress, habitsAcquired, newsPublished)
+        );
     }
 
     private int countMutualFriends(Long currentUserId, Long friendId) {
