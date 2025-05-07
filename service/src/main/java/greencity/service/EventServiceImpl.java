@@ -277,8 +277,8 @@ public class EventServiceImpl implements EventService {
      * {@inheritDoc}
      * Method for like some event by its id.
      *
-     * @param id   the ID of the event to be deleted
-     * @param user the user requesting the deletion
+     * @param id   the ID of the event to be liked/unliked
+     * @param user the user who is liking or unliking the event
      * @author Rostyslav Kushpit
      */
     @Override
