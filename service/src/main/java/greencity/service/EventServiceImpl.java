@@ -271,4 +271,17 @@ public class EventServiceImpl implements EventService {
         event.getEventImages()
                 .forEach(image -> fileService.delete(image.getImagePath()));
     }
+
+    /**
+     * {@inheritDoc}
+     * Method for like some event by its id.
+     *
+     * @param id   the ID of the event to be deleted
+     * @param user the user requesting the deletion
+     * @author Rostyslav Kushpit
+     */
+    @Override
+    public void likeEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+    }
 }
