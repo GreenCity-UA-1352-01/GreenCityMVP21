@@ -108,7 +108,6 @@ public class EventController {
      *
      * @return HTTP 200 if liked successfully
      */
-    @NotifyUser
     @Operation(summary = "Like an event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),

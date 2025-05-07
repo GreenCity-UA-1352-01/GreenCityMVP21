@@ -6,10 +6,7 @@ import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.user.UserVO;
-import greencity.entity.Event;
-import greencity.entity.EventImage;
-import greencity.entity.Tag;
-import greencity.entity.User;
+import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.Role;
 import greencity.enums.TagType;
@@ -17,9 +14,11 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.notification.NotificationPublisher;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
+import greencity.repository.options.EventLikeRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,6 +38,8 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final FileService fileService;
     private final EventDateTimeLocationService eventDateTimeLocationService;
+    private final EventLikeRepository eventLikeRepository;
+    private final NotificationPublisher notificationPublisher;
     private final ModelMapper modelMapper;
 
     @Override
@@ -283,5 +284,18 @@ public class EventServiceImpl implements EventService {
     @Override
     public void likeEvent(Long id, UserVO user) {
         Event event = getEventById(id);
+        if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
+            return;
+        }
+
+        EventLike like = EventLike.builder()
+                .event(event)
+                .user(getUserById(user.getId()))
+                .likedAt(ZonedDateTime.now())
+                .build();
+        eventLikeRepository.save(like);
+
+        notificationPublisher.publish(EventLikeNotificationFactory.createEvent(new Object[]{id, user})); //TODO OWN NotificationFactory
     }
 }
