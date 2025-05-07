@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
@@ -94,6 +95,30 @@ public class EventController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id, @CurrentUser UserVO user) {
         eventService.deleteById(id, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
+    /**
+     * Like an event by its ID.
+     * Only for authorized users.
+     *
+     * @param eventId   ID of the event to like
+     * @param user currently authenticated user
+     *
+     * @return HTTP 200 if liked successfully
+     */
+    @NotifyUser
+    @Operation(summary = "Like an event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likeEvent(@PathVariable("id") Long eventId,
+                                          @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.likeEvent(eventId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

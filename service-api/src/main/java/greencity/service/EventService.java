@@ -32,4 +32,14 @@ public interface EventService {
      * @author Rostyslav Zadyraichuk
      */
     void deleteById(Long id, UserVO user);
+
+    /**
+     * Like an event.
+     *
+     * @param id   the ID of the event to be liked
+     * @param user the user requesting the like
+     *
+     * @author Rostyslav Kushpit
+     */
+    void likeEvent(Long id, UserVO user);
 }
