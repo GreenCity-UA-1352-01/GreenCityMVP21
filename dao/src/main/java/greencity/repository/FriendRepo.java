@@ -30,7 +30,6 @@ public interface FriendRepo extends JpaRepository<Friend, Long> {
                                                             @Param("city") String city,
                                                             Pageable pageable);
 
-
     /**
      * Finds users who are friends of the friends of the user with the given ID.
      * Does not include the user with the given ID and his direct friends.
