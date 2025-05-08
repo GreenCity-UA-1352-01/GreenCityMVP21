@@ -31,8 +31,7 @@ public class FriendQueryProvider {
                     (f.user_id = :currentUserId AND f.friend_id = u.id)
                         OR
                     (f.user_id = u.id AND f.friend_id = :currentUserId)
-                    )
-                AND f.user_id = :currentUserId
+                )
             LEFT JOIN mutual_friends mf
                 ON u.id = mf.user_id
             WHERE f.id IS NULL
@@ -61,6 +60,7 @@ public class FriendQueryProvider {
             SELECT
                 u.id,
                 u.name,
+                u.first_name AS firstName,
                 u.city,
                 COALESCE(mf.mutual_friends_count, 0) AS mutualFriendsCount
             FROM users u

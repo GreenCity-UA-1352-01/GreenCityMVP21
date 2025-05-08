@@ -44,7 +44,7 @@ class FriendServiceImplTest {
         MODIFIED_NAME = "%" + String.join("%", NAME.split("")) + "%";
         MODIFIED_CITY = null;
         PAGEABLE = PageRequest.of(0, 100, Sort.unsorted());
-        MODIFIED_PAGEABLE = PageRequest.of(0, 10, Sort.unsorted());
+        MODIFIED_PAGEABLE = PageRequest.of(0, AppConstant.FRIENDS_RESPONSE_SIZE, Sort.unsorted());
     }
 
     @Mock
@@ -181,8 +181,9 @@ class FriendServiceImplTest {
 
     @Test
     void testAddFriend_whenUserIdEqualsFriendId_shouldDoNothing() {
-        assertDoesNotThrow(() -> friendService.addFriend(1L, 1L));
+        Long sameId = 1L;
+        assertDoesNotThrow(() -> friendService.addFriend(sameId, sameId));
 
-        verify(friendRepo, never()).addFriend(1L, 1L);
+        verify(friendRepo, never()).addFriend(sameId, sameId);
     }
 }
