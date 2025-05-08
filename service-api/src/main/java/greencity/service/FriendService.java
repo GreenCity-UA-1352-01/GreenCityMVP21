@@ -1,6 +1,13 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
+import greencity.dto.friend.EcoFriendProfileDto;
+import greencity.dto.friend.EcoFriendsResponse;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+
+import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +40,7 @@ public interface FriendService {
      * @param friendId      the ID of the user to add as a friend
      */
     void addFriend(Long currentUserId, Long friendId);
+    PageableDto<EcoFriendsResponse> getAllFriendsForUser(Long userId, Pageable pageable);
+
+    EcoFriendProfileDto getFriendProfile(Long userId, Long friendId);
 }
