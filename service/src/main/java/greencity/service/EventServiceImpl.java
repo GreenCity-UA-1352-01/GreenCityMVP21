@@ -1,10 +1,7 @@
 package greencity.service;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventImage;
@@ -282,6 +279,16 @@ public class EventServiceImpl implements EventService {
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
+
+        if (event.getEventStatus() == EventStatus.CANCELLED) {
+            throw new BadRequestException(ErrorMessage.CANNOT_CANSEL_EVENT + event.getId());
+        }
+
         event.setEventStatus(EventStatus.CANCELLED);
+    }
+
+    @Override
+    public EventVO findById(Long id) {
+        return modelMapper.map(getEventById(id), EventVO.class);
     }
 }

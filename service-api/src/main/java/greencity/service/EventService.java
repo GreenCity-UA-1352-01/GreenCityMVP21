@@ -1,9 +1,6 @@
 package greencity.service;
 
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,4 +31,6 @@ public interface EventService {
     void deleteById(Long id, UserVO user);
 
     void cancelEventById(Long id, UserVO user);
+
+    EventVO findById(Long id);
 }

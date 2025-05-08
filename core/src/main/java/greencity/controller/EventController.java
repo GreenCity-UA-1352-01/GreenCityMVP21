@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.annotations.ValidEventImages;
 import greencity.constant.HttpStatuses;
 import greencity.dto.event.CreateEventDto;
@@ -104,6 +105,7 @@ public class EventController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/cancel/{id}")
+    @NotifyUser
     public ResponseEntity<Void> cancelEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.cancelEventById(id, user);
         return ResponseEntity.status(HttpStatus.OK).build();

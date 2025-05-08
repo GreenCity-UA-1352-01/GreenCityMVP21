@@ -17,7 +17,7 @@ import java.util.Set;
 @Setter
 @Builder
 @EqualsAndHashCode(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
-@ToString//(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
+@ToString(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
