@@ -175,4 +175,15 @@
                                      referencedColumnNames="id"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="modifyEventTableYukhno" author="Yukhno Dmytro">
+        <addColumn tableName="events">
+            <column name = "event_status" type="VARCHAR(20)" defaultValue="FUTURE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="events" columnName="event_status"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

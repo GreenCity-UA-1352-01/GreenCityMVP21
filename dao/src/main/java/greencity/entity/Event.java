@@ -1,5 +1,6 @@
 package greencity.entity;
 
+import greencity.enums.EventStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -67,5 +68,8 @@ public class Event {
     @Builder.Default
     private boolean isOpen = true;
 
+    @Column(name = "event_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EventStatus eventStatus;
 
 }

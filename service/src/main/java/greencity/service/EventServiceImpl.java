@@ -11,6 +11,7 @@ import greencity.entity.EventImage;
 import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.entity.localization.TagTranslation;
+import greencity.enums.EventStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -94,6 +95,7 @@ public class EventServiceImpl implements EventService {
     private Event buildBaseEvent(CreateEventDto dto, User initiator) {
         Event event = modelMapper.map(dto, Event.class);
         event.setInitiator(initiator);
+        event.setEventStatus(EventStatus.FUTURE);
         return event;
     }
 
