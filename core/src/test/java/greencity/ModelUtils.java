@@ -9,6 +9,7 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
+import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
@@ -456,4 +457,14 @@ public class ModelUtils {
                 .build();
     }
 
+    public static SearchFriendDtoResponse getSearchFriendDtoResponse() {
+        return SearchFriendDtoResponse.builder()
+            .id(1L)
+            .name("test")
+            .city("test")
+            .picture("test")
+            .rating(1D)
+            .mutualFriends(1)
+            .build();
+    }
 }

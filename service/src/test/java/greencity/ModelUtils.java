@@ -4,14 +4,14 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
+import greencity.dto.friend.SearchFriendDtoResponse;
+import greencity.dto.habit.*;
+import greencity.dto.habitfact.*;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
-import greencity.dto.habit.HabitAssignPropertiesDto;
-import greencity.dto.habit.HabitAssignVO;
-import greencity.dto.habitfact.HabitFactTranslationVO;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
@@ -26,6 +26,8 @@ import greencity.entity.*;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
+import greencity.projection.ProjectionProxy;
+import greencity.projection.UserWithMutualFriendsProjection;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -794,6 +796,30 @@ public class ModelUtils {
                 .build();
     }
 
+    public static UserWithMutualFriendsProjection getUserWithMutualFriendsProjection() {
+        Map<String, Object> values = Map.of(
+            "id", 1L,
+            "name", "Username",
+            "firstName", "Taras",
+            "city", "Kyiv",
+            "profilePicture", "picture",
+            "rating", 5D,
+            "mutualFriendsCount", 1
+        );
+        return ProjectionProxy.createProjection(UserWithMutualFriendsProjection.class, values);
+    }
+
+    public static SearchFriendDtoResponse getSearchFriendDtoResponse() {
+        return SearchFriendDtoResponse.builder()
+            .id(1L)
+            .name("Taras Username")
+            .city("Kyiv")
+            .picture("picture")
+            .rating(5D)
+            .mutualFriends(1)
+            .build();
+    }
+
     private static List<EventDateTimeLocation> getEventDateTimeLocationsWithoutEvent() {
         return Arrays.asList(
                 EventDateTimeLocation.builder()
@@ -831,5 +857,4 @@ public class ModelUtils {
                 .isOpen(true)
                 .build();
     }
-
 }
