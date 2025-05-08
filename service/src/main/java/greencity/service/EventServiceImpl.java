@@ -273,4 +273,15 @@ public class EventServiceImpl implements EventService {
         event.getEventImages()
                 .forEach(image -> fileService.delete(image.getImagePath()));
     }
+
+    @Override
+    @Transactional
+    public void cancelEventById(Long id, UserVO user) {
+        Event event = getEventById(id);
+
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        event.setEventStatus(EventStatus.CANCELLED);
+    }
 }

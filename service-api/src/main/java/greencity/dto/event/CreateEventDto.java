@@ -43,6 +43,4 @@ public class CreateEventDto {
     @Size(min = 1, message = "At least one initiative type must be selected")
     private List<String> initiativeTypes;
 
-    @Builder.Default
-    private String status = "FUTURE";
 }
