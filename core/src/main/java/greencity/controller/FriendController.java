@@ -98,6 +98,18 @@ public class FriendController {
         friendService.addFriend(currentUser.getId(), friendId);
     }
 
+    @PatchMapping("/accept/{friendId}")
+    @Operation(summary = "Accept friend request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    })
+    public void acceptFriendRequest(@PathVariable Long friendId,
+                                    @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        friendService.acceptFriendRequest(userVO.getId(), friendId);
+    }
+
     @Operation(summary = "Get all users friends")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
