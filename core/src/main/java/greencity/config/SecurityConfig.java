@@ -255,6 +255,7 @@ public class SecurityConfig {
                                 ECONEWS_COMMENTS,
                                 "/events/comments/{eventCommentId}",
                                 "/econews/{econewsId}",
+                                "/friends/{friendId}",
                                 CUSTOM_SHOPPING_LIST_ITEMS,
                                 CUSTOM_SHOPPING_LIST_URL,
                                 "/favorite_place/{placeId}",

@@ -38,4 +38,6 @@ public interface FriendService {
     PageableDto<EcoFriendsResponse> getAllFriendsForUser(Long userId, Pageable pageable);
 
     EcoFriendProfileDto getFriendProfile(Long userId, Long friendId);
+  
+    void removeFriend(Long userId, Long friendId);
 }

@@ -1,5 +1,6 @@
 package greencity.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.EcoFriendProfileDto;
 import greencity.dto.friend.EcoFriendsResponse;
@@ -138,5 +139,30 @@ public class FriendServiceImpl implements FriendService {
 
     private int countMutualFriends(Long currentUserId, Long friendId) {
         return friendRepository.countMutualFriends(currentUserId, friendId);
+    }
+
+    /**
+     * Removes a bidirectional friendship between two users.
+     * <p>
+     * This method deletes both directions of the friendship:
+     * user → friend and friend → user.
+     * If no friendship records are found in either direction, it throws an {@link EntityNotFoundException}.
+     * </p>
+     *
+     * @param userId   the ID of the user initiating the removal
+     * @param friendId the ID of the friend to be removed
+     * @throws EntityNotFoundException if no friendship exists between the two users
+     */
+    @Transactional
+    public void removeFriend(Long userId, Long friendId) {
+
+        int deletedCount = 0;
+
+        deletedCount += friendRepository.deleteByUserIdAndFriendId(userId, friendId);
+        deletedCount += friendRepository.deleteByUserIdAndFriendId(friendId, userId);
+
+        if (deletedCount == 0) {
+            throw new NotFoundException("Friendship not found between users");
+        }
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface FriendRepo extends JpaRepository<Friend, Long> {
     /**
@@ -91,4 +93,6 @@ public interface FriendRepo extends JpaRepository<Friend, Long> {
     @Query(value = "SELECT COUNT(ha.id) FROM HabitAssign ha "
             + "WHERE upper(ha.status) = 'ACQUIRED' AND ha.user.id = :userId")
     int countHabitAssignsByUserFriendIdAndStatusAcquired(@Param("userId") Long userId);
+           
+    int deleteByUserIdAndFriendId(Long userId, Long friendId);
 }

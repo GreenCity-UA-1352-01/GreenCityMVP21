@@ -28,11 +28,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(FriendController.class)
 @ContextConfiguration(classes = {GreenCityApplication.class})
@@ -163,5 +163,45 @@ class FriendControllerTest {
 
         verify(friendService).addFriend(USER.getId(), FRIEND_ID);
         verify(userService).findByEmail(USER_EMAIL);
+    }
+  
+    @Test
+    @WithMockUser(username = "vovasaenco@ukr.net")
+    public void removeFriend_FriendshipDeleted() throws Exception {
+
+        long friendId = 1L;
+        String email = "vovasaenco@ukr.net";
+
+        UserVO userVO = new UserVO();
+        userVO.setId(123L);
+
+        when(userService.findByEmail(email)).thenReturn(userVO);
+
+        mockMvc.perform(delete("/friends/" + friendId))
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).findByEmail(email);
+        verify(friendService, times(1)).removeFriend(userVO.getId(), friendId);
+    }
+
+    @Test
+    @WithMockUser(username = "vovasaenco@ukr.net")
+    public void removeFriend_FriendshipNotExists_NotFoundExceptionThrown() throws Exception {
+
+        long friendId = 1L;
+        String email = "vovasaenco@ukr.net";
+
+        UserVO userVO = new UserVO();
+        userVO.setId(123L);
+
+        when(userService.findByEmail(email)).thenReturn(userVO);
+
+        doThrow(new NotFoundException("Friendship not found"))
+                .when(friendService).removeFriend(userVO.getId(), friendId);
+
+        mockMvc.perform(delete("/friends/" + friendId))
+                .andExpect(status().isNotFound());
+
+        verify(friendService, times(1)).removeFriend(userVO.getId(), friendId);
     }
 }
