@@ -40,4 +40,6 @@ public interface FriendService {
     EcoFriendProfileDto getFriendProfile(Long userId, Long friendId);
   
     void removeFriend(Long userId, Long friendId);
+
+    void acceptFriendRequest(Long id, Long friendId);
 }
