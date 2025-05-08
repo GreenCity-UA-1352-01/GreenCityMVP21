@@ -11,7 +11,6 @@ import greencity.mapping.records.FriendProfileData;
 import greencity.mapping.records.FriendWithMutuals;
 import greencity.repository.EcoNewsRepo;
 import greencity.constant.AppConstant;
-import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.BadRequestException;
@@ -24,13 +23,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -38,6 +33,11 @@ import java.util.List;
 public class FriendServiceImpl implements FriendService {
     private final FriendRepo friendRepository;
     private final SearchFriendDtoResponseMapper searchFriendDtoResponseMapper;
+    private final UserRepo userRepository;
+    private final HabitAssignRepo habitAssignRepo;
+    private final EcoNewsRepo ecoNewsRepository;
+    private final EcoFriendsResponseMapper ecoFriendsResponseMapper;
+    private final EcoFriendProfileDtoMapper ecoFriendProfileDtoMapper;
 
     /**
      * {@inheritDoc}
@@ -99,11 +99,6 @@ public class FriendServiceImpl implements FriendService {
             friendRepository.addFriend(currentUserId, friendId);
         }
     }
-    private final UserRepo userRepository;
-    private final HabitAssignRepo habitAssignRepo;
-    private final EcoNewsRepo ecoNewsRepository;
-    private final EcoFriendsResponseMapper ecoFriendsResponseMapper;
-    private final EcoFriendProfileDtoMapper ecoFriendProfileDtoMapper;
 
     @Override
     @Transactional(readOnly = true)
