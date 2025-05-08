@@ -199,11 +199,10 @@ public class SecurityConfig {
                                 "/habit/tags/search",
                                 "/habit/search",
                                 "/habit/{habitId}/friends/profile-pictures",
-                                "/friends/not-friends-yet"),
+                                "/friends/not-friends-yet",
                                 "/habit/{habitId}/friends/profile-pictures",
                                 "/friends",
                                 "/friends/friend/{friendId}")
-
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.POST,
                                 "/category",
