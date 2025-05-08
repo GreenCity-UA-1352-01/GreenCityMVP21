@@ -37,4 +37,20 @@ public class NotificationServiceImpl implements NotificationService {
         );
         return notificationResponseDtoMapper.convert(notification);
     }
+
+    @Override
+    @Transactional
+    public void deleteLikeNotification(Long initiatorId,
+                                       Long receiverId,
+                                       Long eventId) {
+        String objectLink = "/events/" + eventId;
+        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    objectLink
+            );
+        }
+    }
 }

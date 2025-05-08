@@ -59,4 +59,15 @@
             <dropColumn tableName="notifications" columnName="object_link"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="addOriginColumnToNotificationsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addColumn tableName="notifications">
+            <column name="origin" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="notifications" columnName="origin"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

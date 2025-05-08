@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface EventLikeRepository extends JpaRepository<EventLike, Long> {
+
     boolean existsByEventIdAndUserId(Long eventId, Long userId);
     Long countByEventId(Long eventId);
     Optional<EventLike> findByEventIdAndUserId(Long eventId, Long userId);

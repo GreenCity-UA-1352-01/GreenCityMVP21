@@ -1,17 +1,15 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
-import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.annotations.ValidEventImages;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -119,5 +117,20 @@ public class EventController {
                                           @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.likeEvent(eventId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Obtain event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = EventVO.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventVO> getEventById(@PathVariable Long eventId) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(eventService.findById(eventId));
     }
 }

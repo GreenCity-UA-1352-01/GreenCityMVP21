@@ -1,24 +1,25 @@
 package greencity.service;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.event.*;
+import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
+import greencity.enums.NotificationOrigin;
+import greencity.enums.NotificationStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.mapping.NotificationMapper;
 import greencity.notification.NotificationPublisher;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
-import greencity.repository.options.EventLikeRepository;
+import greencity.repository.EventLikeRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,7 +40,7 @@ public class EventServiceImpl implements EventService {
     private final FileService fileService;
     private final EventDateTimeLocationService eventDateTimeLocationService;
     private final EventLikeRepository eventLikeRepository;
-    private final NotificationPublisher notificationPublisher;
+    private final NotificationService notificationService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -282,10 +283,12 @@ public class EventServiceImpl implements EventService {
      * @author Rostyslav Kushpit
      */
     @Override
+    @Transactional
     public void likeEvent(Long id, UserVO user) {
         Event event = getEventById(id);
         if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
             eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
+            notificationService.deleteLikeNotification(user.getId(), event.getInitiator().getId(), id);
             return;
         }
 
@@ -296,6 +299,34 @@ public class EventServiceImpl implements EventService {
                 .build();
         eventLikeRepository.save(like);
 
-        notificationPublisher.publish(EventLikeNotificationFactory.createEvent(new Object[]{id, user})); //TODO OWN NotificationFactory
+        EventVO eventVO = findById(id);
+
+        NotificationRequestDto notification = NotificationRequestDto.builder()
+                .action("likes")
+                .objectName(eventVO.getTitle())
+                .objectLink("/events/" + eventVO.getId())
+                .creationDate(ZonedDateTime.now())
+                .status(NotificationStatus.UNREAD)
+                .receiverId(eventVO.getInitiator().getId())
+                .initiatorId(user.getId())
+                .origin(NotificationOrigin.GREEN_CITY)
+                .build();
+
+        notificationService.createNotification(notification);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param id event id
+     * @return {@link EventVO} with founded event
+     * @throws NotFoundException if event not found
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    public EventVO findById(Long id) {
+        Optional<Event> eventOpt = eventRepository.findById(id);
+        Event event = eventOpt.orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+        return modelMapper.map(event, EventVO.class);
     }
 }

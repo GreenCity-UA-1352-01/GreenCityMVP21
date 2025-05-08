@@ -1,7 +1,6 @@
 package greencity.service;
 
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -32,6 +31,16 @@ public interface EventService {
      * @author Rostyslav Zadyraichuk
      */
     void deleteById(Long id, UserVO user);
+
+    /**
+     * Finds an event by its ID.
+     *
+     * @param id the ID of the event to find
+     * @return the {@link EventVO} associated with the given ID
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    EventVO findById(Long id);
 
     /**
      * Like an event.

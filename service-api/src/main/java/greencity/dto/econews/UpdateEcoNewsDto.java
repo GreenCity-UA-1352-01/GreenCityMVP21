@@ -14,8 +14,8 @@ import java.util.List;
 @Builder
 public class UpdateEcoNewsDto {
     @NotNull
-    @Pattern(regexp = "^[0-9]+$", message = "ID must contain only digits")
-    private String id;
+    @Min(1)
+    private Long id;
 
     @NotEmpty
     @Size(min = 1, max = 170)
@@ -33,9 +33,4 @@ public class UpdateEcoNewsDto {
     private String image;
 
     private String source;
-
-    @Size(min = 20, max = 63206, message = "Text length must be between 20 and 63206 characters")
-    private String text;
-
-
 }
