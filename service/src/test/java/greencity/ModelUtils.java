@@ -15,6 +15,7 @@ import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.notification.NotificationRequestDto;
+import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
@@ -827,6 +828,26 @@ public class ModelUtils {
                 .build();
     }
 
+    public static Notification getNotification() {
+        return Notification.builder()
+            .id(1L)
+            .action("test")
+            .objectName("test")
+            .objectLink("link")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .receiver(getUser().setId(2L))
+            .initiator(getUser().setId(1L))
+            .build();
+    }
+
+    public static NotificationCounter getNotificationCounter() {
+        return NotificationCounter.builder()
+            .countOfNotifications(1)
+            .user(getUser().setId(2L))
+            .build();
+    }
+
     public static NotificationRequestDto getNotificationRequestDto() {
         return NotificationRequestDto.builder()
             .initiatorId(1L)
@@ -834,6 +855,20 @@ public class ModelUtils {
             .objectName("test")
             .objectLink("link")
             .action("test")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .build();
+    }
+
+    public static NotificationResponseDto getNotificationResponseDto() {
+        return NotificationResponseDto.builder()
+            .id(1L)
+            .initiatorId(1L)
+            .receiverId(2L)
+            .objectName("test")
+            .objectLink("link")
+            .action("test")
+            .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
             .build();
     }

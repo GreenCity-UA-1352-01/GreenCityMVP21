@@ -38,12 +38,16 @@ public class NotificationServiceImpl implements NotificationService {
         notification = notificationsRepo.save(notification);
         final User receiver = notification.getReceiver();
 
-        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(notificationCounter ->
+        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(
+            notificationCounter ->
                 notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-            () -> notificationCounterRepo.save(NotificationCounter.builder()
-                .countOfNotifications(1)
-                .user(receiver)
-                .build())
+            () -> {
+                NotificationCounter newNotificationCounter = NotificationCounter.builder()
+                    .countOfNotifications(1)
+                    .user(receiver)
+                    .build();
+                notificationCounterRepo.save(newNotificationCounter);
+            }
         );
         return notificationResponseDtoMapper.convert(notification);
     }
