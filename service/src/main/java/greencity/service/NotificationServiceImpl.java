@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
@@ -10,6 +11,8 @@ import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
 import greencity.repository.NotificationRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,5 +53,16 @@ public class NotificationServiceImpl implements NotificationService {
             }
         );
         return notificationResponseDtoMapper.convert(notification);
+    }
+
+    @Override
+    public PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId, Pageable pageable) {
+        Page<Notification> notifications = notificationsRepo.findNotificationsForUser(userId, pageable);
+        return new PageableDto<>(notifications.stream()
+                .map(notificationResponseDtoMapper::convert)
+                .toList(),
+            notifications.getTotalElements(),
+            notifications.getNumber(),
+            notifications.getTotalPages());
     }
 }
