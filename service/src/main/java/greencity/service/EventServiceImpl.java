@@ -41,6 +41,7 @@ public class EventServiceImpl implements EventService {
     private final EventDateTimeLocationService eventDateTimeLocationService;
     private final EventLikeRepository eventLikeRepository;
     private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final ModelMapper modelMapper;
 
     @Override
@@ -312,7 +313,7 @@ public class EventServiceImpl implements EventService {
                 .origin(NotificationOrigin.GREEN_CITY)
                 .build();
 
-        notificationService.createNotification(notification);
+        notificationPublisher.publish(notification);
     }
 
     /**
