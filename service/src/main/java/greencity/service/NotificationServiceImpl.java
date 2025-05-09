@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
@@ -10,10 +11,10 @@ import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
 import greencity.repository.NotificationRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,12 +56,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<NotificationResponseDto> getAllNotificationsForUser(Long userId) {
-        return notificationsRepo.findAllByReceiverIdOrderByCreationDateDesc(userId).stream()
-                .map(notification -> {
-                    NotificationResponseDto dto = modelMapper.map(notification, NotificationResponseDto.class);
-                    return dto;
-                })
-                .collect(Collectors.toList());
+    public PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId, Pageable pageable) {
+        Page<Notification> notifications = notificationsRepo.findNotificationsForUser(userId, pageable);
+        return new PageableDto<>(notifications.stream()
+                .map(notificationResponseDtoMapper::convert)
+                .toList(),
+            notifications.getTotalElements(),
+            notifications.getNumber(),
+            notifications.getTotalPages());
     }
 }

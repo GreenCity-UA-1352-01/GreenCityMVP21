@@ -4,33 +4,32 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import greencity.ModelUtils;
+import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
+import greencity.entity.User;
 import greencity.enums.NotificationStatus;
 import greencity.repository.NotificationRepo;
 import greencity.entity.NotificationCounter;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
-import greencity.enums.NotificationStatus;
 import greencity.repository.NotificationCounterRepo;
-import greencity.service.NotificationServiceImpl;
-import greencity.repository.NotificationRepo;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ModelMapper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -39,12 +38,14 @@ class NotificationServiceImplTest {
     private static final NotificationCounter NOTIFICATION_COUNTER;
     private static final NotificationRequestDto NOTIFICATION_REQUEST_DTO;
     private static final NotificationResponseDto NOTIFICATION_RESPONSE_DTO;
+    private static final Pageable PAGEABLE;
 
     static {
         NOTIFICATION = ModelUtils.getNotification();
         NOTIFICATION_COUNTER = ModelUtils.getNotificationCounter();
         NOTIFICATION_REQUEST_DTO = ModelUtils.getNotificationRequestDto();
         NOTIFICATION_RESPONSE_DTO = ModelUtils.getNotificationResponseDto();
+        PAGEABLE = PageRequest.of(0, 10);
     }
 
     @Mock
@@ -55,8 +56,6 @@ class NotificationServiceImplTest {
     private NotificationMapper notificationMapper;
     @Spy
     private NotificationResponseDtoMapper notificationResponseDtoMapper;
-    @Mock
-    private ModelMapper modelMapper;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
@@ -102,6 +101,8 @@ class NotificationServiceImplTest {
             .objectName("Test News")
             .creationDate(ZonedDateTime.now())
             .status(NotificationStatus.UNREAD)
+            .receiver(ModelUtils.getUser().setId(userId))
+            .initiator(ModelUtils.getUser().setId(2L))
             .build();
 
         NotificationResponseDto dto = NotificationResponseDto.builder()
@@ -109,20 +110,19 @@ class NotificationServiceImplTest {
             .action("liked")
             .objectName("Test News")
             .creationDate(notification.getCreationDate())
-            .status("UNREAD")
+            .status(NotificationStatus.UNREAD)
             .receiverId(userId)
             .initiatorId(2L)
             .build();
+        Page<Notification> page = new PageImpl<>(List.of(notification));
 
-        when(notificationRepo.findAllByReceiverIdOrderByCreationDateDesc(userId))
-            .thenReturn(List.of(notification));
-        when(modelMapper.map(notification, NotificationResponseDto.class)).thenReturn(dto);
+        when(notificationRepo.findNotificationsForUser(userId, PAGEABLE))
+            .thenReturn(page);
 
-        List<NotificationResponseDto> result = notificationService.getAllNotificationsForUser(userId);
+        PageableDto<NotificationResponseDto> result = notificationService.getAllNotificationsForUser(userId, PAGEABLE);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(dto.getId());
-        verify(notificationRepo).findAllByReceiverIdOrderByCreationDateDesc(userId);
-        verify(modelMapper).map(notification, NotificationResponseDto.class);
+        assertThat(result.getPage()).hasSize(1);
+        assertThat(result.getPage().getFirst().getId()).isEqualTo(dto.getId());
+        verify(notificationRepo).findNotificationsForUser(userId, PAGEABLE);
     }
 }
