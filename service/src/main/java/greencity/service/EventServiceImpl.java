@@ -288,6 +288,7 @@ public class EventServiceImpl implements EventService {
     public void likeEvent(Long id, UserVO user) {
         Event event = getEventById(id);
         if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            notificationService.deleteLikeNotification(user.getId(), event.getInitiator().getId(), id);
             return;
         }
 
@@ -298,20 +299,6 @@ public class EventServiceImpl implements EventService {
                 .build();
         eventLikeRepository.save(like);
 
-        EventVO eventVO = findById(id);
-
-        NotificationRequestDto notification = NotificationRequestDto.builder()
-                .action("likes")
-                .objectName(eventVO.getTitle())
-                .objectLink("/events/" + eventVO.getId())
-                .creationDate(ZonedDateTime.now())
-                .status(NotificationStatus.UNREAD)
-                .receiverId(eventVO.getInitiator().getId())
-                .initiatorId(user.getId())
-                .origin(NotificationOrigin.GREEN_CITY)
-                .build();
-
-        notificationPublisher.publish(notification);
     }
 
     /**

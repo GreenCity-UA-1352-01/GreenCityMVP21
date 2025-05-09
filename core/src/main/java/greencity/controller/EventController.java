@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
@@ -106,12 +107,14 @@ public class EventController {
      *
      * @return HTTP 200 if liked successfully
      */
+
     @Operation(summary = "Like an event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
+    @NotifyUser
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> likeEvent(@PathVariable("id") Long eventId,
                                           @Parameter(hidden = true) @CurrentUser UserVO user) {
