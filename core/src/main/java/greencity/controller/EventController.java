@@ -119,6 +119,28 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * Unlike an event by its ID.
+     * Only for authorized users.
+     *
+     * @param eventId   ID of the event to unlike
+     * @param user currently authenticated user
+     *
+     * @return HTTP 200 if unliked successfully
+     */
+    @Operation(summary = "Unlike an event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikeEvent(@PathVariable("id") Long eventId,
+                                            @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.unlikeEvent(eventId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @Operation(summary = "Obtain event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {

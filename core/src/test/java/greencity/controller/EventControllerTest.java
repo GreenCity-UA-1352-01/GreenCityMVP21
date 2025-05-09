@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -269,4 +270,37 @@ class EventControllerTest {
         verifyNoInteractions(userService, eventService, modelMapper);
     }
 
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    void likeEvent_Success() throws Exception {
+        Long eventId = 1L;
+        UserVO userVO = getUserVO();
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
+        doNothing().when(eventService).likeEvent(eq(eventId), any(UserVO.class));
+
+        mockMvc.perform(post("/events/{id}/like", eventId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(eventService).likeEvent(eq(eventId), any(UserVO.class));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    void unlikeEvent_Success() throws Exception {
+        Long eventId = 1L;
+        UserVO userVO = getUserVO();
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
+        doNothing().when(eventService).unlikeEvent(eq(eventId), any(UserVO.class));
+
+        mockMvc.perform(delete("/events/{id}/like", eventId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(eventService).unlikeEvent(eq(eventId), any(UserVO.class));
+    }
 }

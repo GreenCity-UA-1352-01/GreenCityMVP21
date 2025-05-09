@@ -34,6 +34,8 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static greencity.enums.UserStatus.ACTIVATED;
 
 public class ModelUtils {
@@ -512,8 +514,8 @@ public class ModelUtils {
     }
 
     public static UpdateEcoNewsDto getUpdateEcoNewsDto() {
-        return new UpdateEcoNewsDto("1", "title", "text", "shortInfo", Collections.singletonList("tag"),
-            "image", "source", "text");
+        return new UpdateEcoNewsDto(1L, "title", "text", "shortInfo", Collections.singletonList("tag"),
+            "image", "source");
     }
 
     public static SearchNewsDto getSearchNewsDto() {
