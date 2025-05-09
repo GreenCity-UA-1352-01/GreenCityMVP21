@@ -1,6 +1,7 @@
 package greencity.aspects;
 
 import greencity.dto.notification.NotificationRequestDto;
+import greencity.notification.NotificationEventFactory;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
 import java.lang.reflect.Method;
@@ -31,7 +32,14 @@ public class NotificationAspect {
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();
 
-        NotificationRequestDto event = registry.getFactory(method).createEvent(args);
-        publisher.publish(event);
+        NotificationEventFactory factory = registry.getFactory(method);
+        if (factory == null) {
+            return;
+        }
+
+        NotificationRequestDto event = factory.createEvent(args);
+        if (event != null) {
+            publisher.publish(event);
+        }
     }
 }

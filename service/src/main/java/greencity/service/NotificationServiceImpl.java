@@ -37,4 +37,23 @@ public class NotificationServiceImpl implements NotificationService {
         );
         return notificationResponseDtoMapper.convert(notification);
     }
+
+    @Transactional
+    public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink) {
+        boolean exists = notificationsRepo.existsByUsersAndLink(initiatorId, receiverId, objectLink);
+        if (exists) {
+            notificationsRepo.deleteByUsersAndLink(
+                    initiatorId, receiverId, objectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+    private void decrementCounter(Long receiverId) {
+        NotificationCounter counter = notificationCounterRepo.findById(receiverId)
+                .orElse(null);
+        if (counter != null && counter.getCountOfNotifications() > 0) {
+            counter.setCountOfNotifications(counter.getCountOfNotifications() - 1);
+            notificationCounterRepo.save(counter);
+        }
+    }
 }
