@@ -21,6 +21,16 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final NotificationResponseDtoMapper notificationResponseDtoMapper;
 
+    /**
+     * {@inheritDoc}
+     * If notification counter for receiver is not present in the database, creates new one with count of
+     * notifications set to 1.
+     * If notification counter for receiver is present in the database, increments count of notifications by 1.
+     * @param dto notification data transfer object
+     * @return created notification data transfer object
+     * @author Roman Diakov
+     * @author Rostyslav Zadyraichuk
+     */
     @Override
     @Transactional
     public NotificationResponseDto createNotification(NotificationRequestDto dto) {
