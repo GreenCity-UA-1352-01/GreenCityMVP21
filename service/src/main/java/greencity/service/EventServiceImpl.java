@@ -278,8 +278,8 @@ public class EventServiceImpl implements EventService {
      * {@inheritDoc}
      * Method for like some event by its id.
      *
-     * @param id   the ID of the event to be liked/unliked
-     * @param user the user who is liking or unliking the event
+     * @param id   the ID of the event to be liked
+     * @param user the user who is liking the event
      * @author Rostyslav Kushpit
      */
     @Override
@@ -287,8 +287,6 @@ public class EventServiceImpl implements EventService {
     public void likeEvent(Long id, UserVO user) {
         Event event = getEventById(id);
         if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
-            eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
-            notificationService.deleteLikeNotification(user.getId(), event.getInitiator().getId(), id);
             return;
         }
 
@@ -313,6 +311,24 @@ public class EventServiceImpl implements EventService {
                 .build();
 
         notificationService.createNotification(notification);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Method for unlike some event by its id.
+     *
+     * @param id   the ID of the event to be unliked
+     * @param user the user who is unliking the event
+     * @author Roman Diakov
+     */
+    @Override
+    @Transactional
+    public void unlikeEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+        if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
+            notificationService.deleteLikeNotification(user.getId(), event.getInitiator().getId(), id);
+        }
     }
 
     /**

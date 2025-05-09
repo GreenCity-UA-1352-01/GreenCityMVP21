@@ -17,6 +17,7 @@ import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepository;
+import greencity.repository.EventLikeRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,9 +48,13 @@ class EventServiceImplTest {
     @Mock
     private EventRepository eventRepository;
     @Mock
+    private EventLikeRepository eventLikeRepository;
+    @Mock
     private FileService fileService;
     @Mock
     private EventDateTimeLocationService eventDateTimeLocationService;
+    @Mock
+    private NotificationService notificationService;
     @Mock
     private ModelMapper modelMapper;
 
@@ -236,6 +241,8 @@ class EventServiceImplTest {
                 eventRepository,
                 fileService,
                 eventDateTimeLocationService,
+                eventLikeRepository,
+                notificationService,
                 modelMapper2
         );
 
@@ -307,6 +314,8 @@ class EventServiceImplTest {
                 eventRepository,
                 fileService,
                 eventDateTimeLocationService,
+                eventLikeRepository,
+                notificationService,
                 modelMapper2
         );
 
@@ -362,6 +371,8 @@ class EventServiceImplTest {
                 eventRepository,
                 fileService,
                 eventDateTimeLocationService,
+                eventLikeRepository,
+                notificationService,
                 modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
@@ -440,7 +451,7 @@ class EventServiceImplTest {
     void updateEvent_ShouldRemoveImages_ThatAreMissingInRequest() {
         ModelMapper modelMapper2 = new ModelMapper();
         EventServiceImpl service = new EventServiceImpl(
-                userRepo, tagsRepo, eventRepository, fileService, eventDateTimeLocationService, modelMapper2
+                userRepo, tagsRepo, eventRepository, fileService, eventDateTimeLocationService, eventLikeRepository, notificationService, modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
         request.setImages(List.of(
@@ -487,4 +498,3 @@ class EventServiceImplTest {
     }
 
 }
-

@@ -51,4 +51,14 @@ public interface EventService {
      * @author Rostyslav Kushpit
      */
     void likeEvent(Long id, UserVO user);
+
+    /**
+     * Unlike an event.
+     *
+     * @param id   the ID of the event to be unliked
+     * @param user the user requesting the unlike
+     *
+     * @author Roman Diakov
+     */
+    void unlikeEvent(Long id, UserVO user);
 }
