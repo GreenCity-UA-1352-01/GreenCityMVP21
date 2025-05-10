@@ -619,6 +619,22 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
+    /**
+     * Exception handler for {@link ConflictException}.
+     * Returns a response entity with status 409 (Conflict) and a descriptive error message.
+     *
+     * @param ex the thrown ConflictException
+     * @return a response with HTTP 409 status and error message in the body
+     * @author Rostyslav Kushpit
+     */
+    @ExceptionHandler(ConflictException.class)
+    public final ResponseEntity<Object> handleConflictException(ConflictException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException ex) {
         List<ValidationExceptionDto> collect =
@@ -646,5 +662,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new HashMap<>(errorAttributes.getErrorAttributes(webRequest,
                 ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE)));
     }
+
+
 
 }

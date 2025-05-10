@@ -10,10 +10,7 @@ import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
-import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.exception.exceptions.TagNotFoundException;
-import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.exception.exceptions.*;
 import greencity.mapping.NotificationMapper;
 import greencity.notification.NotificationPublisher;
 import greencity.repository.EventRepository;
@@ -277,10 +274,13 @@ public class EventServiceImpl implements EventService {
 
     /**
      * {@inheritDoc}
-     * Method for like some event by its id.
+     * Method for liking an event by its ID.
+     * If the user has already liked this event, a {@link ConflictException} is thrown
+     * and no notification is sent. This ensures idempotency and prevents duplicate notifications.
      *
      * @param id   the ID of the event to be liked
      * @param user the user who is liking the event
+     * @throws ConflictException if the event was already liked by the user
      * @author Rostyslav Kushpit
      */
     @Override
@@ -288,8 +288,7 @@ public class EventServiceImpl implements EventService {
     public void likeEvent(Long id, UserVO user) {
         Event event = getEventById(id);
         if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
-            notificationService.deleteLikeNotification(user.getId(), event.getInitiator().getId(), id);
-            return;
+            throw new ConflictException(ErrorMessage.EVENT_ALREADY_LIKED);
         }
 
         EventLike like = EventLike.builder()
@@ -298,7 +297,6 @@ public class EventServiceImpl implements EventService {
                 .likedAt(ZonedDateTime.now())
                 .build();
         eventLikeRepository.save(like);
-
     }
 
     /**
