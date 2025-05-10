@@ -144,8 +144,8 @@ public final class ErrorMessage {
     public static final String MAX_PHOTO_EVENT = "The number of photos cannot exceed 5";
     public static final String WRONG_EVENT_ID = "This session does not belong to this event";
     public static final String START_DATE_TIME_AFTER_END_DATE_TIME = "StartDateTime should be before EndDateTime";
-    public static final String CANNOT_CANSEL_EVENT = "You have already canceled event with id ";
-    public static final String USER_IS_ALREADY_ATTENDER = "You are already attender of this event";
+    public static final String CANNOT_CANCEL_EVENT = "You have already canceled event with id ";
+    public static final String USER_IS_ALREADY_ATTENDER = "Already attender of this event";
     public static final String USER_IS_INITIATOR = "You are initiator of this event";
 
 

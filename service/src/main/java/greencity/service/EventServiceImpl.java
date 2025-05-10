@@ -267,9 +267,8 @@ public class EventServiceImpl implements EventService {
         event.getEventImages()
                 .forEach(image -> fileService.delete(image.getImagePath()));
     }
-
-    @Override
     @Transactional
+    @Override
     public void cancelEventById(Long id, UserVO user) {
 //        Event event = getEventById(id);
 //
@@ -289,7 +288,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(id);
         eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
         checkIfAttenderIsNotInitiator(event, user);
-        checkIfAlreadyAttender(event, user);
+        checkIfAlreadyAttender(event, user.getId());
         EventAttender eventAttender = createEventAttender(event, user);
 
         if (!event.isOpen()){
@@ -297,6 +296,22 @@ public class EventServiceImpl implements EventService {
         }
         event.getAttenders().add(eventAttender);
         eventRepository.save(event);
+
+    }
+    @Transactional
+    @Override
+    public void acceptAttenderToEvent(Long eventId, Long userId, UserVO user) {
+        Event event = getEventById(eventId);
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfAlreadyAttender(event, userId);
+        EventAttender eventAttender = event.getAttenders().stream()
+                .filter(attender -> attender.getAttender().getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
+        eventAttender.setStatus(EventAttenderStatus.ACCEPTED);
 
     }
 
@@ -308,12 +323,15 @@ public class EventServiceImpl implements EventService {
                 .build();
     }
 
-    private void checkIfAlreadyAttender(Event event, UserVO user) {
+    private void checkIfAlreadyAttender(Event event, Long userVOId) {
         if (event.getAttenders().stream()
-                .anyMatch(attender -> attender.getAttender().getId().equals(getUserById(user.getId()).getId()))) {
+                .anyMatch(attender ->
+                        attender.getAttender().getId().equals(userVOId) &&
+                                attender.getStatus() == EventAttenderStatus.ACCEPTED)) {
             throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_ATTENDER);
         }
     }
+
 
     private void checkIfAttenderIsNotInitiator(Event event, UserVO user) {
         if (event.getInitiator().getId().equals(getUserById(user.getId()).getId())) {

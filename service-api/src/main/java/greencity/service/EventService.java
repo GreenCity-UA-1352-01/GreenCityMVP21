@@ -34,5 +34,7 @@ public interface EventService {
 
     void attendEvent(Long id, UserVO user);
 
+    void acceptAttenderToEvent(Long eventId, Long userId, UserVO user);
+
     EventVO findById(Long id);
 }
