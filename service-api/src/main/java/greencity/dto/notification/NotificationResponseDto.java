@@ -12,6 +12,8 @@ import lombok.*;
 public class NotificationResponseDto {
     Long id;
     private String action;
+    private String actionSource;
+    private Long objectId;
     private String objectName;
     private String objectLink;
     private ZonedDateTime creationDate;

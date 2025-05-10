@@ -24,6 +24,8 @@ public class NotificationMapper extends AbstractConverter<NotificationRequestDto
 
         return Notification.builder()
             .action(dto.getAction())
+            .actionSource(dto.getActionSource())
+            .objectId(dto.getObjectId())
             .objectName(dto.getObjectName())
             .objectLink(dto.getObjectLink())
             .creationDate(dto.getCreationDate())

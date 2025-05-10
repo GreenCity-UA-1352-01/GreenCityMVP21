@@ -59,4 +59,19 @@
             <dropColumn tableName="notifications" columnName="object_link"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="modifyNotificationTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addColumn tableName="notifications">
+            <column name="action_source" type="VARCHAR(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="object_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="notifications" columnName="action_source"/>
+            <dropColumn tableName="notifications" columnName="object_id"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

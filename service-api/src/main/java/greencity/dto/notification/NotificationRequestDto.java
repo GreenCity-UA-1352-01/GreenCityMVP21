@@ -17,6 +17,13 @@ public class NotificationRequestDto {
     private String action;
 
     @NotEmpty
+    private String actionSource;
+
+    @NotNull
+    @Min(1)
+    private Long objectId;
+
+    @NotEmpty
     private String objectName;
 
     private String objectLink;

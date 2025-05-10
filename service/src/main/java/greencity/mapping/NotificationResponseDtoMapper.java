@@ -12,6 +12,8 @@ public class NotificationResponseDtoMapper extends AbstractConverter<Notificatio
         return NotificationResponseDto.builder()
             .id(notification.getId())
             .action(notification.getAction())
+            .actionSource(notification.getActionSource())
+            .objectId(notification.getObjectId())
             .objectName(notification.getObjectName())
             .objectLink(notification.getObjectLink())
             .creationDate(notification.getCreationDate())

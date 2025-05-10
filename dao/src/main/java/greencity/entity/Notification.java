@@ -23,7 +23,13 @@ public class Notification {
     @Column
     private String action;
 
-    @Column(name = "object_name")
+    @Column(name = "action_source", nullable = false)
+    private String actionSource;
+
+    @Column(name = "object_id", nullable = false)
+    private Long objectId;
+
+    @Column(name = "object_name", nullable = false)
     private String objectName;
 
     @Column(name = "object_link")
