@@ -286,6 +286,7 @@ public class EventServiceImpl implements EventService {
         eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
         checkIfAttenderIsNotInitiator(event, user);
         checkIfAlreadyAttender(event, user.getId());
+        checkIfAlreadyRequested(event, user.getId());
         EventAttender eventAttender = createEventAttender(event, user);
 
         if (!event.isOpen()) {
@@ -328,7 +329,16 @@ public class EventServiceImpl implements EventService {
                 .ifPresent(attender -> {
                     if (attender.getStatus() == EventAttenderStatus.ACCEPTED) {
                         throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_ATTENDER);
-                    } else {
+                    }
+                });
+    }
+
+    private void checkIfAlreadyRequested(Event event, Long userVOId) {
+        event.getAttenders().stream()
+                .filter(attender -> attender.getAttender().getId().equals(userVOId))
+                .findFirst()
+                .ifPresent(attender -> {
+                    if (attender.getStatus() == EventAttenderStatus.REQUESTED) {
                         throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_REQUESTED);
                     }
                 });

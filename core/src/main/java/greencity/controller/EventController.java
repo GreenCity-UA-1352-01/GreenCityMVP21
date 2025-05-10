@@ -136,6 +136,7 @@ public class EventController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("{eventId}/accept-attender/{userId}")
+    @NotifyUser
     public ResponseEntity<Void> acceptAttenderToEvent(@PathVariable Long eventId, @PathVariable Long userId, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.acceptAttenderToEvent(eventId, userId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
