@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
+import greencity.enums.NotificationOrigin;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -17,12 +18,16 @@ public interface NotificationService {
     NotificationResponseDto createNotification(NotificationRequestDto dto);
 
     /**
-     * Method to retrieve all notifications for a specific user with pagination.
+     * Retrieves all notifications for a specific user.
      *
-     * @param userId   the id of the user.
+     * @param userId   the user's id to retrieve notifications for.
+     * @param origin   the origin of the notifications to filter by.
      * @param pageable the pagination information.
-     * @return a pageable dto containing the notifications.
+     * @return a page of notification response DTOs.
      * @author Marian Shtangret
+     * @author Rostyslav Zadyraichuk
      */
-    PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId, Pageable pageable);
+    PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId,
+                                                                    NotificationOrigin origin,
+                                                                    Pageable pageable);
 }

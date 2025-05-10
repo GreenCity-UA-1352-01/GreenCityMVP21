@@ -6,6 +6,7 @@ import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
 import greencity.entity.NotificationCounter;
 import greencity.entity.User;
+import greencity.enums.NotificationOrigin;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
@@ -29,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
      * If notification counter for receiver is not present in the database, creates new one with count of
      * notifications set to 1.
      * If notification counter for receiver is present in the database, increments count of notifications by 1.
+     *
      * @param dto notification data transfer object
      * @return created notification data transfer object
      * @author Roman Diakov
@@ -55,14 +57,30 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationResponseDtoMapper.convert(notification);
     }
 
+    /**
+     * Returns all notifications for specified user id and notification origin.
+     * Origin can be null, then notifications from all origins will be returned.
+     *
+     * @param userId   user id
+     * @param origin   notification origin
+     * @param pageable page request
+     * @return notification response dto with pagination
+     * @author Marian Shtangret
+     * @author Rostyslav Zadyraichuk
+     */
     @Override
-    public PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId, Pageable pageable) {
-        Page<Notification> notifications = notificationsRepo.findNotificationsForUser(userId, pageable);
+    public PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId,
+                                                                           NotificationOrigin origin,
+                                                                           Pageable pageable) {
+        Page<Notification> notifications = origin == null
+            ? notificationsRepo.findNotificationsForUser(userId, pageable)
+            : notificationsRepo.findNotificationsForUser(userId, origin, pageable);
         return new PageableDto<>(notifications.stream()
                 .map(notificationResponseDtoMapper::convert)
                 .toList(),
             notifications.getTotalElements(),
             notifications.getNumber(),
-            notifications.getTotalPages());
+            notifications.getTotalPages()
+        );
     }
 }

@@ -18,6 +18,7 @@ public class NotificationResponseDtoMapper extends AbstractConverter<Notificatio
             .status(notification.getStatus())
             .receiverId(notification.getReceiver().getId())
             .initiatorId(notification.getInitiator().getId())
+            .origin(notification.getOrigin())
             .build();
     }
 }
