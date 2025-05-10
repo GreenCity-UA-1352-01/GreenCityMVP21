@@ -32,5 +32,7 @@ public interface EventService {
 
     void cancelEventById(Long id, UserVO user);
 
+    void attendEvent(Long id, UserVO user);
+
     EventVO findById(Long id);
 }

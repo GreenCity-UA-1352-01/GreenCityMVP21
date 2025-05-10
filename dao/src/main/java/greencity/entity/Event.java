@@ -53,6 +53,15 @@ public class Event {
             orphanRemoval = true
     )
     @Builder.Default
+    private List<EventAttender> attenders = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
+    @Builder.Default
     private List<EventImage> eventImages = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -68,8 +77,5 @@ public class Event {
     @Builder.Default
     private boolean isOpen = true;
 
-    @Column(name = "event_status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private EventStatus eventStatus;
 
 }

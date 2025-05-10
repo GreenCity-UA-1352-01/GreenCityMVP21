@@ -3,11 +3,9 @@ package greencity.service;
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
-import greencity.entity.Event;
-import greencity.entity.EventImage;
-import greencity.entity.Tag;
-import greencity.entity.User;
+import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
+import greencity.enums.EventAttenderStatus;
 import greencity.enums.EventStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
@@ -92,7 +90,6 @@ public class EventServiceImpl implements EventService {
     private Event buildBaseEvent(CreateEventDto dto, User initiator) {
         Event event = modelMapper.map(dto, Event.class);
         event.setInitiator(initiator);
-        event.setEventStatus(EventStatus.FUTURE);
         return event;
     }
 
@@ -274,17 +271,54 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public void cancelEventById(Long id, UserVO user) {
+//        Event event = getEventById(id);
+//
+//        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
+//            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+//        }
+//
+//        if (event.getEventStatus() == EventStatus.CANCELLED) {
+//            throw new BadRequestException(ErrorMessage.CANNOT_CANSEL_EVENT + event.getId());
+//        }
+//
+//        event.setEventStatus(EventStatus.CANCELLED);
+    }
+    @Transactional
+    @Override
+    public void attendEvent(Long id, UserVO user) {
         Event event = getEventById(id);
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfAttenderIsNotInitiator(event, user);
+        checkIfAlreadyAttender(event, user);
+        EventAttender eventAttender = createEventAttender(event, user);
 
-        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
-            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        if (!event.isOpen()){
+            eventAttender.setStatus(EventAttenderStatus.REQUESTED);
         }
+        event.getAttenders().add(eventAttender);
+        eventRepository.save(event);
 
-        if (event.getEventStatus() == EventStatus.CANCELLED) {
-            throw new BadRequestException(ErrorMessage.CANNOT_CANSEL_EVENT + event.getId());
+    }
+
+    private EventAttender createEventAttender(Event event, UserVO user) {
+        return EventAttender.builder()
+                .event(event)
+                .attender(getUserById(user.getId()))
+                .status(EventAttenderStatus.ACCEPTED)
+                .build();
+    }
+
+    private void checkIfAlreadyAttender(Event event, UserVO user) {
+        if (event.getAttenders().stream()
+                .anyMatch(attender -> attender.getAttender().getId().equals(getUserById(user.getId()).getId()))) {
+            throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_ATTENDER);
         }
+    }
 
-        event.setEventStatus(EventStatus.CANCELLED);
+    private void checkIfAttenderIsNotInitiator(Event event, UserVO user) {
+        if (event.getInitiator().getId().equals(getUserById(user.getId()).getId())) {
+            throw new BadRequestException(ErrorMessage.USER_IS_INITIATOR);
+        }
     }
 
     @Override

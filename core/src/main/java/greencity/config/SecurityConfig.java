@@ -204,6 +204,7 @@ public class SecurityConfig {
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.POST,
                                 "/events/create",
+                                "/events/subscribe/{id}",
                                 "/category",
                                 "/econews",
                                 "/econews/like",
