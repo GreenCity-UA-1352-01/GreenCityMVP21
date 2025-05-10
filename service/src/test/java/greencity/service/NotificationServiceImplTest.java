@@ -8,7 +8,7 @@ import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
-import greencity.entity.User;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import greencity.repository.NotificationRepo;
 import greencity.entity.NotificationCounter;
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
 
+    private static final NotificationOrigin NOTIFICATION_ORIGIN;
     private static final Notification NOTIFICATION;
     private static final NotificationCounter NOTIFICATION_COUNTER;
     private static final NotificationRequestDto NOTIFICATION_REQUEST_DTO;
@@ -41,6 +42,7 @@ class NotificationServiceImplTest {
     private static final Pageable PAGEABLE;
 
     static {
+        NOTIFICATION_ORIGIN = NotificationOrigin.GREEN_CITY;
         NOTIFICATION = ModelUtils.getNotification();
         NOTIFICATION_COUNTER = ModelUtils.getNotificationCounter();
         NOTIFICATION_REQUEST_DTO = ModelUtils.getNotificationRequestDto();
@@ -93,7 +95,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetAllNotificationsForUser_returnsMappedDtos() {
+    void testGetAllNotificationsForUser_whenOriginIsNull() {
         Long userId = 1L;
         Notification notification = Notification.builder()
             .id(1L)
@@ -119,10 +121,48 @@ class NotificationServiceImplTest {
         when(notificationRepo.findNotificationsForUser(userId, PAGEABLE))
             .thenReturn(page);
 
-        PageableDto<NotificationResponseDto> result = notificationService.getAllNotificationsForUser(userId, PAGEABLE);
+        PageableDto<NotificationResponseDto> result =
+            notificationService.getAllNotificationsForUser(userId, null, PAGEABLE);
 
         assertThat(result.getPage()).hasSize(1);
         assertThat(result.getPage().getFirst().getId()).isEqualTo(dto.getId());
         verify(notificationRepo).findNotificationsForUser(userId, PAGEABLE);
+        verify(notificationRepo, never()).findNotificationsForUser(userId, null, PAGEABLE);
+    }
+
+    @Test
+    void testGetAllNotificationsForUser_whenOriginIsPresent() {
+        Long userId = 1L;
+        Notification notification = Notification.builder()
+            .id(1L)
+            .action("liked")
+            .objectName("Test News")
+            .creationDate(ZonedDateTime.now())
+            .status(NotificationStatus.UNREAD)
+            .receiver(ModelUtils.getUser().setId(userId))
+            .initiator(ModelUtils.getUser().setId(2L))
+            .build();
+
+        NotificationResponseDto dto = NotificationResponseDto.builder()
+            .id(1L)
+            .action("liked")
+            .objectName("Test News")
+            .creationDate(notification.getCreationDate())
+            .status(NotificationStatus.UNREAD)
+            .receiverId(userId)
+            .initiatorId(2L)
+            .build();
+        Page<Notification> page = new PageImpl<>(List.of(notification));
+
+        when(notificationRepo.findNotificationsForUser(userId, NOTIFICATION_ORIGIN, PAGEABLE))
+            .thenReturn(page);
+
+        PageableDto<NotificationResponseDto> result =
+            notificationService.getAllNotificationsForUser(userId, NOTIFICATION_ORIGIN, PAGEABLE);
+
+        assertThat(result.getPage()).hasSize(1);
+        assertThat(result.getPage().getFirst().getId()).isEqualTo(dto.getId());
+        verify(notificationRepo).findNotificationsForUser(userId, NOTIFICATION_ORIGIN, PAGEABLE);
+        verify(notificationRepo, never()).findNotificationsForUser(userId, PAGEABLE);
     }
 }
