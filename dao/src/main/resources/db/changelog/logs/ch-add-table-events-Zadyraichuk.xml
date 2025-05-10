@@ -7,7 +7,7 @@
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name ="title" type="VARCHAR">
+            <column name="title" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="VARCHAR">
@@ -34,10 +34,10 @@
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name ="image_path" type="VARCHAR">
+            <column name="image_path" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="event_id"  type="BIGINT">
+            <column name="event_id" type="BIGINT">
                 <constraints foreignKeyName="FK_event_images_event_id" references="events (id)"/>
             </column>
         </createTable>
@@ -63,16 +63,17 @@
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name ="start_date_time" type="TIMESTAMP WITH TIME ZONE">
+            <column name="start_date_time" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name ="end_date_time" type="TIMESTAMP WITH TIME ZONE">
+            <column name="end_date_time" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name ="location" type="VARCHAR"/>
-            <column name ="link" type="VARCHAR"/>
-            <column name="event_id"  type="BIGINT">
-                <constraints foreignKeyName="FK_event_date_time_location_event_id" references="events (id)" nullable="false"/>
+            <column name="location" type="VARCHAR"/>
+            <column name="link" type="VARCHAR"/>
+            <column name="event_id" type="BIGINT">
+                <constraints foreignKeyName="FK_event_date_time_location_event_id" references="events (id)"
+                             nullable="false"/>
             </column>
         </createTable>
         <rollback>
@@ -82,10 +83,10 @@
 
     <changeSet id="addEventsTagsTableZadyraichuk" author="Rostyslav Zadyraichuk">
         <createTable tableName="events_tags">
-            <column name="event_id"  type="BIGINT">
+            <column name="event_id" type="BIGINT">
                 <constraints foreignKeyName="FK_events_tags_event_id" references="events (id)"/>
             </column>
-            <column name="tag_id"  type="BIGINT">
+            <column name="tag_id" type="BIGINT">
                 <constraints foreignKeyName="FK_events_tags_tag_id" references="tags (id)"/>
             </column>
         </createTable>
@@ -97,10 +98,10 @@
     <!-- removed table -->
     <changeSet id="addEventsInvitedUsersTableZadyraichuk" author="Rostyslav Zadyraichuk">
         <createTable tableName="events_invited_users">
-            <column name="event_id"  type="BIGINT">
+            <column name="event_id" type="BIGINT">
                 <constraints foreignKeyName="FK_events_invited_users_event_id" references="events (id)"/>
             </column>
-            <column name="user_id"  type="BIGINT">
+            <column name="user_id" type="BIGINT">
                 <constraints foreignKeyName="FK_events_invited_users_user_id" references="users (id)"/>
             </column>
         </createTable>
@@ -121,10 +122,10 @@
                 </column>
             </addColumn>
             <createTable tableName="events_invited_users">
-                <column name="event_id"  type="BIGINT">
+                <column name="event_id" type="BIGINT">
                     <constraints foreignKeyName="FK_events_invited_users_event_id" references="events (id)"/>
                 </column>
-                <column name="user_id"  type="BIGINT">
+                <column name="user_id" type="BIGINT">
                     <constraints foreignKeyName="FK_events_invited_users_user_id" references="users (id)"/>
                 </column>
             </createTable>
@@ -136,12 +137,12 @@
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="event_id"  type="BIGINT">
+            <column name="event_id" type="BIGINT">
                 <constraints foreignKeyName="FK_events_attenders_event_id"
                              references="events (id)"
                              deleteCascade="true"/>
             </column>
-            <column name="attender_id"  type="BIGINT">
+            <column name="attender_id" type="BIGINT">
                 <constraints foreignKeyName="FK_events_attenders_attender_id"
                              references="users (id)"
                              deleteCascade="true"/>
@@ -178,7 +179,7 @@
 
     <changeSet id="modifyEventTableYukhno" author="Yukhno Dmytro">
         <addColumn tableName="events">
-            <column name = "event_status" type="VARCHAR(20)" defaultValue="FUTURE">
+            <column name="event_status" type="VARCHAR(20)" defaultValue="FUTURE">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
@@ -186,4 +187,16 @@
             <dropColumn tableName="events" columnName="event_status"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="removeEventStatusColumnYukhno" author="Cherniavckyi Pavlo">
+        <dropColumn tableName="events" columnName="event_status"/>
+        <rollback>
+            <addColumn tableName="events">
+                <column name="event_status" type="VARCHAR(20)" defaultValue="FUTURE">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

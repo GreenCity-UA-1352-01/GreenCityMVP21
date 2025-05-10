@@ -1,6 +1,5 @@
 package greencity.entity;
 
-import greencity.enums.EventStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

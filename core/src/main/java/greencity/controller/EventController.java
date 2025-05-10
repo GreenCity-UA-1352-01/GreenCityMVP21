@@ -120,6 +120,7 @@ public class EventController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/subscribe/{id}")
+    @NotifyUser
     public ResponseEntity<Void> subscribeEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.attendEvent(id, user);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -135,7 +136,7 @@ public class EventController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("{eventId}/accept-attender/{userId}")
-    public ResponseEntity<Void> acceptAttenderToEvent(@PathVariable Long eventId,@PathVariable Long userId, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<Void> acceptAttenderToEvent(@PathVariable Long eventId, @PathVariable Long userId, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.acceptAttenderToEvent(eventId, userId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

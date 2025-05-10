@@ -6,7 +6,6 @@ import greencity.dto.user.UserVO;
 import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.EventAttenderStatus;
-import greencity.enums.EventStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -267,21 +266,19 @@ public class EventServiceImpl implements EventService {
         event.getEventImages()
                 .forEach(image -> fileService.delete(image.getImagePath()));
     }
+
     @Transactional
     @Override
     public void cancelEventById(Long id, UserVO user) {
-//        Event event = getEventById(id);
-//
-//        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
-//            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
-//        }
-//
-//        if (event.getEventStatus() == EventStatus.CANCELLED) {
-//            throw new BadRequestException(ErrorMessage.CANNOT_CANSEL_EVENT + event.getId());
-//        }
-//
-//        event.setEventStatus(EventStatus.CANCELLED);
+        Event event = getEventById(id);
+
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+
+        //event.setEventStatus(EventStatus.CANCELLED);
     }
+
     @Transactional
     @Override
     public void attendEvent(Long id, UserVO user) {
@@ -291,13 +288,14 @@ public class EventServiceImpl implements EventService {
         checkIfAlreadyAttender(event, user.getId());
         EventAttender eventAttender = createEventAttender(event, user);
 
-        if (!event.isOpen()){
+        if (!event.isOpen()) {
             eventAttender.setStatus(EventAttenderStatus.REQUESTED);
         }
         event.getAttenders().add(eventAttender);
         eventRepository.save(event);
 
     }
+
     @Transactional
     @Override
     public void acceptAttenderToEvent(Long eventId, Long userId, UserVO user) {
@@ -324,12 +322,16 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkIfAlreadyAttender(Event event, Long userVOId) {
-        if (event.getAttenders().stream()
-                .anyMatch(attender ->
-                        attender.getAttender().getId().equals(userVOId) &&
-                                attender.getStatus() == EventAttenderStatus.ACCEPTED)) {
-            throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_ATTENDER);
-        }
+        event.getAttenders().stream()
+                .filter(attender -> attender.getAttender().getId().equals(userVOId))
+                .findFirst()
+                .ifPresent(attender -> {
+                    if (attender.getStatus() == EventAttenderStatus.ACCEPTED) {
+                        throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_ATTENDER);
+                    } else {
+                        throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_REQUESTED);
+                    }
+                });
     }
 
 
