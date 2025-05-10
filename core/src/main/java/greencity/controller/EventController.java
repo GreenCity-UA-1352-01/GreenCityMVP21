@@ -106,8 +106,9 @@ public class EventController {
     })
     @PutMapping("/cancel/{id}")
     @NotifyUser
-    public ResponseEntity<Void> cancelEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
-        eventService.cancelEventById(id, user);
+    public ResponseEntity<Void> cancelEvent(@PathVariable Long id, @Parameter(hidden = true)
+    @CurrentUser UserVO user, @RequestParam String reason) {
+        eventService.cancelEventById(id, user, reason);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

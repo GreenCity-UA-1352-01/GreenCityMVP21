@@ -12,6 +12,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.repository.CancelledEventsRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
@@ -32,9 +33,11 @@ public class EventServiceImpl implements EventService {
     private final UserRepo userRepo;
     private final TagsRepo tagsRepo;
     private final EventRepository eventRepository;
+    private final CancelledEventsRepository cancelledEventsRepository;
     private final FileService fileService;
     private final EventDateTimeLocationService eventDateTimeLocationService;
     private final ModelMapper modelMapper;
+
 
     @Override
     @Transactional
@@ -269,14 +272,25 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     @Override
-    public void cancelEventById(Long id, UserVO user) {
+    public void cancelEventById(Long id, UserVO user, String reason) {
         Event event = getEventById(id);
+        User initiator = getUserById(user.getId());
 
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
 
-        //event.setEventStatus(EventStatus.CANCELLED);
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+
+        checkIfEventNotCancelled(event);
+
+        CancelledEvent cancelledEvent = CancelledEvent.builder()
+                .event(event)
+                .canceled_at(ZonedDateTime.now())
+                .user(initiator)
+                .reason(reason)
+                .build();
+        cancelledEventsRepository.save(cancelledEvent);
     }
 
     @Transactional
@@ -284,6 +298,7 @@ public class EventServiceImpl implements EventService {
     public void attendEvent(Long id, UserVO user) {
         Event event = getEventById(id);
         eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
         checkIfAttenderIsNotInitiator(event, user);
         checkIfAlreadyAttender(event, user.getId());
         checkIfAlreadyRequested(event, user.getId());
@@ -305,6 +320,7 @@ public class EventServiceImpl implements EventService {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
         checkIfAlreadyAttender(event, userId);
         EventAttender eventAttender = event.getAttenders().stream()
                 .filter(attender -> attender.getAttender().getId().equals(userId))
@@ -348,6 +364,12 @@ public class EventServiceImpl implements EventService {
     private void checkIfAttenderIsNotInitiator(Event event, UserVO user) {
         if (event.getInitiator().getId().equals(getUserById(user.getId()).getId())) {
             throw new BadRequestException(ErrorMessage.USER_IS_INITIATOR);
+        }
+    }
+
+    private void checkIfEventNotCancelled(Event event) {
+        if (!cancelledEventsRepository.findByEventId(event.getId()).isEmpty()) {
+            throw new BadRequestException(ErrorMessage.EVENT_ALREADY_CANCELLED);
         }
     }
 

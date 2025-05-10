@@ -30,7 +30,7 @@ public interface EventService {
      */
     void deleteById(Long id, UserVO user);
 
-    void cancelEventById(Long id, UserVO user);
+    void cancelEventById(Long id, UserVO user, String reason);
 
     void attendEvent(Long id, UserVO user);
 
