@@ -10,6 +10,7 @@ import greencity.dto.eventimage.EventImageResponseDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
+import greencity.enums.EventAttenderStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -27,6 +28,7 @@ import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,6 +54,8 @@ class EventServiceImplTest {
     private EventDateTimeLocationService eventDateTimeLocationService;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -485,6 +489,139 @@ class EventServiceImplTest {
         assertFalse(actualPaths.contains("https://cdn.com/file/img2.jpg"));
         assertFalse(actualPaths.contains("https://cdn.com/file/img4.jpg"));
     }
+
+    @Test
+    void attendEvent_Success_OpenEvent() {
+        Event event = ModelUtils.getEvent();
+        UserVO userVO = ModelUtils.getUserVO();
+        event.getInitiator().setId(2L);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(user));
+
+        eventService.attendEvent(1L, userVO);
+
+        assertEquals(1, event.getAttenders().size());
+        assertEquals(EventAttenderStatus.ACCEPTED, event.getAttenders().getFirst().getStatus());
+    }
+    @Test
+    void attendEvent_UserIsInitiator_ThrowsException() {
+        Event event = ModelUtils.getEvent();
+        UserVO userVO = ModelUtils.getUserVO();
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class, () -> eventService.attendEvent(1L, userVO));
+    }
+    @Test
+    void attendEvent_AlreadyAccepted_ThrowsException() {
+        Event event = ModelUtils.getEvent();
+        User user = ModelUtils.getUser();
+        user.setId(3L);
+
+        event.getAttenders().add(EventAttender.builder()
+                .attender(user)
+                .event(event)
+                .status(EventAttenderStatus.ACCEPTED)
+                .build());
+
+        UserVO userVO = ModelUtils.getUserVO();
+        userVO.setId(3L);
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class, () -> eventService.attendEvent(1L, userVO));
+    }
+    @Test
+    void attendEvent_AlreadyRequested_ThrowsException() {
+        Event event = ModelUtils.getEvent();
+        User user = ModelUtils.getUser();
+        user.setId(4L);
+
+        event.getAttenders().add(EventAttender.builder()
+                .attender(user)
+                .event(event)
+                .status(EventAttenderStatus.REQUESTED)
+                .build());
+
+        UserVO userVO = ModelUtils.getUserVO();
+        userVO.setId(4L);
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class, () -> eventService.attendEvent(1L, userVO));
+    }
+    @Test
+    void attendEvent_ClosedEvent_StatusRequested() {
+        Event event = ModelUtils.getEvent();
+        event.setOpen(false);
+
+        User user = ModelUtils.getUser();
+        user.setId(3L);
+
+        UserVO userVO = ModelUtils.getUserVO();
+        userVO.setId(3L);
+
+
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(user));
+
+
+        eventService.attendEvent(3L, userVO);
+
+
+        assertEquals(1, event.getAttenders().size());
+        assertEquals(EventAttenderStatus.REQUESTED, event.getAttenders().get(0).getStatus());
+    }
+    @Test
+    void acceptAttenderToEvent_Success() {
+        Event event = ModelUtils.getEvent();
+        User initiator = ModelUtils.getUser();
+        initiator.setId(1L);
+        event.setInitiator(initiator);
+
+        UserVO userVO = ModelUtils.getUserVO(); // инициатор
+        userVO.setId(1L);
+        userVO.setRole(Role.ROLE_USER);
+
+        User attenderUser = new User();
+        attenderUser.setId(2L);
+
+        EventAttender attender = new EventAttender();
+        attender.setAttender(attenderUser);
+        attender.setStatus(EventAttenderStatus.REQUESTED);
+        event.setAttenders(new ArrayList<>(List.of(attender)));
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        eventService.acceptAttenderToEvent(1L, 2L, userVO);
+
+        assertEquals(EventAttenderStatus.ACCEPTED, event.getAttenders().get(0).getStatus());
+    }
+    @Test
+    void acceptAttenderToEvent_AccessDenied_UserIsNotAdminOrInitiator() {
+        User initiator = new User();
+        initiator.setId(1L);
+
+        Event event = ModelUtils.getEvent();
+        event.setInitiator(initiator);
+        event.setAttenders(new ArrayList<>());
+
+        UserVO notAllowedUser = new UserVO();
+        notAllowedUser.setId(2L);
+        notAllowedUser.setRole(Role.ROLE_USER); // не админ
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThrows(AccessDeniedException.class, () ->
+                eventService.acceptAttenderToEvent(1L, 3L, notAllowedUser)
+        );
+    }
+
+
 
 }
 
