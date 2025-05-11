@@ -17,6 +17,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.repository.CancelledEventsRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
@@ -55,7 +56,8 @@ class EventServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
     @Mock
-    private UserService userService;
+    CancelledEventsRepository cancelledEventsRepository;
+
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -238,6 +240,7 @@ class EventServiceImplTest {
                 userRepo,
                 tagsRepo,
                 eventRepository,
+                cancelledEventsRepository,
                 fileService,
                 eventDateTimeLocationService,
                 modelMapper2
@@ -278,7 +281,6 @@ class EventServiceImplTest {
             return null;
         }).when(eventDateTimeLocationService).updateEventDateTimeLocation(any(), any());
         UpdateEventDtoResponse result = eventService2.updateEvent(request, null, user);
-        System.out.println(result);
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Update Title", result.getTitle());
@@ -309,6 +311,7 @@ class EventServiceImplTest {
                 userRepo,
                 tagsRepo,
                 eventRepository,
+                cancelledEventsRepository,
                 fileService,
                 eventDateTimeLocationService,
                 modelMapper2
@@ -364,6 +367,7 @@ class EventServiceImplTest {
                 userRepo,
                 tagsRepo,
                 eventRepository,
+                cancelledEventsRepository,
                 fileService,
                 eventDateTimeLocationService,
                 modelMapper2
@@ -444,7 +448,7 @@ class EventServiceImplTest {
     void updateEvent_ShouldRemoveImages_ThatAreMissingInRequest() {
         ModelMapper modelMapper2 = new ModelMapper();
         EventServiceImpl service = new EventServiceImpl(
-                userRepo, tagsRepo, eventRepository, fileService, eventDateTimeLocationService, modelMapper2
+                userRepo, tagsRepo, eventRepository, cancelledEventsRepository, fileService, eventDateTimeLocationService, modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
         request.setImages(List.of(
@@ -504,6 +508,7 @@ class EventServiceImplTest {
         assertEquals(1, event.getAttenders().size());
         assertEquals(EventAttenderStatus.ACCEPTED, event.getAttenders().getFirst().getStatus());
     }
+
     @Test
     void attendEvent_UserIsInitiator_ThrowsException() {
         Event event = ModelUtils.getEvent();
@@ -514,6 +519,7 @@ class EventServiceImplTest {
 
         assertThrows(BadRequestException.class, () -> eventService.attendEvent(1L, userVO));
     }
+
     @Test
     void attendEvent_AlreadyAccepted_ThrowsException() {
         Event event = ModelUtils.getEvent();
@@ -534,6 +540,7 @@ class EventServiceImplTest {
 
         assertThrows(BadRequestException.class, () -> eventService.attendEvent(1L, userVO));
     }
+
     @Test
     void attendEvent_AlreadyRequested_ThrowsException() {
         Event event = ModelUtils.getEvent();
@@ -554,6 +561,7 @@ class EventServiceImplTest {
 
         assertThrows(BadRequestException.class, () -> eventService.attendEvent(1L, userVO));
     }
+
     @Test
     void attendEvent_ClosedEvent_StatusRequested() {
         Event event = ModelUtils.getEvent();
@@ -576,6 +584,7 @@ class EventServiceImplTest {
         assertEquals(1, event.getAttenders().size());
         assertEquals(EventAttenderStatus.REQUESTED, event.getAttenders().get(0).getStatus());
     }
+
     @Test
     void acceptAttenderToEvent_Success() {
         Event event = ModelUtils.getEvent();
@@ -601,6 +610,7 @@ class EventServiceImplTest {
 
         assertEquals(EventAttenderStatus.ACCEPTED, event.getAttenders().get(0).getStatus());
     }
+
     @Test
     void acceptAttenderToEvent_AccessDenied_UserIsNotAdminOrInitiator() {
         User initiator = new User();
@@ -620,7 +630,6 @@ class EventServiceImplTest {
                 eventService.acceptAttenderToEvent(1L, 3L, notAllowedUser)
         );
     }
-
 
 
 }

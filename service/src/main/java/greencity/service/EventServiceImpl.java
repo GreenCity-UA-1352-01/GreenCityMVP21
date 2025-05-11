@@ -76,10 +76,7 @@ public class EventServiceImpl implements EventService {
         updateEventImages(event, images, updateEventDtoRequest);
 
         eventRepository.save(event);
-        System.out.println(event);
-        UpdateEventDtoResponse response = modelMapper.map(event, UpdateEventDtoResponse.class);
-        System.out.println(response);
-        return response;
+        return modelMapper.map(event, UpdateEventDtoResponse.class);
     }
 
     private List<String> tagsConverter(Event event) {
