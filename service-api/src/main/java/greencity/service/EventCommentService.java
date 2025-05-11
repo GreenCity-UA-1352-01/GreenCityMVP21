@@ -15,4 +15,15 @@ public interface EventCommentService {
      * @author Rostyslav Zadyraichuk
      */
     AddEventCommentDtoResponse save(Long eventId, AddEventCommentDtoRequest comment, UserVO user);
+
+    /**
+     * This method allows the current user to like a specific event comment.
+     * If the user has already liked the comment, an exception will be thrown.
+     * A like is saved in the event_comment_like table.
+     *
+     * @param commentId the ID of the event comment to be liked
+     * @param userId      the user who is liking the comment
+     * @author Rostyslav Kushpit
+     */
+    void likeComment(UserVO user, Long commentId);
 }

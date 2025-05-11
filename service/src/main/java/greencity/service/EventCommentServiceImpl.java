@@ -8,10 +8,15 @@ import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
+import greencity.entity.EventCommentLike;
 import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.ConflictException;
+import greencity.repository.EventCommentLikeRepository;
 import greencity.repository.EventCommentRepo;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,6 +28,7 @@ import static greencity.constant.AppConstant.AUTHORIZATION;
 @AllArgsConstructor
 public class EventCommentServiceImpl implements EventCommentService {
     private EventCommentRepo eventCommentRepo;
+    private EventCommentLikeRepository eventCommentLikeRepo;
     private EventService eventService;
     private ModelMapper modelMapper;
     private final greencity.rating.RatingCalculation ratingCalculation;
@@ -61,4 +67,21 @@ public class EventCommentServiceImpl implements EventCommentService {
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
         return modelMapper.map(eventCommentRepo.save(eventComment), AddEventCommentDtoResponse.class);
     }
+
+    @Override
+    @Transactional
+    public void likeComment(UserVO user, Long commentId) {
+        EventComment eventComment = eventCommentRepo.findById(commentId).orElseThrow(
+                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        if (eventCommentLikeRepo.existsByEventCommentAndUser(commentId, user.getId())) {
+            throw new ConflictException(ErrorMessage.COMMENT_ALREADY_LIKED);
+        }
+        EventCommentLike eventCommentLike = EventCommentLike.builder()
+                .eventComment(eventComment)
+                .user(modelMapper.map(user, User.class))
+                .likedAt(ZonedDateTime.now())
+                .build();
+        eventCommentLikeRepo.save(eventCommentLike);
+    }
+
 }
