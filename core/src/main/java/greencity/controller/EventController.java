@@ -127,6 +127,21 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(summary = "Unsubscribe from event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/unsubscribe/{id}")
+    @NotifyUser
+    public ResponseEntity<Void> unsubscribeFromEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.unsubscribeFromEvent(id, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @Operation(summary = "Accept attender to event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {

@@ -374,4 +374,16 @@ public class EventServiceImpl implements EventService {
     public EventVO findById(Long id) {
         return modelMapper.map(getEventById(id), EventVO.class);
     }
+
+    @Override
+    public void unsubscribeFromEvent(Long id, UserVO userVO) {
+        Event event = getEventById(id);
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
+        User findUser = getUserById(userVO.getId());
+        if (!event.getAttenders().removeIf(attender -> attender.getAttender().getId().equals(findUser.getId()))) {
+            throw new NotFoundException(ErrorMessage.USER_IS_NOT_ATTENDER);
+        }
+        eventRepository.save(event);
+    }
 }

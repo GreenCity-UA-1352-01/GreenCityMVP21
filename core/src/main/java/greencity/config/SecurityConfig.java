@@ -255,6 +255,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,
                                 ECONEWS_COMMENTS,
                                 "/events/comments/{eventCommentId}",
+                                "/events/unsubscribe/{id}",
                                 "/econews/{econewsId}",
                                 CUSTOM_SHOPPING_LIST_ITEMS,
                                 CUSTOM_SHOPPING_LIST_URL,

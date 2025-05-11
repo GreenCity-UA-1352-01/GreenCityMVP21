@@ -1,6 +1,5 @@
 package greencity.notification.factories;
 
-
 import greencity.annotations.NotificationHandler;
 import greencity.controller.EventController;
 import greencity.dto.event.EventVO;
@@ -20,7 +19,7 @@ import java.time.ZonedDateTime;
 @Component
 @AllArgsConstructor
 @NotificationHandler
-public class SubscribeEventNotificationFactory implements NotificationEventFactory {
+public class UnsubscribeFromEventNotificationFactory implements NotificationEventFactory {
     private final EventService eventService;
 
     @Override
@@ -28,7 +27,7 @@ public class SubscribeEventNotificationFactory implements NotificationEventFacto
         Class<?>[] expectedParameterTypes = {Long.class, UserVO.class};
         try {
             Method joinPointMethod = EventController.class
-                    .getDeclaredMethod("subscribeEvent", expectedParameterTypes);
+                    .getDeclaredMethod("unsubscribeFromEvent", expectedParameterTypes);
             return joinPointMethod.equals(method);
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);
@@ -45,7 +44,7 @@ public class SubscribeEventNotificationFactory implements NotificationEventFacto
         EventVO event = eventService.findById(eventId);
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
-        String action = "User with name %s successfully subscribed to event %s. %s".formatted(name, title, CommentDateTimeFormatter.format(creationDate));
+        String action = "User with name %s unsubscribed from event %s. %s".formatted(name, title, CommentDateTimeFormatter.format(creationDate));
         return NotificationRequestDto.builder()
                 .action(action)
                 .objectName("Event")
