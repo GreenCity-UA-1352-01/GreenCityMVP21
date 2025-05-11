@@ -24,7 +24,7 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
 
     @Override
     public boolean supports(Method method) {
-        Class<?>[] expectedParameterTypes = {Long.class, UserVO.class};
+        Class<?>[] expectedParameterTypes = {Long.class, UserVO.class, String.class};
         try {
             Method joinPointMethod = EventController.class
                     .getDeclaredMethod("cancelEvent", expectedParameterTypes);
