@@ -1,7 +1,9 @@
 package greencity.service;
 
+import greencity.annotations.NotifyUser;
 import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
+import greencity.dto.event.EventCommentVO;
 import greencity.dto.event.EventVO;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
@@ -68,20 +70,48 @@ public class EventCommentServiceImpl implements EventCommentService {
         return modelMapper.map(eventCommentRepo.save(eventComment), AddEventCommentDtoResponse.class);
     }
 
+    /**
+     * This method allows the current user to like a specific event comment.
+     * If the user has already liked the comment, a ConflictException is thrown.
+     * A like is saved in the event_comment_like table.
+     *
+     * @param user      the user who is liking the comment
+     * @param commentId the ID of the comment to be liked
+     * @throws BadRequestException   if the comment is not found
+     * @throws ConflictException     if the user has already liked the comment
+     * @author Rostyslav Kushpit
+     */
     @Override
     @Transactional
-    public void likeComment(UserVO user, Long commentId) {
+    public void likeComment(Long commentId, UserVO user) {
         EventComment eventComment = eventCommentRepo.findById(commentId).orElseThrow(
                 () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
-        if (eventCommentLikeRepo.existsByEventCommentAndUser(commentId, user.getId())) {
+        if (eventCommentLikeRepo.existsByEventCommentIdAndUserId(commentId, user.getId())) {
             throw new ConflictException(ErrorMessage.COMMENT_ALREADY_LIKED);
         }
+
         EventCommentLike eventCommentLike = EventCommentLike.builder()
                 .eventComment(eventComment)
                 .user(modelMapper.map(user, User.class))
                 .likedAt(ZonedDateTime.now())
                 .build();
         eventCommentLikeRepo.save(eventCommentLike);
+    }
+
+    /**
+     * Retrieves an EventCommentVO by its ID.
+     *
+     * @param id the ID of the comment to retrieve
+     * @return EventCommentVO containing the basic data of the comment
+     * @throws BadRequestException if the comment is not found
+     * @author Rostyslav Kushpit
+     */
+    @Override
+    @Transactional
+    public EventCommentVO findById(Long id) {
+        EventComment eventComment = eventCommentRepo.findById(id).orElseThrow(
+                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        return modelMapper.map(eventComment, EventCommentVO.class);
     }
 
 }

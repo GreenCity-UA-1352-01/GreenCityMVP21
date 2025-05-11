@@ -45,4 +45,18 @@ public class EventCommentController {
             .status(HttpStatus.CREATED)
             .body(eventCommentService.save(eventId, comment, user));
     }
+
+    @Operation(summary = "Like comment of event")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("{commentId}/like")
+    @NotifyUser
+    public ResponseEntity<Void> likeEventComment(@PathVariable("commentId") Long commentId,
+                                                 @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventCommentService.likeComment(commentId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

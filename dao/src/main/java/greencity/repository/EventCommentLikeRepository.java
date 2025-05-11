@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventCommentLikeRepository extends JpaRepository<EventCommentLike, Long> {
-    boolean existsByEventCommentAndUser(Long eventCommentId, Long userId);
+    boolean existsByEventCommentIdAndUserId(Long eventCommentId, Long userId);
     void deleteByEventCommentAndUser(EventComment eventComment, User user);
 }

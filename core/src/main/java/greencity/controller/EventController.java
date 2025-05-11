@@ -160,19 +160,4 @@ public class EventController {
                 .status(HttpStatus.OK)
                 .body(eventService.findById(eventId));
     }
-
-    @Operation(summary = "Like comment of event")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
-    @NotifyUser
-    @PostMapping("/{eventId}/comments/like/{commentId}")
-    public ResponseEntity<Void> likeEventComment(@PathVariable("eventId") Long eventId,
-                                                 @PathVariable("commentId") Long commentId,
-                                                 @Parameter(hidden = true) @CurrentUser UserVO user) {
-        eventCommentService.likeComment(user, commentId);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }

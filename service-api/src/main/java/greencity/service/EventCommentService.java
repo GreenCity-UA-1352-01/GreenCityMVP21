@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.event.EventCommentVO;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.user.UserVO;
@@ -21,9 +22,11 @@ public interface EventCommentService {
      * If the user has already liked the comment, an exception will be thrown.
      * A like is saved in the event_comment_like table.
      *
+     * @param user the user who is liking the comment
      * @param commentId the ID of the event comment to be liked
-     * @param userId      the user who is liking the comment
      * @author Rostyslav Kushpit
      */
-    void likeComment(UserVO user, Long commentId);
+    void likeComment(Long commentId, UserVO user);
+
+    EventCommentVO findById(Long id);
 }
