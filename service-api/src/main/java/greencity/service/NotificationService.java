@@ -6,7 +6,11 @@ import greencity.dto.notification.NotificationResponseDto;
 public interface NotificationService {
     NotificationResponseDto createNotification(NotificationRequestDto dto);
 
-    void deleteLikeNotification(Long initiatorId,
-                            Long receiverId,
-                            Long eventId);
+    void deleteEventLikeNotification(Long initiatorId,
+                                     Long receiverId,
+                                     Long eventId);
+
+    void deleteHabitLikeNotification(Long initiatorId,
+                                     Long receiverId,
+                                     Long habitId);
 }

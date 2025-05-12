@@ -40,10 +40,26 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void deleteLikeNotification(Long initiatorId,
-                                       Long receiverId,
-                                       Long eventId) {
+    public void deleteEventLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long eventId) {
         String objectLink = "/events/" + eventId;
+        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    objectLink
+            );
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteHabitLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long habitId) {
+        String objectLink = "/habit/" + habitId;
         if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
             notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
                     initiatorId,

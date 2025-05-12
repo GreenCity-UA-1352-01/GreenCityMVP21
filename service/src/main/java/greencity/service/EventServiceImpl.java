@@ -38,7 +38,6 @@ public class EventServiceImpl implements EventService {
     private final EventDateTimeLocationService eventDateTimeLocationService;
     private final EventLikeRepository eventLikeRepository;
     private final NotificationService notificationService;
-    private final NotificationPublisher notificationPublisher;
     private final ModelMapper modelMapper;
 
     @Override
@@ -313,7 +312,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(id);
         if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
             eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
-            notificationService.deleteLikeNotification(user.getId(), event.getInitiator().getId(), id);
+            notificationService.deleteEventLikeNotification(user.getId(), event.getInitiator().getId(), id);
         }
     }
 
