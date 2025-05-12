@@ -3,45 +3,22 @@ package greencity.dto.notification;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@AllArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @EqualsAndHashCode
-public class NotificationRequestDto {
-    @NotEmpty
+public abstract class BaseNotificationResponseDto {
     private String action;
-
-    @NotNull
-    @Min(1)
     private Long objectId;
-
-    @NotEmpty
     private String objectName;
-
-    @NotNull
+    private String objectLink;
     private NotificationObjectType objectType;
-
-    @NotNull
     private ZonedDateTime creationDate;
-
-    @NotEmpty
     private NotificationStatus status;
-
-    @NotNull
     private NotificationType notificationType;
-
-    @NotNull
-    @Min(1)
     private Long receiverId;
-
-    @NotNull
-    @Min(1)
-    private Long initiatorId;
 }

@@ -1,23 +1,14 @@
 package greencity.dto.notification;
 
-import greencity.enums.NotificationStatus;
-import java.time.ZonedDateTime;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@AllArgsConstructor
 @Getter
 @Setter
-@Builder
-@EqualsAndHashCode
-public class NotificationResponseDto {
-    Long id;
-    private String action;
-    private String actionSource;
-    private Long objectId;
-    private String objectName;
-    private String objectLink;
-    private ZonedDateTime creationDate;
-    private NotificationStatus status;
-    private Long receiverId;
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+public class NotificationResponseDto extends BaseNotificationResponseDto {
+    private Long id;
     private Long initiatorId;
+    private String initiatorName;
 }

@@ -1,17 +1,14 @@
 package greencity.controller;
 
-import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserId;
 import greencity.constant.HttpStatuses;
-import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationResponseDto;
+import greencity.dto.notification.BaseNotificationResponseDto;
 import greencity.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -31,12 +28,10 @@ public class NotificationController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
-    @ApiPageable
     @GetMapping("/user/{userId}")
-    public ResponseEntity<PageableDto<NotificationResponseDto>> getUserNotifications(
-            @PathVariable @CurrentUserId Long userId,
-            @Parameter(hidden = true) Pageable pageable) {
+    public ResponseEntity<Set<BaseNotificationResponseDto>> getUserNotifications(
+            @PathVariable @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationsService.getAllNotificationsForUser(userId, pageable));
+            .body(notificationsService.getAllNotificationsForUser(userId));
     }
 }

@@ -62,16 +62,23 @@
 
     <changeSet id="modifyNotificationTableZadyraichuk" author="Rostyslav Zadyraichuk">
         <addColumn tableName="notifications">
-            <column name="action_source" type="VARCHAR(300)">
-                <constraints nullable="false"/>
-            </column>
             <column name="object_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="object_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
         </addColumn>
+        <dropColumn tableName="notifications" columnName="object_link"/>
         <rollback>
-            <dropColumn tableName="notifications" columnName="action_source"/>
             <dropColumn tableName="notifications" columnName="object_id"/>
+            <dropColumn tableName="notifications" columnName="type"/>
+            <addColumn tableName="notifications">
+                <column name="object_link" type="VARCHAR(300)"/>
+            </addColumn>
         </rollback>
     </changeSet>
 </databaseChangeLog>

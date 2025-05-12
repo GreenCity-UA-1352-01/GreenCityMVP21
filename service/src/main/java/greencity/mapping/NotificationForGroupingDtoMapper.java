@@ -1,15 +1,15 @@
 package greencity.mapping;
 
-import greencity.dto.notification.NotificationResponseDto;
+import greencity.dto.notification.NotificationForGroupingDto;
 import greencity.entity.Notification;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NotificationResponseDtoMapper extends AbstractConverter<Notification, NotificationResponseDto> {
+public class NotificationForGroupingDtoMapper extends AbstractConverter<Notification, NotificationForGroupingDto> {
     @Override
-    public NotificationResponseDto convert(Notification notification) {
-        NotificationResponseDto dto = NotificationResponseDto.builder()
+    public NotificationForGroupingDto convert(Notification notification) {
+        NotificationForGroupingDto dto = NotificationForGroupingDto.builder()
             .id(notification.getId())
             .action(notification.getAction())
             .objectId(notification.getObjectId())
@@ -17,9 +17,10 @@ public class NotificationResponseDtoMapper extends AbstractConverter<Notificatio
             .objectType(notification.getObjectType())
             .creationDate(notification.getCreationDate())
             .status(notification.getStatus())
-            .notificationType(notification.getNotificationType())
             .receiverId(notification.getReceiver().getId())
             .initiatorId(notification.getInitiator().getId())
+            .initiatorName(notification.getInitiator().getName())
+            .notificationType(notification.getNotificationType())
             .build();
         dto.setObjectLink(dto.getObjectType().getLinkBuilder().apply(dto));
         return dto;

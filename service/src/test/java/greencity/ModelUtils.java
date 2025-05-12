@@ -832,10 +832,8 @@ public class ModelUtils {
         return Notification.builder()
             .id(1L)
             .action("test")
-            .actionSource("test")
             .objectId(1L)
             .objectName("test")
-            .objectLink("link")
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
             .receiver(getUser().setId(2L))
@@ -856,11 +854,11 @@ public class ModelUtils {
             .receiverId(2L)
             .objectId(1L)
             .objectName("test")
-            .objectLink("link")
+            .objectType(NotificationObjectType.EVENT)
             .action("test")
-            .actionSource("test")
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
+            .notificationType(NotificationType.EVENT_COMMENT)
             .build();
     }
 
@@ -872,10 +870,11 @@ public class ModelUtils {
             .objectId(1L)
             .objectName("test")
             .objectLink("link")
+            .objectType(NotificationObjectType.EVENT)
             .action("test")
-            .actionSource("test")
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
+            .notificationType(NotificationType.EVENT_COMMENT)
             .build();
     }
 }
