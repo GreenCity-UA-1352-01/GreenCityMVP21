@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.controller.NotificationController;
 import greencity.dto.notification.NotificationResponseDto;
+import greencity.enums.NotificationStatus;
 import greencity.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,7 +40,7 @@ class NotificationControllerTest {
                 .action("liked")
                 .objectName("Some News")
                 .creationDate(ZonedDateTime.now())
-                .status("UNREAD")
+                .status(NotificationStatus.UNREAD)
                 .receiverId(userId)
                 .initiatorId(2L)
                 .build();

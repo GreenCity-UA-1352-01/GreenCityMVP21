@@ -2,6 +2,7 @@ package greencity.dto.notification;
 
 import greencity.enums.NotificationStatus;
 import java.time.ZonedDateTime;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 @AllArgsConstructor

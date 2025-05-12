@@ -52,7 +52,7 @@ class NotificationServiceImplTest {
                 .action("liked")
                 .objectName("Test News")
                 .creationDate(notification.getCreationDate())
-                .status("UNREAD")
+                .status(NotificationStatus.UNREAD)
                 .receiverId(userId)
                 .initiatorId(2L)
                 .build();
