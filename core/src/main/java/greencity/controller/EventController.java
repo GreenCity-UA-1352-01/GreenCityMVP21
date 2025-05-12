@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.event.CreateEventDto;
 import greencity.dto.event.CreateEventDtoResponse;
@@ -62,6 +63,7 @@ public class EventController {
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Event not found")
     })
+    @NotifyUser
     @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UpdateEventDtoResponse> update(
             @Valid @RequestPart UpdateEventDtoRequest updateEventDtoRequest,

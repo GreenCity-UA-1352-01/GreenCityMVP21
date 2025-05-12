@@ -12,9 +12,12 @@ import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
+import greencity.dto.habit.*;
+import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
@@ -30,7 +33,6 @@ import greencity.projection.ProjectionProxy;
 import greencity.projection.UserWithMutualFriendsProjection;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,10 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -856,5 +855,16 @@ public class ModelUtils {
                 .tags(List.of("Соціальний"))
                 .isOpen(true)
                 .build();
+    }
+
+    public static NotificationRequestDto getNotificationRequestDto() {
+        return NotificationRequestDto.builder()
+            .initiatorId(1L)
+            .receiverId(2L)
+            .objectName("test")
+            .objectLink("link")
+            .action("test")
+            .status(NotificationStatus.UNREAD)
+            .build();
     }
 }
