@@ -28,5 +28,16 @@ public interface EventCommentService {
      */
     void likeComment(Long commentId, UserVO user);
 
+    /**
+     * This method allows the current user to remove a like from a specific event comment.
+     * If the user has not liked the comment, an exception will be thrown.
+     * The like is removed from the event_comment_like table.
+     *
+     * @param commentId the ID of the event comment to remove the like from
+     * @param user the user who is removing the like
+     * @author Roman Diakov
+     */
+    void unlikeComment(Long commentId, UserVO user);
+
     EventCommentVO findById(Long id);
 }

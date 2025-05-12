@@ -42,14 +42,25 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void deleteLikeNotification(Long initiatorId,
                                        Long receiverId,
-                                       Long eventId) {
-        String objectLink = "/events/" + eventId;
-        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+                                       Long id) {
+        String eventObjectLink = "/events/" + id;
+        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, eventObjectLink)) {
             notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
                     initiatorId,
                     receiverId,
                     "likes",
-                    objectLink
+                    eventObjectLink
+            );
+            return;
+        }
+
+        String commentObjectLink = "/comments/" + id;
+        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    commentObjectLink
             );
         }
     }

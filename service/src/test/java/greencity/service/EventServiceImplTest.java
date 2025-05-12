@@ -16,6 +16,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.notification.NotificationPublisher;
 import greencity.repository.EventRepository;
 import greencity.repository.EventLikeRepository;
 import greencity.repository.TagsRepo;
@@ -57,6 +58,8 @@ class EventServiceImplTest {
     private NotificationService notificationService;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private NotificationPublisher  notificationPublisher;
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -243,6 +246,7 @@ class EventServiceImplTest {
                 eventDateTimeLocationService,
                 eventLikeRepository,
                 notificationService,
+                notificationPublisher,
                 modelMapper2
         );
 
@@ -316,6 +320,7 @@ class EventServiceImplTest {
                 eventDateTimeLocationService,
                 eventLikeRepository,
                 notificationService,
+                notificationPublisher,
                 modelMapper2
         );
 
@@ -373,6 +378,7 @@ class EventServiceImplTest {
                 eventDateTimeLocationService,
                 eventLikeRepository,
                 notificationService,
+                notificationPublisher,
                 modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
@@ -451,7 +457,7 @@ class EventServiceImplTest {
     void updateEvent_ShouldRemoveImages_ThatAreMissingInRequest() {
         ModelMapper modelMapper2 = new ModelMapper();
         EventServiceImpl service = new EventServiceImpl(
-                userRepo, tagsRepo, eventRepository, fileService, eventDateTimeLocationService, eventLikeRepository, notificationService, modelMapper2
+                userRepo, tagsRepo, eventRepository, fileService, eventDateTimeLocationService, eventLikeRepository, notificationService, notificationPublisher, modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
         request.setImages(List.of(

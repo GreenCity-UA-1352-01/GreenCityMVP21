@@ -14,6 +14,7 @@ import greencity.entity.EventCommentLike;
 import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.ConflictException;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventCommentLikeRepository;
 import greencity.repository.EventCommentRepo;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +36,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private ModelMapper modelMapper;
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
+    private final NotificationService notificationService;
 
     /**
      * {@inheritDoc}
@@ -114,4 +116,27 @@ public class EventCommentServiceImpl implements EventCommentService {
         return modelMapper.map(eventComment, EventCommentVO.class);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param commentId the ID of the event comment to remove the like from
+     * @param user      the user who is removing the like
+     * @throws BadRequestException if the comment is not found
+     * @throws NotFoundException   if the user has not liked the comment
+     * @author Roman Diakov
+     */
+    @Override
+    @Transactional
+    public void unlikeComment(Long commentId, UserVO user) {
+        EventComment eventComment = eventCommentRepo.findById(commentId).orElseThrow(
+                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+
+        if (!eventCommentLikeRepo.existsByEventCommentIdAndUserId(commentId, user.getId())) {
+            throw new NotFoundException("You have not liked this comment yet");
+        }
+
+        eventCommentLikeRepo.deleteByEventCommentAndUser(eventComment, modelMapper.map(user, User.class));
+
+        notificationService.deleteLikeNotification(user.getId(), eventComment.getUser().getId(), commentId);
+    }
 }

@@ -59,4 +59,17 @@ public class EventCommentController {
         eventCommentService.likeComment(commentId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @Operation(summary = "Unlike comment of event")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("{commentId}/like")
+    public ResponseEntity<Void> unlikeEventComment(@PathVariable("commentId") Long commentId,
+                                                  @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventCommentService.unlikeComment(commentId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
