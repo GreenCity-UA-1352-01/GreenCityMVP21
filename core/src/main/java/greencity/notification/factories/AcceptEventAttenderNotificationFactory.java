@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 @Component
 @AllArgsConstructor
 @NotificationHandler
@@ -33,7 +35,7 @@ public class AcceptEventAttenderNotificationFactory implements NotificationEvent
     }
 
     @Override
-    public NotificationRequestDto createEvent(Object[] args) {
+    public List<NotificationRequestDto> createEvent(Object[] args) {
         Long eventId = (Long) args[0];
         Long userId = (Long) args[1];
         UserVO initiator = (UserVO) args[2];
@@ -43,7 +45,12 @@ public class AcceptEventAttenderNotificationFactory implements NotificationEvent
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
         String action = "Initiator accepted you to %s event. %s".formatted(title, CommentDateTimeFormatter.format(creationDate));
-        return NotificationRequestDto.builder()
+
+        // Create a list to hold all notifications
+        List<NotificationRequestDto> notifications = new ArrayList<>();
+
+        // Add notification for the accepted attender
+        notifications.add(NotificationRequestDto.builder()
                 .action(action)
                 .objectName("Event")
                 .objectLink("/events/" + event.getId())
@@ -52,6 +59,8 @@ public class AcceptEventAttenderNotificationFactory implements NotificationEvent
                 .receiverId(userId)
                 .initiatorId(initiator.getId())
                 .origin(NotificationOrigin.GREEN_CITY)
-                .build();
+                .build());
+
+        return notifications;
     }
 }

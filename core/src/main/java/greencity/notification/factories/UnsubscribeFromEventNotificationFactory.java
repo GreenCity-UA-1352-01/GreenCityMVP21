@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -35,7 +37,7 @@ public class UnsubscribeFromEventNotificationFactory implements NotificationEven
     }
 
     @Override
-    public NotificationRequestDto createEvent(Object[] args) {
+    public List<NotificationRequestDto> createEvent(Object[] args) {
         Long eventId = (Long) args[0];
         UserVO initiator = (UserVO) args[1];
         String name = initiator.getName();
@@ -45,7 +47,12 @@ public class UnsubscribeFromEventNotificationFactory implements NotificationEven
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
         String action = "User with name %s unsubscribed from event %s. %s".formatted(name, title, CommentDateTimeFormatter.format(creationDate));
-        return NotificationRequestDto.builder()
+
+        // Create a list to hold all notifications
+        List<NotificationRequestDto> notifications = new ArrayList<>();
+
+        // Add notification for the event initiator
+        notifications.add(NotificationRequestDto.builder()
                 .action(action)
                 .objectName("Event")
                 .objectLink("/events/" + event.getId())
@@ -54,6 +61,8 @@ public class UnsubscribeFromEventNotificationFactory implements NotificationEven
                 .receiverId(event.getInitiator().getId())
                 .initiatorId(initiator.getId())
                 .origin(NotificationOrigin.GREEN_CITY)
-                .build();
+                .build());
+
+        return notifications;
     }
 }

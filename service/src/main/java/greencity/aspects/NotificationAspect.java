@@ -3,13 +3,15 @@ package greencity.aspects;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
-import java.lang.reflect.Method;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 @Component
 @Aspect
@@ -31,7 +33,7 @@ public class NotificationAspect {
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();
 
-        NotificationRequestDto event = registry.getFactory(method).createEvent(args);
+        List<NotificationRequestDto> event = registry.getFactory(method).createEvent(args);
         publisher.publish(event);
     }
 }

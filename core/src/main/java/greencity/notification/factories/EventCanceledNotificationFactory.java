@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -35,7 +37,7 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
     }
 
     @Override
-    public NotificationRequestDto createEvent(Object[] args) {
+    public List<NotificationRequestDto> createEvent(Object[] args) {
         Long eventId = (Long) args[0];
         UserVO initiator = (UserVO) args[1];
 
@@ -44,7 +46,9 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
         String action = "Unfortunately event %s was cancelled. %s".formatted(title, CommentDateTimeFormatter.format(creationDate));
-        return NotificationRequestDto.builder()
+
+        List<NotificationRequestDto> notifications = new ArrayList<>();
+        notifications.add(NotificationRequestDto.builder()
                 .action(action)
                 .objectName("Event")
                 .objectLink("/events/" + event.getId())
@@ -53,6 +57,7 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
                 .receiverId(event.getInitiator().getId())
                 .initiatorId(initiator.getId())
                 .origin(NotificationOrigin.GREEN_CITY)
-                .build();
+                .build());
+        return notifications;
     }
 }
