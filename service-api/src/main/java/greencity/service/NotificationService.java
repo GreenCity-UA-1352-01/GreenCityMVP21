@@ -9,4 +9,7 @@ public interface NotificationService {
     void deleteLikeNotification(Long initiatorId,
                             Long receiverId,
                             Long eventId);
+    void deleteCommentLikeNotification(Long initiatorId,
+                            Long receiverId,
+                            Long eventId);
 }

@@ -137,6 +137,6 @@ public class EventCommentServiceImpl implements EventCommentService {
 
         eventCommentLikeRepo.deleteByEventCommentAndUser(eventComment, modelMapper.map(user, User.class));
 
-        notificationService.deleteLikeNotification(user.getId(), eventComment.getUser().getId(), commentId);
+        notificationService.deleteCommentLikeNotification(user.getId(), eventComment.getUser().getId(), commentId);
     }
 }

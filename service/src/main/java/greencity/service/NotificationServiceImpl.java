@@ -64,4 +64,20 @@ public class NotificationServiceImpl implements NotificationService {
             );
         }
     }
+
+    @Override
+    @Transactional
+    public void deleteCommentLikeNotification(Long initiatorId,
+                                              Long receiverId,
+                                              Long id) {
+        String commentObjectLink = "/comments/" + id;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    commentObjectLink
+            );
+        }
+    }
 }
