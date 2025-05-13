@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
-import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
@@ -94,7 +93,6 @@ public class FriendController {
     })
     @Parameter(name = "friendId", description = "Friend's id. Cannot be empty and must be greater than 0.")
     @PostMapping("/{friendId}")
-    @NotifyUser
     public void addFriend(@PathVariable("friendId") @Valid @Positive Long friendId,
                           @Parameter(hidden = true) @CurrentUser UserVO currentUser) {
         friendService.addFriend(currentUser.getId(), friendId);
