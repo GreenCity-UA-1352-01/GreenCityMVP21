@@ -39,4 +39,5 @@ public interface EventService {
     EventVO findById(Long id);
 
     void unsubscribeFromEvent(Long id, UserVO user);
+    List<Long> findAttendersIdByEventId(Long id);
 }

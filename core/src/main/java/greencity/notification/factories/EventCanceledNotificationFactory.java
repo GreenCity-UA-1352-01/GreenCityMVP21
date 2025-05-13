@@ -46,18 +46,20 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
         String action = "Unfortunately event %s was cancelled. %s".formatted(title, CommentDateTimeFormatter.format(creationDate));
-
+        List<Long> receivers = eventService.findAttendersIdByEventId(eventId);
         List<NotificationRequestDto> notifications = new ArrayList<>();
-        notifications.add(NotificationRequestDto.builder()
-                .action(action)
-                .objectName("Event")
-                .objectLink("/events/" + event.getId())
-                .creationDate(ZonedDateTime.now())
-                .status(NotificationStatus.UNREAD)
-                .receiverId(event.getInitiator().getId())
-                .initiatorId(initiator.getId())
-                .origin(NotificationOrigin.GREEN_CITY)
-                .build());
+        for (Long receiver : receivers) {
+            notifications.add(NotificationRequestDto.builder()
+                    .action(action)
+                    .objectName("Event")
+                    .objectLink("/events/" + event.getId())
+                    .creationDate(ZonedDateTime.now())
+                    .status(NotificationStatus.UNREAD)
+                    .receiverId(receiver)
+                    .initiatorId(initiator.getId())
+                    .origin(NotificationOrigin.GREEN_CITY)
+                    .build());
+        }
         return notifications;
     }
 }

@@ -369,6 +369,13 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException(ErrorMessage.EVENT_ALREADY_CANCELLED);
         }
     }
+    @Override
+    public List<Long> findAttendersIdByEventId(Long eventId) {
+        Event event = getEventById(eventId);
+        return event.getAttenders().stream()
+                .map(attender -> attender.getAttender().getId())
+                .collect(Collectors.toList());
+    }
 
     @Override
     public EventVO findById(Long id) {
