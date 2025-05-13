@@ -1,10 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.eventimage.EventImageResponseDto;
 import greencity.dto.tag.TagVO;
@@ -33,6 +30,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -592,7 +591,7 @@ class EventServiceImplTest {
         initiator.setId(1L);
         event.setInitiator(initiator);
 
-        UserVO userVO = ModelUtils.getUserVO(); // инициатор
+        UserVO userVO = ModelUtils.getUserVO();
         userVO.setId(1L);
         userVO.setRole(Role.ROLE_USER);
 
@@ -622,7 +621,7 @@ class EventServiceImplTest {
 
         UserVO notAllowedUser = new UserVO();
         notAllowedUser.setId(2L);
-        notAllowedUser.setRole(Role.ROLE_USER); // не админ
+        notAllowedUser.setRole(Role.ROLE_USER);
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
 
@@ -630,7 +629,146 @@ class EventServiceImplTest {
                 eventService.acceptAttenderToEvent(1L, 3L, notAllowedUser)
         );
     }
+    @Test
+    void checkIfEventNotCancelled_EventAlreadyCancelled_ThrowsException() throws Exception {
+        Event event = ModelUtils.getEvent();
+        event.setId(1L);
 
+        when(cancelledEventsRepository.findByEventId(1L))
+                .thenReturn(List.of(new CancelledEvent()));
+
+        Method method = EventServiceImpl.class.getDeclaredMethod("checkIfEventNotCancelled", Event.class);
+        method.setAccessible(true);
+
+        assertThrows(BadRequestException.class, () -> {
+            try {
+                method.invoke(eventService, event);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        });
+    }
+
+
+    @Test
+    void findAttendersIdByEventId_ReturnsCorrectIds() {
+        Event event = ModelUtils.getEvent();
+        User user1 = new User(); user1.setId(1L);
+        User user2 = new User(); user2.setId(2L);
+
+        event.setAttenders(List.of(
+                EventAttender.builder().attender(user1).build(),
+                EventAttender.builder().attender(user2).build()
+        ));
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        List<Long> result = eventService.findAttendersIdByEventId(1L);
+
+        assertEquals(List.of(1L, 2L), result);
+    }
+
+    @Test
+    void findById_ReturnsMappedEventVO() {
+        Event event = ModelUtils.getEvent();
+        EventVO eventVO = ModelUtils.getEventVO();
+        event.setId(1L);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(modelMapper.map(event, EventVO.class)).thenReturn(eventVO);
+
+        EventVO result = eventService.findById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("title", result.getTitle());
+    }
+
+    @Test
+    void unsubscribeFromEvent_SuccessfullyRemovesUser() {
+        Event event = ModelUtils.getEvent();
+        event.setId(1L);
+        User user = ModelUtils.getUser();
+        user.setId(5L);
+
+        event.setAttenders(new ArrayList<>(List.of(
+                EventAttender.builder().attender(user).build()
+        )));
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepo.findById(5L)).thenReturn(Optional.of(user));
+        when(cancelledEventsRepository.findByEventId(1L)).thenReturn(Collections.emptyList());
+
+        eventService.unsubscribeFromEvent(1L, UserVO.builder().id(5L).build());
+
+        assertTrue(event.getAttenders().isEmpty());
+        verify(eventRepository).save(event);
+    }
+    @Test
+    void unsubscribeFromEvent_UserNotAttender_ThrowsNotFoundException() {
+        Event event = ModelUtils.getEvent();
+        event.setId(1L);
+        User user = ModelUtils.getUser();
+        user.setId(99L);
+
+        event.setAttenders(new ArrayList<>());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepo.findById(99L)).thenReturn(Optional.of(user));
+        when(cancelledEventsRepository.findByEventId(1L)).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class, () -> {
+            eventService.unsubscribeFromEvent(1L, UserVO.builder().id(99L).build());
+        });
+    }
+
+    @Test
+    void cancelEventById_Success_AdminUser() {
+        Event event = ModelUtils.getEvent();
+        event.setId(1L);
+        event.setDateTimes(List.of(ModelUtils.getEventDateTimeLocation()));
+        User initiator = ModelUtils.getUser();
+        initiator.setId(10L);
+
+        UserVO userVO = UserVO.builder()
+                .id(10L)
+                .role(Role.ROLE_ADMIN)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepo.findById(10L)).thenReturn(Optional.of(initiator));
+        when(cancelledEventsRepository.findByEventId(1L)).thenReturn(List.of());
+        doNothing().when(eventDateTimeLocationService).isFutureEvent(any());
+
+        eventService.cancelEventById(1L, userVO, "Bad weather");
+
+        verify(cancelledEventsRepository).save(any(CancelledEvent.class));
+    }
+
+    @Test
+    void cancelEventById_Success_InitiatorCancelsOwnEvent() {
+        Event event = ModelUtils.getEvent();
+        event.setId(1L);
+        event.setDateTimes(List.of(ModelUtils.getEventDateTimeLocation()));
+        User initiator = ModelUtils.getUser();
+        initiator.setId(2L);
+        event.setInitiator(initiator);
+
+        UserVO userVO = UserVO.builder()
+                .id(2L)
+                .role(Role.ROLE_USER)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepo.findById(2L)).thenReturn(Optional.of(initiator));
+        when(cancelledEventsRepository.findByEventId(1L)).thenReturn(List.of());
+        doNothing().when(eventDateTimeLocationService).isFutureEvent(any());
+
+        eventService.cancelEventById(1L, userVO, "Reason");
+
+        verify(cancelledEventsRepository).save(any(CancelledEvent.class));
+
+    }
 
 }
 
