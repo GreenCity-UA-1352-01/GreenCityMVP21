@@ -5,6 +5,7 @@ import greencity.controller.EcoNewsController;
 import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
@@ -71,6 +72,7 @@ public class NewsLikedNotificationFactory implements NotificationEventFactory {
                 .status(NotificationStatus.UNREAD)
                 .receiverId(receiver.getId())
                 .initiatorId(initiator.getId())
+                .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }
 }
