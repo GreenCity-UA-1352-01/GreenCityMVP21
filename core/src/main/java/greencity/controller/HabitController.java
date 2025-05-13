@@ -265,15 +265,15 @@ public class HabitController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "Dislike a habit.")
+    @Operation(summary = "Unlike a habit.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("{habitId}/unlike")
-    public ResponseEntity<ResponseEntity.BodyBuilder> dislikeHabit(@PathVariable Long habitId,
-                                                                @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+    public ResponseEntity<ResponseEntity.BodyBuilder> unlikeHabit(@PathVariable Long habitId,
+                                                                  @Parameter(hidden = true) @CurrentUser UserVO userVO) {
         habitService.unlikeHabit(habitId, userVO.getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
