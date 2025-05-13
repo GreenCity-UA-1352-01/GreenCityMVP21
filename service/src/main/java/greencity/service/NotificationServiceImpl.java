@@ -6,6 +6,7 @@ import greencity.dto.notification.UpdateNotificationStatusRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
 import greencity.enums.NotificationStatus;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.NotificationCounterRepo;
 import greencity.repository.NotificationRepo;
@@ -52,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new NotFoundException("Notification with ID " + request.getId() + " not found."));
 
         if (!Objects.equals(notification.getReceiver().getId(), user.getId())) {
-            throw new IllegalArgumentException("Notification with ID " + request.getId() + " does not belong to user with ID " + user.getId() + ".");
+            throw new BadRequestException("Notification with ID " + request.getId() + " does not belong to user with ID " + user.getId() + ".");
         }
 
         NotificationStatus enumStatus = NotificationStatus.valueOf(request.getStatus().toUpperCase());
