@@ -6,6 +6,8 @@ import greencity.ModelUtils;
 import greencity.config.SecurityConfig;
 import greencity.config.WebMvcConfig;
 import greencity.dto.PageableDto;
+import greencity.dto.friend.EcoFriendProfileDto;
+import greencity.dto.friend.EcoFriendsResponse;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.NotFoundException;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
@@ -203,5 +206,61 @@ class FriendControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(friendService, times(1)).removeFriend(userVO.getId(), friendId);
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetAllFriends_shouldReturnOk() throws Exception {
+        EcoFriendsResponse friendResponse = ModelUtils.getEcoFriendsResponse();
+        PageableDto<EcoFriendsResponse> response = new PageableDto<>(
+                List.of(friendResponse), 1, 0, 1);
+
+        when(friendService.getAllFriendsForUser(eq(USER.getId()), any(Pageable.class))).thenReturn(response);
+
+        mockMvc.perform(get("/friends")
+                        .param("page", "0")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(response)));
+
+        verify(friendService).getAllFriendsForUser(eq(USER.getId()), any(Pageable.class));
+    }
+
+    @Test
+    void testGetAllFriends_shouldReturn401_whenUnauthorized() throws Exception {
+        mockMvc.perform(get("/friends")
+                        .param("page", "0"))
+                .andExpect(status().isUnauthorized());
+
+        verify(friendService, never()).getAllFriendsForUser(anyLong(), any());
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetFriendProfile_shouldReturnOk() throws Exception {
+        EcoFriendProfileDto ecoFriendProfileDto = ModelUtils.getEcoFriendProfile();
+
+        when(friendService.getFriendProfile(USER.getId(), FRIEND_ID)).thenReturn(ecoFriendProfileDto);
+
+        mockMvc.perform(get("/friends/friend/{friendId}", FRIEND_ID)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(ecoFriendProfileDto)));
+
+        verify(friendService).getFriendProfile(USER.getId(), FRIEND_ID);
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetFriendProfile_shouldReturn404_whenFriendNotFound() throws Exception {
+        when(friendService.getFriendProfile(USER.getId(), FRIEND_ID))
+                .thenThrow(new NotFoundException("Friend not found"));
+
+        mockMvc.perform(get("/friends/friend/{friendId}", FRIEND_ID))
+                .andExpect(status().isNotFound());
+
+        verify(friendService).getFriendProfile(USER.getId(), FRIEND_ID);
     }
 }

@@ -9,6 +9,8 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
+import greencity.dto.friend.EcoFriendProfileDto;
+import greencity.dto.friend.EcoFriendsResponse;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
@@ -32,6 +34,8 @@ import greencity.dto.tag.TagViewDto;
 import greencity.dto.user.*;
 import greencity.entity.*;
 import greencity.enums.*;
+import greencity.mapping.records.FriendProfileData;
+import greencity.mapping.records.FriendWithMutuals;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -466,5 +470,53 @@ public class ModelUtils {
             .rating(1D)
             .mutualFriends(1)
             .build();
+    }
+
+    public static EcoFriendsResponse getEcoFriendsResponse() {
+        User user = User.builder()
+                .id(1L)
+                .firstName("Alla")
+                .city("Kyiv")
+                .rating(4.5)
+                .profilePicturePath("/images/alla.jpg")
+                .lastActivityTime(LocalDateTime.now())
+                .build();
+
+        FriendWithMutuals friendWithMutuals = new FriendWithMutuals(user, 3);
+
+        return EcoFriendsResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .city(user.getCity())
+                .rating(user.getRating())
+                .profilePicturePath(user.getProfilePicturePath())
+                .isOnline(true)
+                .mutualFriends(friendWithMutuals.mutualFriends())
+                .build();
+    }
+
+    public static EcoFriendProfileDto getEcoFriendProfile() {
+        User user = User.builder()
+                .id(1L)
+                .name("Alla")
+                .profilePicturePath("/images/alla.jpg")
+                .rating(4.5)
+                .userCredo("Enjoy your life!")
+                .lastActivityTime(LocalDateTime.now())
+                .build();
+
+        FriendProfileData friendProfileData = new FriendProfileData(user, 3, 1, 5);
+
+        return EcoFriendProfileDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .profilePicturePath(user.getProfilePicturePath())
+                .rating(user.getRating())
+                .userCredo(user.getUserCredo())
+                .isOnline(true)
+                .habitsInProgress(friendProfileData.habitsInProgress())
+                .habitsAcquired(friendProfileData.habitsAcquired())
+                .newsPublished(friendProfileData.newsPublished())
+                .build();
     }
 }
