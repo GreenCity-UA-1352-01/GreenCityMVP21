@@ -10,6 +10,7 @@ public class NotificationResponseDtoMapper extends AbstractConverter<Notificatio
     @Override
     public NotificationResponseDto convert(Notification notification) {
         return NotificationResponseDto.builder()
+            .id(notification.getId())
             .action(notification.getAction())
             .objectName(notification.getObjectName())
             .objectLink(notification.getObjectLink())
@@ -17,6 +18,7 @@ public class NotificationResponseDtoMapper extends AbstractConverter<Notificatio
             .status(notification.getStatus())
             .receiverId(notification.getReceiver().getId())
             .initiatorId(notification.getInitiator().getId())
+            .origin(notification.getOrigin())
             .build();
     }
 }
