@@ -14,6 +14,7 @@ import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDateTimeFormatter;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.notification.NotificationsGroupedResponseDto;
@@ -850,6 +851,7 @@ public class ModelUtils {
         return NotificationReceiver.builder()
             .id(1L)
             .receiver(getUser())
+            .status(NotificationStatus.UNREAD)
             .build();
     }
 
@@ -860,6 +862,8 @@ public class ModelUtils {
             .objectId(1L)
             .objectName("test")
             .creationDate(zonedDateTime)
+            .notificationType(NotificationType.EVENT_COMMENT)
+            .objectType(NotificationObjectType.EVENT)
             .initiator(getUser().setId(1L))
             .build();
     }
@@ -888,11 +892,11 @@ public class ModelUtils {
         return NotificationResponseDto.builder()
             .id(1L)
             .initiatorId(1L)
-            .initiatorName("test")
-            .receiverId(2L)
+            .initiatorName("Taras")
+            .receiverId(1L)
             .objectId(1L)
             .objectName("test")
-            .objectLink("link")
+            .objectLink("/event/1")
             .objectType(NotificationObjectType.EVENT)
             .action("test")
             .creationDate(zonedDateTime)
@@ -902,17 +906,19 @@ public class ModelUtils {
     }
 
     public static NotificationsGroupedResponseDto getNotificationsGroupedResponseDto() {
+        String dateTime = NotificationDateTimeFormatter.format(zonedDateTime);
         return NotificationsGroupedResponseDto.builder()
-            .ids(Set.of(1L, 2L))
-            .action("test")
+            .ids(Set.of(1L))
+            .action("Taras commented on your event test. %s".formatted(dateTime))
             .objectId(1L)
             .objectName("test")
+            .objectLink("/event/1")
             .objectType(NotificationObjectType.EVENT)
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
-            .receiverId(2L)
-            .initiatorIds(Set.of(1L, 2L))
-            .initiatorNames(Set.of("test1", "test2"))
+            .receiverId(1L)
+            .initiatorIds(Set.of(1L))
+            .initiatorNames(Set.of("Taras"))
             .notificationType(NotificationType.EVENT_COMMENT)
             .build();
     }

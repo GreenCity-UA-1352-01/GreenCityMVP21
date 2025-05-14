@@ -62,11 +62,24 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationResponseDtoMapper.convert(notification);
     }
 
+
+    /**
+     * Retrieves all notifications for a specific user. If user has no notifications, returns an empty set.
+     *
+     * <p>
+     * The notifications are grouped by notification type and object id and sorted by creation date,
+     * type, object id, and status.
+     *
+     * @param userId the id of the user.
+     * @return a set containing the notifications.
+     * @author Marian Shtangret
+     * @author Rostyslav Zadyraichuk
+     */
     @Override
     public Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId) {
         List<Notification> notifications = notificationsRepo.findNotificationsForUser(userId);
         if (notifications.isEmpty()) {
-            throw new IllegalArgumentException("No notifications to group");
+            return Collections.emptySet();
         }
 
         Map<NotificationGroupKey, List<NotificationResponseDto>> groupedNotifications = new HashMap<>();

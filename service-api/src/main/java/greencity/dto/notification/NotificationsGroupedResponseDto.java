@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"ids", "initiatorIds", "initiatorNames"})
 public class NotificationsGroupedResponseDto extends BaseNotificationResponseDto {
     @Builder.Default
     private Set<Long> ids = new HashSet<>();
