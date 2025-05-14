@@ -3,8 +3,13 @@ package greencity.controller;
 import greencity.annotations.CurrentUserId;
 import greencity.constant.HttpStatuses;
 import greencity.dto.notification.BaseNotificationResponseDto;
+import greencity.dto.notification.NotificationResponseDto;
+import greencity.dto.notification.NotificationsGroupedResponseDto;
 import greencity.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.Set;
@@ -23,14 +28,19 @@ public class NotificationController {
 
     @Operation(summary = "Find all notifications by user.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content(
+                array = @ArraySchema(schema = @Schema(oneOf = {
+                    NotificationResponseDto.class,
+                    NotificationsGroupedResponseDto.class
+                }))
+            )),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
     @GetMapping("/user/{userId}")
     public ResponseEntity<Set<BaseNotificationResponseDto>> getUserNotifications(
-            @PathVariable @CurrentUserId Long userId) {
+        @PathVariable @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationsService.getAllNotificationsForUser(userId));
     }

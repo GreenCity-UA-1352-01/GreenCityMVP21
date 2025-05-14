@@ -1,15 +1,12 @@
 package greencity.service;
 
 import greencity.dto.notification.BaseNotificationResponseDto;
-import greencity.dto.notification.NotificationForGroupingDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
 import greencity.entity.NotificationCounter;
-import greencity.entity.User;
-import greencity.enums.NotificationStatus;
+import greencity.entity.NotificationReceiver;
 import greencity.enums.NotificationType;
-import greencity.mapping.NotificationForGroupingDtoMapper;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.mapping.NotificationsGroupedResponseDtoMapper;
@@ -30,7 +27,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationCounterRepo notificationCounterRepo;
     private final NotificationMapper notificationMapper;
     private final NotificationResponseDtoMapper notificationResponseDtoMapper;
-    private final NotificationForGroupingDtoMapper notificationForGroupingDtoMapper;
     private final NotificationsGroupedResponseDtoMapper notificationsGroupedResponseDtoMapper;
 
     /**
@@ -38,60 +34,61 @@ public class NotificationServiceImpl implements NotificationService {
      * If notification counter for receiver is not present in the database, creates new one with count of
      * notifications set to 1.
      * If notification counter for receiver is present in the database, increments count of notifications by 1.
+     *
      * @param dto notification data transfer object
-     * @return created notification data transfer object
+     * @return list of created notifications
      * @author Roman Diakov
      * @author Rostyslav Zadyraichuk
      */
     @Override
     @Transactional
-    public NotificationResponseDto createNotification(NotificationRequestDto dto) {
+    public List<NotificationResponseDto> createNotifications(NotificationRequestDto dto) {
         Notification notification = notificationMapper.convert(dto);
         notification = notificationsRepo.save(notification);
-        final User receiver = notification.getReceiver();
+        List<NotificationReceiver> receivers = notification.getNotificationReceivers();
 
-        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(
-            notificationCounter ->
-                notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-            () -> {
-                NotificationCounter newNotificationCounter = NotificationCounter.builder()
-                    .countOfNotifications(1)
-                    .user(receiver)
-                    .build();
-                notificationCounterRepo.save(newNotificationCounter);
-            }
-        );
+        receivers.forEach(nr -> {
+            notificationCounterRepo.findById(nr.getId()).ifPresentOrElse(notificationCounter ->
+                    notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
+                () -> {
+                    NotificationCounter newNotificationCounter = NotificationCounter.builder()
+                        .countOfNotifications(1)
+                        .user(nr.getReceiver())
+                        .build();
+                    notificationCounterRepo.save(newNotificationCounter);
+                });
+        });
+
         return notificationResponseDtoMapper.convert(notification);
     }
 
     @Override
     public Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId) {
         List<Notification> notifications = notificationsRepo.findNotificationsForUser(userId);
-        Map<NotificationGroupKey, List<NotificationForGroupingDto>> groupedNotifications = new HashMap<>();
-//        Map<NotificationType, Map<Long, Map<NotificationStatus, List<NotificationResponseDto>>>> groupedNotifications = new HashMap<>();
+        if (notifications.isEmpty()) {
+            throw new IllegalArgumentException("No notifications to group");
+        }
+
+        Map<NotificationGroupKey, List<NotificationResponseDto>> groupedNotifications = new HashMap<>();
         var result = new TreeSet<>(Comparator
-            .comparing(BaseNotificationResponseDto::getCreationDate)
+            .comparing(BaseNotificationResponseDto::getCreationDate, Comparator.reverseOrder())
             .thenComparing(BaseNotificationResponseDto::getNotificationType)
             .thenComparing(BaseNotificationResponseDto::getObjectId)
             .thenComparing(BaseNotificationResponseDto::getStatus)
-            .reversed());
+        );
 
         for (Notification notification : notifications) {
-            NotificationForGroupingDto dto = notificationForGroupingDtoMapper.convert(notification);
+            List<NotificationResponseDto> dtos = notificationResponseDtoMapper.convert(notification);
             NotificationGroupKey key = new NotificationGroupKey(
                 notification.getNotificationType(),
-                notification.getObjectId(),
-                notification.getStatus()
+                notification.getObjectId()
             );
             if (key.getType().isGroupable()) {
                 groupedNotifications
                     .computeIfAbsent(key, k -> new ArrayList<>())
-//                    .computeIfAbsent(dto.getType(), t -> new HashMap<>())
-//                    .computeIfAbsent(dto.getObjectId(), id -> new HashMap<>())
-//                    .computeIfAbsent(dto.getStatus(), s -> new ArrayList<>())
-                    .add(dto);
+                    .addAll(dtos);
             } else {
-                result.add(dto);
+                result.addAll(dtos);
             }
         }
 
@@ -108,6 +105,5 @@ public class NotificationServiceImpl implements NotificationService {
     private static class NotificationGroupKey {
         private final NotificationType type;
         private final Long objectId;
-        private final NotificationStatus status;
     }
 }

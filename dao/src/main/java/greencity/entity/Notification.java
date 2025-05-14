@@ -1,9 +1,10 @@
 package greencity.entity;
 
 import greencity.enums.NotificationObjectType;
-import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 import java.time.ZonedDateTime;
 
@@ -14,8 +15,8 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(exclude = {"receiver", "initiator"})
-@ToString(exclude = {"receiver", "initiator"})
+@EqualsAndHashCode(exclude = {"notificationReceivers"})
+@ToString(exclude = {"notificationReceivers"})
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,19 +50,18 @@ public class Notification {
     @Column(name = "creation_date", nullable = false)
     private ZonedDateTime creationDate;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private NotificationStatus status;
-
     @Column(name = "notification_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", referencedColumnName = "id")
-    private User receiver;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", referencedColumnName = "id")
     private User initiator;
+
+    @OneToMany(fetch = FetchType.LAZY,
+        mappedBy = "notification",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
+    @Builder.Default
+    private List<NotificationReceiver> notificationReceivers = new ArrayList<>();
 }
