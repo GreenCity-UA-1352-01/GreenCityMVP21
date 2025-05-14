@@ -10,6 +10,8 @@ import greencity.entity.Event;
 import greencity.entity.EventComment;
 import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.mapping.AddEventCommentDtoResponseMapper;
+import greencity.mapping.EventCommentMapper;
 import greencity.repository.EventCommentRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +27,8 @@ public class EventCommentServiceImpl implements EventCommentService {
     private EventCommentRepo eventCommentRepo;
     private EventService eventService;
     private ModelMapper modelMapper;
+    private EventCommentMapper eventCommentMapper;
+    private AddEventCommentDtoResponseMapper addEventCommentDtoResponseMapper;
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
 
@@ -43,7 +47,7 @@ public class EventCommentServiceImpl implements EventCommentService {
                                            AddEventCommentDtoRequest comment,
                                            UserVO userVO) {
         EventVO event = eventService.findById(eventId);
-        EventComment eventComment = modelMapper.map(comment, EventComment.class);
+        EventComment eventComment = eventCommentMapper.convert(comment);
         eventComment.setUser(modelMapper.map(userVO, User.class));
         eventComment.setEvent(modelMapper.map(event, Event.class));
         if (comment.getParentCommentId() != 0) {
@@ -52,6 +56,7 @@ public class EventCommentServiceImpl implements EventCommentService {
                     () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
             if (parentComment.getParentComment() == null) {
                 eventComment.setParentComment(parentComment);
+                parentComment.getComments().add(eventComment);
             } else {
                 throw new BadRequestException(ErrorMessage.CANNOT_REPLY_THE_REPLY);
             }
@@ -59,6 +64,6 @@ public class EventCommentServiceImpl implements EventCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
-        return modelMapper.map(eventCommentRepo.save(eventComment), AddEventCommentDtoResponse.class);
+        return addEventCommentDtoResponseMapper.convert(eventCommentRepo.save(eventComment));
     }
 }

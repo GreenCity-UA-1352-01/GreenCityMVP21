@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class AddEventCommentDtoResponse {
     private Long id;
     private EventCommentAuthorDto author;

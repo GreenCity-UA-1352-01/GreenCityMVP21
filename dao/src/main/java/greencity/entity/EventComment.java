@@ -2,8 +2,9 @@ package greencity.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.*;
@@ -31,17 +32,18 @@ public class EventComment {
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private ZonedDateTime createdDate;
 
     @LastModifiedDate
     @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
+    private ZonedDateTime modifiedDate;
 
     @ManyToOne
     @JoinColumn(name = "parent_comment_id")
     private EventComment parentComment;
 
     @OneToMany(mappedBy = "parentComment", cascade = {CascadeType.ALL})
+    @Builder.Default
     private List<EventComment> comments = new ArrayList<>();
 
     @ManyToOne
@@ -61,5 +63,6 @@ public class EventComment {
         joinColumns = @JoinColumn(name = "event_comment_id"),
         inverseJoinColumns = @JoinColumn(name = "user_liked_id")
     )
-    private Set<User> usersLiked;
+    @Builder.Default
+    private Set<User> usersLiked = new HashSet<>();
 }
