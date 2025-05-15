@@ -2,6 +2,7 @@ package greencity.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,11 +33,11 @@ public class EventComment {
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private ZonedDateTime createdDate;
+    private LocalDateTime createdDate;
 
     @LastModifiedDate
     @Column(name = "modified_date", nullable = false)
-    private ZonedDateTime modifiedDate;
+    private LocalDateTime modifiedDate;
 
     @ManyToOne
     @JoinColumn(name = "parent_comment_id")

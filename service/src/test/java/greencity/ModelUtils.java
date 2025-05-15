@@ -841,10 +841,11 @@ public class ModelUtils {
         return EventComment.builder()
             .id(1L)
             .text("text")
-            .createdDate(ZonedDateTime.now())
-            .modifiedDate(ZonedDateTime.now())
+            .createdDate(LocalDateTime.now())
+            .modifiedDate(LocalDateTime.now())
             .user(getUser())
             .event(getEvent())
+            .deleted(false)
             .build();
     }
 
@@ -888,7 +889,7 @@ public class ModelUtils {
             .id(1L)
             .author(getEventCommentAuthorDto())
             .text("text")
-            .modifiedDate(ZonedDateTime.now())
+            .modifiedDate(LocalDateTime.now())
             .build();
     }
 }

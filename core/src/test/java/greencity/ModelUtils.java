@@ -506,7 +506,7 @@ public class ModelUtils {
                 .id(1L)
                 .author(getEventCommentAuthorDto())
                 .text("text")
-                .modifiedDate(ZonedDateTime.now())
+                .modifiedDate(LocalDateTime.now())
                 .build();
     }
 }

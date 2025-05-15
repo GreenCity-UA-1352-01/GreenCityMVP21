@@ -17,10 +17,11 @@ import greencity.rating.RatingCalculation;
 import greencity.repository.EventCommentRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
@@ -43,26 +44,15 @@ class EventCommentServiceImplTest {
     private RatingCalculation ratingCalculation;
     @Mock
     private EventService eventService;
-
-    private ModelMapper modelMapper;
-    private EventCommentMapper eventCommentMapper;
+    @Spy
     private AddEventCommentDtoResponseMapper addEventCommentDtoResponseMapper;
-    private EventCommentServiceImpl eventCommentService;
+    @Spy
+    private EventCommentMapper eventCommentMapper;
+    @Spy
+    private ModelMapper modelMapper;
 
-    @BeforeEach
-    void setUp() {
-        modelMapper = new ModelMapper();
-        eventCommentMapper = new EventCommentMapper(eventCommentRepository);
-        addEventCommentDtoResponseMapper = new AddEventCommentDtoResponseMapper(modelMapper);
-        eventCommentService = new EventCommentServiceImpl(
-            eventCommentRepository,
-            eventService,
-            modelMapper,
-            eventCommentMapper,
-            addEventCommentDtoResponseMapper,
-            ratingCalculation,
-            httpServletRequest);
-    }
+    @InjectMocks
+    private EventCommentServiceImpl eventCommentService;
 
     @Test
     void testSave_withoutParentComment() {
@@ -86,7 +76,7 @@ class EventCommentServiceImplTest {
     @Test
     void testSave_withNotExistingParentComment() {
         AddEventCommentDtoRequest request = ModelUtils.getAddEventCommentDtoRequest();
-        EventComment eventComment = modelMapper.map(request, EventComment.class);
+        EventComment eventComment = eventCommentMapper.convert(request);
 
         when(eventService.findById(EVENT.getId())).thenReturn(EVENT);
         when(eventCommentRepository.findById(request.getParentCommentId()))
@@ -100,7 +90,7 @@ class EventCommentServiceImplTest {
     @Test
     void testSave_withExistingParentCommentWithoutDoubleParent() {
         AddEventCommentDtoRequest request = ModelUtils.getAddEventCommentDtoRequest();
-        EventComment eventComment = modelMapper.map(request, EventComment.class);
+        EventComment eventComment = eventCommentMapper.convert(request);
         eventComment.setId(1L);
         eventComment.setUser(modelMapper.map(USER, User.class));
 
@@ -120,7 +110,7 @@ class EventCommentServiceImplTest {
     @Test
     void testSave_withExistingParentCommentWithDoubleParent() {
         AddEventCommentDtoRequest request = ModelUtils.getAddEventCommentDtoRequest();
-        EventComment eventComment = modelMapper.map(request, EventComment.class);
+        EventComment eventComment = eventCommentMapper.convert(request);
         eventComment.setParentComment(eventComment);
 
         when(eventService.findById(EVENT.getId())).thenReturn(EVENT);
