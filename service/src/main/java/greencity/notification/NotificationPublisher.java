@@ -4,7 +4,6 @@ import greencity.dto.notification.NotificationRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 @Component

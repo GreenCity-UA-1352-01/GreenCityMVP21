@@ -1,5 +1,7 @@
 package greencity.service;
 
+
+import greencity.dto.user.UserVO;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
@@ -16,6 +18,8 @@ public interface NotificationService {
      * @author Rostyslav Zadyraichuk
      */
     NotificationResponseDto createNotification(NotificationRequestDto dto);
+  
+    void updateNotificationStatus(UpdateNotificationStatusRequestDto updateNotificationStatusRequestDto, UserVO user);
 
     void deleteEventLikeNotification(Long initiatorId,
                                      Long receiverId,

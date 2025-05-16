@@ -1,6 +1,9 @@
 package greencity.aspects;
 
 import greencity.dto.notification.NotificationRequestDto;
+import greencity.notification.NotificationHandlerRegistry;
+import greencity.notification.NotificationPublisher;
+import java.lang.reflect.Method;
 import greencity.notification.NotificationEventFactory;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
@@ -10,7 +13,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.util.List;
 

@@ -1,5 +1,6 @@
 package greencity.dto.notification;
 
+import java.time.ZonedDateTime;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationOrigin;

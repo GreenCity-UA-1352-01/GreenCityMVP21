@@ -1,7 +1,6 @@
 package greencity.notification;
 
 import greencity.dto.notification.NotificationRequestDto;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
