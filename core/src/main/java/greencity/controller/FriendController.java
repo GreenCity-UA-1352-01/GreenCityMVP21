@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
@@ -96,6 +97,19 @@ public class FriendController {
     public void addFriend(@PathVariable("friendId") @Valid @Positive Long friendId,
                           @Parameter(hidden = true) @CurrentUser UserVO currentUser) {
         friendService.addFriend(currentUser.getId(), friendId);
+    }
+
+    @Operation(summary = "Accept friend request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    })
+    @PatchMapping("/accept/{friendId}")
+    @NotifyUser
+    public void acceptFriendRequest(@PathVariable Long friendId,
+                                    @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        friendService.acceptFriendRequest(userVO.getId(), friendId);
     }
 
     @Operation(summary = "Get all users friends")
