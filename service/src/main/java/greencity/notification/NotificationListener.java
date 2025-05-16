@@ -11,6 +11,13 @@ import org.springframework.stereotype.Component;
 public class NotificationListener {
     private final NotificationService notificationService;
 
+    /**
+     * Handles published notifications and saves them in the database.
+     *
+     * @param notificationRequestDto notification DTO for creation
+     * @see NotificationPublisher
+     * @author Roman Diakov & Rostyslav Zadyraichuk
+     */
     @EventListener
     public void handleNotification(NotificationRequestDto notificationRequestDto) {
         notificationService.createNotification(notificationRequestDto);

@@ -4,11 +4,18 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
+import greencity.dto.event.*;
+import greencity.dto.eventcomment.AddEventCommentDtoRequest;
+import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EventCommentAuthorDto;
+import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationRequestDto;
+import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
@@ -20,6 +27,7 @@ import greencity.entity.*;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
+import java.util.stream.Collectors;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -31,6 +39,8 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static greencity.enums.UserStatus.ACTIVATED;
 
 public class ModelUtils {
@@ -43,9 +53,22 @@ public class ModelUtils {
     public static String TEST_EMAIL_2 = "test2@mail.com";
     public static ZonedDateTime zonedDateTime = ZonedDateTime.now();
     public static LocalDateTime localDateTime = LocalDateTime.now();
+    public static ZonedDateTime FIXED_EVENT_START = ZonedDateTime.of(2025, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime FIXED_EVENT_END = ZonedDateTime.of(2025, 12, 13, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime UPDATE_EVENT_START = ZonedDateTime.of(2026, 12, 14, 10, 30, 0, 0, ZoneOffset.UTC);
+    public static ZonedDateTime UPDATE_EVENT_END = ZonedDateTime.of(2026, 12, 15, 12, 28, 0, 0, ZoneOffset.UTC);
+
 
     public static Tag getTag() {
         return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
+    }
+
+    public static Tag getEventTag() {
+        return new Tag(1L, TagType.EVENT, getEventTagTranslations(), Collections.emptyList(), Collections.emptySet());
+    }
+
+    public static TagVO getEventTagVO() {
+        return new TagVO(1L, TagType.EVENT, getEventTagTranslationsVO(), Collections.emptyList(), Collections.emptySet());
     }
 
     public static Tag getHabitTag() {
@@ -76,6 +99,13 @@ public class ModelUtils {
             TagTranslation.builder().id(1L).name("Соціальний").language(getLanguageUa()).build(),
             TagTranslation.builder().id(2L).name("Social").language(language).build(),
             TagTranslation.builder().id(3L).name("Соціальний").language(language).build());
+    }
+
+    public static List<TagTranslationVO> getEventTagTranslationsVO() {
+        return Arrays.asList(
+                TagTranslationVO.builder().id(1L).name("Соціальний").build(),
+                TagTranslationVO.builder().id(2L).name("Social").build(),
+                TagTranslationVO.builder().id(3L).name("Соціальний").build());
     }
 
     public static TagDto getTagDto() {
@@ -489,8 +519,8 @@ public class ModelUtils {
     }
 
     public static UpdateEcoNewsDto getUpdateEcoNewsDto() {
-        return new UpdateEcoNewsDto("1", "title", "text", "shortInfo", Collections.singletonList("tag"),
-            "image", "source", "text");
+        return new UpdateEcoNewsDto(1L, "title", "text", "shortInfo", Collections.singletonList("tag"),
+            "image", "source");
     }
 
     public static SearchNewsDto getSearchNewsDto() {
@@ -663,9 +693,258 @@ public class ModelUtils {
 
     public static CustomShoppingListItemResponseDto getCustomShoppingListItemResponseDtoWithStatusInProgress() {
         return CustomShoppingListItemResponseDto.builder()
-            .id(2L)
-            .text("item")
-            .status(ShoppingListItemStatus.INPROGRESS)
+                .id(2L)
+                .text("item")
+                .status(ShoppingListItemStatus.INPROGRESS)
+                .build();
+    }
+
+    public static CreateEventDto getCreateEventDto() {
+        return CreateEventDto.builder()
+                .title("title")
+                .description("description")
+                .dates(List.of(getEventDateLocationDto()))
+                .tags(List.of(getEventTag().getType().toString()))
+                .mainImage("mainImage")
+                .open(true)
+                .online(false)
+                .initiativeTypes(List.of("INITIATIVE_TYPE"))
+                .build();
+    }
+
+    public static CreateEventDtoResponse getCreateEventDtoResponse() {
+        Tag tag = getEventTag();
+        List<String> tagTranslations = tag.getTagTranslations().stream()
+                .map(TagTranslation::getName)
+                .collect(Collectors.toList());
+
+        return CreateEventDtoResponse.builder()
+                .eventId(1L)
+                .title("title")
+                .description("description")
+                .open(true)
+                .tags(tagTranslations)
+                .dates(List.of(getEventDateLocationDto()))
+                .images(List.of("mainImage"))
+                .createdDateTime(ZonedDateTime.now())
+                .build();
+    }
+
+
+    public static EventDateLocationDto getEventDateLocationDto() {
+        return EventDateLocationDto.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+    }
+
+    public static EventDateTimeLocationRequestDto getEventDateTimeLocationRequestDto() {
+        return EventDateTimeLocationRequestDto.builder()
+                .id(1L)
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+    }
+
+    public static Event getEvent() {
+        return Event.builder()
+                .title("title")
+                .description("description")
+                .dateTimes(List.of(EventDateTimeLocation.builder()
+                        .startDateTime(FIXED_EVENT_START)
+                        .endDateTime(FIXED_EVENT_END)
+                        .location("location")
+                        .link("link")
+                        .build()))
+                .mainImage(EventImage.builder()
+                        .id(1L)
+                        .imagePath("mainImage")
+                        .build())
+                .initiator(getUser())
+                .eventImages(new ArrayList<>(List.of(
+                        EventImage.builder().imagePath("https://cdn.com/file/main.jpg").build()
+                )))
+                .tags(Set.of(getEventTag()))
+                .isOpen(true)
+                .build();
+
+    }
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .build();
+    }
+    public static EventDateTimeLocation getEventDateTimeLocation() {
+        return EventDateTimeLocation.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+
+    }
+
+    public static Event getEventWithoutImages() {
+        Event event = getEventWithoutDates();
+        List<EventDateTimeLocation> dateTimes = getEventDateTimeLocationsWithoutEvent();
+        event.setDateTimes(dateTimes);
+        dateTimes.forEach(dateTime -> dateTime.setEvent(event));
+        return event;
+    }
+
+    private static Event getEventWithoutDates() {
+        return Event.builder()
+                .id(1L)
+                .title("test")
+                .description("test")
+                .initiator(getUser())
+                .tags(Set.copyOf(getTags()))
+                .isOpen(true)
+                .build();
+    }
+
+    private static List<EventDateTimeLocation> getEventDateTimeLocationsWithoutEvent() {
+        return Arrays.asList(
+                EventDateTimeLocation.builder()
+                        .id(1L)
+                        .startDateTime(ZonedDateTime.now().minusDays(1).minusHours(1))
+                        .endDateTime(ZonedDateTime.now().minusDays(1))
+                        .location("test")
+                        .build(),
+                EventDateTimeLocation.builder()
+                        .id(2L)
+                        .startDateTime(ZonedDateTime.now().plusDays(1))
+                        .endDateTime(ZonedDateTime.now().plusDays(1).plusHours(1))
+                        .link("test")
+                        .build()
+        );
+    }
+
+    public static UpdateEventDtoRequest getUpdateEventDtoRequest() {
+        return UpdateEventDtoRequest.builder()
+                .id(1L)
+                .title("Update Title")
+                .description("description with more than 20 characters")
+                .dateTimes(List.of(EventDateTimeLocationRequestDto.builder()
+                        .id(1L)
+                        .startDateTime(UPDATE_EVENT_START)
+                        .endDateTime(UPDATE_EVENT_END)
+                        .location("Update location")
+                        .link("Update link")
+                        .build()))
+                .mainImage("UpdateMain.jpg")
+                .images(List.of(
+                        "https://csb10032000a548f571.blob.core.windows.net/allfiles/e04cc9f5-4fc5-438d-9dfe-48dc80a86704cute-cat-indoors.jpg"
+                ))
+                .tags(List.of("Соціальний"))
+                .isOpen(true)
+                .build();
+    }
+
+    public static Notification getNotification() {
+        return Notification.builder()
+            .id(1L)
+            .action("test")
+            .objectName("test")
+            .objectLink("link")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .receiver(getUser().setId(2L))
+            .initiator(getUser().setId(1L))
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
+    }
+
+    public static NotificationCounter getNotificationCounter() {
+        return NotificationCounter.builder()
+            .countOfNotifications(1)
+            .user(getUser().setId(2L))
+            .build();
+    }
+
+    public static NotificationRequestDto getNotificationRequestDto() {
+        return NotificationRequestDto.builder()
+            .initiatorId(1L)
+            .receiverId(2L)
+            .objectName("test")
+            .objectLink("link")
+            .action("test")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
+    }
+
+    public static NotificationResponseDto getNotificationResponseDto() {
+        return NotificationResponseDto.builder()
+            .id(1L)
+            .initiatorId(1L)
+            .receiverId(2L)
+            .objectName("test")
+            .objectLink("link")
+            .action("test")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
+    }
+
+    public static EventComment getEventComment() {
+        return EventComment.builder()
+            .id(1L)
+            .text("text")
+            .createdDate(LocalDateTime.now())
+            .modifiedDate(LocalDateTime.now())
+            .user(getUser())
+            .event(getEvent())
+            .deleted(false)
+            .build();
+    }
+
+    public static EventImageDto getEventImageDto() {
+        return EventImageDto.builder()
+            .imagePath("main.jpg")
+            .isMainImage(true)
+            .build();
+    }
+
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+            .id(1L)
+            .title("title")
+            .description("description with more than 20 characters")
+            .dateTimes(List.of(getEventDateLocationDto()))
+            .mainImage(getEventImageDto())
+            .eventImages(List.of(getEventImageDto()))
+            .tags(Set.of(getTagVO()))
+            .isOpen(true)
+            .initiator(getUserVO())
+            .build();
+    }
+
+    public static AddEventCommentDtoRequest getAddEventCommentDtoRequest() {
+        return AddEventCommentDtoRequest.builder()
+            .text("text")
+            .parentCommentId(1L)
+            .build();
+    }
+
+    public static EventCommentAuthorDto getEventCommentAuthorDto() {
+        return EventCommentAuthorDto.builder()
+            .id(1L)
+            .name("Taras")
+            .build();
+    }
+
+    public static AddEventCommentDtoResponse getAddEventCommentDtoResponse() {
+        return AddEventCommentDtoResponse.builder()
+            .id(1L)
+            .author(getEventCommentAuthorDto())
+            .text("text")
+            .modifiedDate(LocalDateTime.now())
             .build();
     }
 }

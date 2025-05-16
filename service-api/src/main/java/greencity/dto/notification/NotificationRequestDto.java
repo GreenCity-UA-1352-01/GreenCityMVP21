@@ -1,10 +1,15 @@
 package greencity.dto.notification;
 
+import java.time.ZonedDateTime;
+import greencity.enums.NotificationOrigin;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationOrigin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import java.time.ZonedDateTime;
 import lombok.*;
+
+import java.time.ZonedDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -24,7 +29,7 @@ public class NotificationRequestDto {
     private ZonedDateTime creationDate;
 
     @NotEmpty
-    private String status;
+    private NotificationStatus status;
 
     @NotNull
     @Min(1)
@@ -33,4 +38,7 @@ public class NotificationRequestDto {
     @NotNull
     @Min(1)
     private Long initiatorId;
+
+    @NotNull
+    private NotificationOrigin origin;
 }
