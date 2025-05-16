@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -58,7 +59,7 @@ class EventControllerTest {
     @Mock
     private UserService userService;
 
-    @Mock
+    @Spy
     private ModelMapper modelMapper;
 
     @InjectMocks
@@ -271,34 +272,32 @@ class EventControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "User", roles = "USER")
     void likeEvent_Success() throws Exception {
         Long eventId = 1L;
         UserVO userVO = getUserVO();
 
         when(userService.findByEmail(anyString())).thenReturn(userVO);
-        when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
         doNothing().when(eventService).likeEvent(eq(eventId), any(UserVO.class));
 
         mockMvc.perform(post("/events/{id}/like", eventId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal))
                 .andExpect(status().isOk());
 
         verify(eventService).likeEvent(eq(eventId), any(UserVO.class));
     }
 
     @Test
-    @WithMockUser(username = "User", roles = "USER")
     void unlikeEvent_Success() throws Exception {
         Long eventId = 1L;
         UserVO userVO = getUserVO();
 
         when(userService.findByEmail(anyString())).thenReturn(userVO);
-        when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
         doNothing().when(eventService).unlikeEvent(eq(eventId), any(UserVO.class));
 
         mockMvc.perform(delete("/events/{id}/like", eventId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal))
                 .andExpect(status().isOk());
 
         verify(eventService).unlikeEvent(eq(eventId), any(UserVO.class));

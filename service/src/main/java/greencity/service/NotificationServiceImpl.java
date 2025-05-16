@@ -66,7 +66,7 @@ public class NotificationServiceImpl implements NotificationService {
                     "likes",
                     eventObjectLink
             );
-            return;
+            decrementCounter(receiverId);
         }
     }
 
@@ -85,6 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
                     "likes",
                     commentObjectLink
             );
+            decrementCounter(receiverId);
         }
     }
 
@@ -95,13 +96,16 @@ public class NotificationServiceImpl implements NotificationService {
                                             Long receiverId,
                                             Long habitId) {
         String objectLink = "/habit/" + habitId;
-        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
             notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
-                    initiatorId,
-                    receiverId,
-                    "likes",
-                    objectLink
+                initiatorId,
+                receiverId,
+                "likes",
+                objectLink
             );
+            decrementCounter(receiverId);
+        }
+    }
 
     /**
      * Returns all notifications for specified user id and notification origin.
@@ -132,7 +136,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink) {
-        boolean exists = notificationsRepo.existsByUsersAndLink(initiatorId, receiverId, objectLink);
+        boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink);
         if (exists) {
             notificationsRepo.deleteByUsersAndLink(
                     initiatorId, receiverId, objectLink
@@ -140,6 +144,7 @@ public class NotificationServiceImpl implements NotificationService {
             decrementCounter(receiverId);
         }
     }
+
     private void decrementCounter(Long receiverId) {
         NotificationCounter counter = notificationCounterRepo.findById(receiverId)
                 .orElse(null);
