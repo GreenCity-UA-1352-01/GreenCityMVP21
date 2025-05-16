@@ -180,5 +180,6 @@
     <include file="db/changelog/logs/ch-add-table-notifications-Zadyraichuk.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-comment-Zadyraichuk.xml"/>
     <include file="db/changelog/logs/ch-add-table-event_likes-Kushpit.xml"/>
+    <include file="db/changelog/logs/ch-add-table-event_comment_likes-Kushpit.xml"/>
 </databaseChangeLog>
 
