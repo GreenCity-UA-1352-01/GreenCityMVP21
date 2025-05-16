@@ -100,7 +100,7 @@ public class EventDateTimeLocationService {
         boolean isFutureEvent = dtoList.stream()
                 .anyMatch(dateTime -> dateTime.getStartDateTime().isAfter(ZonedDateTime.now()));
         if (!isFutureEvent) {
-            throw new BadRequestException(ErrorMessage.CANNOT_EDIT_PAST_EVENT);
+            throw new BadRequestException(ErrorMessage.THE_EVENT_IS_PAST);
         }
     }
 

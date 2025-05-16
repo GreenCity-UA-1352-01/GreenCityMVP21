@@ -123,4 +123,15 @@
             <dropIndex tableName="notifications_receivers" indexName="IDX_NOTIFICATIONS_USERS_USER_ID"/>
         </rollback>
     </changeSet>
+  
+    <changeSet id="addOriginColumnToNotificationsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+      <addColumn tableName="notifications">
+          <column name="origin" type="VARCHAR(30)">
+              <constraints nullable="false"/>
+          </column>
+      </addColumn>
+      <rollback>
+          <dropColumn tableName="notifications" columnName="origin"/>
+      </rollback>
+  </changeSet>
 </databaseChangeLog>

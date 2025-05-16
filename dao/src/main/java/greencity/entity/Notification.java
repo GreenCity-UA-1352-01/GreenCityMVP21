@@ -2,6 +2,8 @@ package greencity.entity;
 
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationType;
+import greencity.enums.NotificationOrigin;
+import greencity.enums.NotificationStatus;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,4 +66,8 @@ public class Notification {
         orphanRemoval = true)
     @Builder.Default
     private List<NotificationReceiver> notificationReceivers = new ArrayList<>();
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private NotificationOrigin origin;
 }

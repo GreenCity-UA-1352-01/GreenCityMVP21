@@ -250,4 +250,31 @@ public class HabitController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(habitService.getFriendsAssignedToHabitProfilePictures(habitId, userVO.getId()));
     }
+
+    @Operation(summary = "Like a habit.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("{habitId}/like")
+    @NotifyUser
+    public ResponseEntity<ResponseEntity.BodyBuilder> likeHabit(@PathVariable Long habitId,
+                                                                @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        habitService.likeHabit(habitId, userVO.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Unlike a habit.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("{habitId}/unlike")
+    public ResponseEntity<ResponseEntity.BodyBuilder> unlikeHabit(@PathVariable Long habitId,
+                                                                  @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        habitService.unlikeHabit(habitId, userVO.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

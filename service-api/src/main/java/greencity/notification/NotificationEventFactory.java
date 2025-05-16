@@ -2,6 +2,7 @@ package greencity.notification;
 
 import greencity.dto.notification.NotificationRequestDto;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public interface NotificationEventFactory {
     /**
@@ -19,5 +20,5 @@ public interface NotificationEventFactory {
      * @param args the arguments of the method
      * @return a notification event
      */
-    NotificationRequestDto createEvent(Object[] args);
+    List<NotificationRequestDto> createEvent(Object[] args);
 }

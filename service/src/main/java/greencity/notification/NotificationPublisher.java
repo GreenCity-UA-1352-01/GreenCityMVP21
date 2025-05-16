@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -16,15 +17,18 @@ public class NotificationPublisher {
     /**
      * Publishes a notification event, that can be handled by a listener.
      *
-     * @param event the notification event to publish, must not be null
+     * @param notifications list of notifications to be published
      * @throws IllegalArgumentException if the event is null
-     * @see NotificationListener
      * @author Roman Diakov & Rostyslav Zadyraichuk
+     * @see NotificationListener
      */
-    public void publish(@Valid NotificationRequestDto event) {
-        if (event == null) {
+    public void publish(List<@Valid NotificationRequestDto> notifications) {
+        if (notifications == null || notifications.isEmpty()) {
             throw new IllegalArgumentException("Notification event must not be null");
         }
-        publisher.publishEvent(event);
+
+        notifications.stream()
+            .filter(n -> !n.getReceiverId().equals(n.getInitiatorId()))
+            .forEach(publisher::publishEvent);
     }
 }

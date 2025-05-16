@@ -4,10 +4,10 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.*;
+import greencity.dto.eventcomment.AddEventCommentDtoRequest;
+import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EventCommentAuthorDto;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
@@ -29,6 +29,7 @@ import greencity.entity.*;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
+import java.util.stream.Collectors;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -521,8 +522,8 @@ public class ModelUtils {
     }
 
     public static UpdateEcoNewsDto getUpdateEcoNewsDto() {
-        return new UpdateEcoNewsDto("1", "title", "text", "shortInfo", Collections.singletonList("tag"),
-            "image", "source", "text");
+        return new UpdateEcoNewsDto(1L, "title", "text", "shortInfo", Collections.singletonList("tag"),
+            "image", "source");
     }
 
     public static SearchNewsDto getSearchNewsDto() {
@@ -773,6 +774,21 @@ public class ModelUtils {
             .build();
 
     }
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .build();
+    }
+    public static EventDateTimeLocation getEventDateTimeLocation() {
+        return EventDateTimeLocation.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+
+    }
 
     public static Event getEventWithoutImages() {
         Event event = getEventWithoutDates();
@@ -865,6 +881,7 @@ public class ModelUtils {
             .notificationType(NotificationType.EVENT_COMMENT)
             .objectType(NotificationObjectType.EVENT)
             .initiator(getUser().setId(1L))
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 
@@ -885,6 +902,8 @@ public class ModelUtils {
             .objectType(NotificationObjectType.EVENT)
             .creationDate(zonedDateTime)
             .notificationType(NotificationType.EVENT_COMMENT)
+            .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 
@@ -920,6 +939,63 @@ public class ModelUtils {
             .initiatorIds(Set.of(1L))
             .initiatorNames(Set.of("Taras"))
             .notificationType(NotificationType.EVENT_COMMENT)
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
+    }
+
+    public static EventComment getEventComment() {
+        return EventComment.builder()
+            .id(1L)
+            .text("text")
+            .createdDate(LocalDateTime.now())
+            .modifiedDate(LocalDateTime.now())
+            .user(getUser())
+            .event(getEvent())
+            .deleted(false)
+            .build();
+    }
+
+    public static EventImageDto getEventImageDto() {
+        return EventImageDto.builder()
+            .imagePath("main.jpg")
+            .isMainImage(true)
+            .build();
+    }
+
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+            .id(1L)
+            .title("title")
+            .description("description with more than 20 characters")
+            .dateTimes(List.of(getEventDateLocationDto()))
+            .mainImage(getEventImageDto())
+            .eventImages(List.of(getEventImageDto()))
+            .tags(Set.of(getTagVO()))
+            .isOpen(true)
+            .initiator(getUserVO())
+            .build();
+    }
+
+    public static AddEventCommentDtoRequest getAddEventCommentDtoRequest() {
+        return AddEventCommentDtoRequest.builder()
+            .text("text")
+            .parentCommentId(1L)
+            .build();
+    }
+
+    public static EventCommentAuthorDto getEventCommentAuthorDto() {
+        return EventCommentAuthorDto.builder()
+            .id(1L)
+            .name("Taras")
+            .build();
+    }
+
+    public static AddEventCommentDtoResponse getAddEventCommentDtoResponse() {
+        return AddEventCommentDtoResponse.builder()
+            .id(1L)
+            .author(getEventCommentAuthorDto())
+            .text("text")
+            .modifiedDate(LocalDateTime.now())
             .build();
     }
 }

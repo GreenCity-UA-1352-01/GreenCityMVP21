@@ -4,12 +4,17 @@ import greencity.dto.notification.NotificationRequestDto;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
 import java.lang.reflect.Method;
+import greencity.notification.NotificationEventFactory;
+import greencity.notification.NotificationHandlerRegistry;
+import greencity.notification.NotificationPublisher;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import java.lang.reflect.Method;
+import java.util.List;
 
 @Component
 @Aspect
@@ -31,7 +36,12 @@ public class NotificationAspect {
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();
 
-        NotificationRequestDto event = registry.getFactory(method).createEvent(args);
-        publisher.publish(event);
+        NotificationEventFactory factory = registry.getFactory(method);
+        if (factory == null) {
+            throw new IllegalStateException("There is no factory for method " + method);   
+        }
+        
+        List<NotificationRequestDto> events = factory.createEvent(args);
+        publisher.publish(events);
     }
 }
