@@ -6,16 +6,17 @@ import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EcoNewsService;
 import greencity.notification.CommentDateTimeFormatter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+
 @Component
 @AllArgsConstructor
 @NotificationHandler
@@ -57,6 +58,7 @@ public class NewsCommentedNotificationFactory implements NotificationEventFactor
                 .status(NotificationStatus.UNREAD)
                 .receiverId(receiver.getId())
                 .initiatorId(initiator.getId())
+                .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }
 }

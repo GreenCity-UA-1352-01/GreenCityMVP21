@@ -2,11 +2,11 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.annotations.NotifyUser;
+import greencity.service.EventCommentService;
+import greencity.annotations.ValidEventImages;
 import greencity.constant.HttpStatuses;
 import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
-import greencity.annotations.ValidEventImages;
-import greencity.service.EventCommentService;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,18 +16,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
-
 import org.springframework.web.bind.annotation.*;
 
 @Validated
@@ -101,7 +96,6 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
     /**
      * Like an event by its ID.
      * Only for authorized users.
@@ -159,5 +153,68 @@ public class EventController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(eventService.findById(eventId));
+    }
+
+    @Operation(summary = "Cancel event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping("/cancel/{id}")
+    @NotifyUser
+    public ResponseEntity<Void> cancelEvent(@PathVariable Long id, @Parameter(hidden = true)
+    @CurrentUser UserVO user, @RequestParam String reason) {
+        eventService.cancelEventById(id, user, reason);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Subscribe to event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/subscribe/{id}")
+    @NotifyUser
+    public ResponseEntity<Void> subscribeEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.attendEvent(id, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Unsubscribe from event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/unsubscribe/{id}")
+    @NotifyUser
+    public ResponseEntity<Void> unsubscribeFromEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.unsubscribeFromEvent(id, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Accept attender to event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("{eventId}/accept-attender/{userId}")
+    @NotifyUser
+    public ResponseEntity<Void> acceptAttenderToEvent(@PathVariable Long eventId, @PathVariable Long userId, @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.acceptAttenderToEvent(eventId, userId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

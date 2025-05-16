@@ -16,7 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @EqualsAndHashCode(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
-@ToString//(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
+@ToString(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +44,15 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
+
+    @OneToMany(
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<EventAttender> attenders = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "event",

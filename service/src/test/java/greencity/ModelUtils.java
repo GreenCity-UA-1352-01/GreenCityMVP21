@@ -767,6 +767,21 @@ public class ModelUtils {
                 .build();
 
     }
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .build();
+    }
+    public static EventDateTimeLocation getEventDateTimeLocation() {
+        return EventDateTimeLocation.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+
+    }
 
     public static Event getEventWithoutImages() {
         Event event = getEventWithoutDates();
