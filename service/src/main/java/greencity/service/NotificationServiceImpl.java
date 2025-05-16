@@ -51,10 +51,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void deleteEventLikeNotification(Long initiatorId,
-                                       Long receiverId,
-                                       Long id) {
+                                            Long receiverId,
+                                            Long id) {
         String eventObjectLink = "/events/" + id;
-        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, eventObjectLink)) {
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, eventObjectLink)) {
             notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
                     initiatorId,
                     receiverId,
@@ -63,9 +63,17 @@ public class NotificationServiceImpl implements NotificationService {
             );
             return;
         }
+    }
 
+
+
+    @Override
+    @Transactional
+    public void deleteCommentLikeNotification(Long initiatorId,
+                                              Long receiverId,
+                                              Long id) {
         String commentObjectLink = "/comments/" + id;
-        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
             notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
                     initiatorId,
                     receiverId,
@@ -74,6 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
             );
         }
     }
+
 
     @Override
     @Transactional

@@ -22,4 +22,8 @@ public interface NotificationService {
     void deleteHabitLikeNotification(Long initiatorId,
                                      Long receiverId,
                                      Long habitId);
+
+    void deleteCommentLikeNotification(Long initiatorId,
+                            Long receiverId,
+                            Long eventId);
 }

@@ -101,22 +101,6 @@ public class EventCommentServiceImpl implements EventCommentService {
     }
 
     /**
-     * Retrieves an EventCommentVO by its ID.
-     *
-     * @param id the ID of the comment to retrieve
-     * @return EventCommentVO containing the basic data of the comment
-     * @throws BadRequestException if the comment is not found
-     * @author Rostyslav Kushpit
-     */
-    @Override
-    @Transactional
-    public EventCommentVO findById(Long id) {
-        EventComment eventComment = eventCommentRepo.findById(id).orElseThrow(
-                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
-        return modelMapper.map(eventComment, EventCommentVO.class);
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @param commentId the ID of the event comment to remove the like from
@@ -137,6 +121,24 @@ public class EventCommentServiceImpl implements EventCommentService {
 
         eventCommentLikeRepo.deleteByEventCommentAndUser(eventComment, modelMapper.map(user, User.class));
 
-        notificationService.deleteEventLikeNotification(user.getId(), eventComment.getUser().getId(), commentId);
+        notificationService.deleteCommentLikeNotification(user.getId(), eventComment.getUser().getId(), commentId);
     }
+
+    /**
+     * Retrieves an EventCommentVO by its ID.
+     *
+     * @param id the ID of the comment to retrieve
+     * @return EventCommentVO containing the basic data of the comment
+     * @throws BadRequestException if the comment is not found
+     * @author Rostyslav Kushpit
+     */
+    @Override
+    @Transactional
+    public EventCommentVO findById(Long id) {
+        EventComment eventComment = eventCommentRepo.findById(id).orElseThrow(
+                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        return modelMapper.map(eventComment, EventCommentVO.class);
+    }
+
+
 }
