@@ -80,6 +80,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
             config.setAllowedOrigins(Collections.singletonList("http://localhost:4205"));
+            config.setAllowedOrigins(Collections.singletonList("http://localhost:63343"));
             config.setAllowedMethods(
                             Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
             config.setAllowedHeaders(
@@ -153,6 +154,7 @@ public class SecurityConfig {
                                 "/user/emailNotifications",
                                 "/user/activatedUsersAmount",
                                 "/user/{userId}/habit/assign",
+                                "/socket/**",
                                 "/token")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST,
