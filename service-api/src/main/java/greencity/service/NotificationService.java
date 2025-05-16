@@ -1,6 +1,10 @@
 package greencity.service;
 
-
+import greencity.dto.notification.BaseNotificationResponseDto;
+import greencity.dto.notification.NotificationRequestDto;
+import greencity.dto.notification.NotificationResponseDto;
+import java.util.List;
+import java.util.Set;
 import greencity.dto.user.UserVO;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
@@ -10,14 +14,14 @@ import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
     /**
-     * Creates a notification.
+     * Creates a notification or notifications depending on the number of receivers.
      *
      * @param dto a request DTO which contains information about a notification
-     * @return a response DTO which contains information about a created notification
+     * @return a list of created notifications
      * @author Roman Diakov
      * @author Rostyslav Zadyraichuk
      */
-    NotificationResponseDto createNotification(NotificationRequestDto dto);
+    List<NotificationResponseDto> createNotifications(NotificationRequestDto dto);
   
     void updateNotificationStatus(UpdateNotificationStatusRequestDto updateNotificationStatusRequestDto, UserVO user);
 
@@ -34,18 +38,14 @@ public interface NotificationService {
                             Long eventId);
   
     /**
-     * Retrieves all notifications for a specific user.
+     * Method to retrieve all notifications for a specific user.
      *
-     * @param userId   the user's id to retrieve notifications for.
-     * @param origin   the origin of the notifications to filter by.
-     * @param pageable the pagination information.
-     * @return a page of notification response DTOs.
+     * @param userId   the id of the user.
+     * @return a set containing the notifications.
      * @author Marian Shtangret
      * @author Rostyslav Zadyraichuk
      */
-    PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId,
-                                                                    NotificationOrigin origin,
-                                                                    Pageable pageable);
+    Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId);
 
     void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink);
 }

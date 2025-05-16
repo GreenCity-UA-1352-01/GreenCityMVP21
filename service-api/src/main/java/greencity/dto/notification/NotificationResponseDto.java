@@ -7,21 +7,16 @@ import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import java.time.ZonedDateTime;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
-@EqualsAndHashCode
-public class NotificationResponseDto {
-    Long id;
-    private String action;
-    private String objectName;
-    private String objectLink;
-    private ZonedDateTime creationDate;
-    private NotificationStatus status;
-    private Long receiverId;
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+public class NotificationResponseDto extends BaseNotificationResponseDto {
+    private Long id;
     private Long initiatorId;
-    private NotificationOrigin origin;
+    private String initiatorName;
 }

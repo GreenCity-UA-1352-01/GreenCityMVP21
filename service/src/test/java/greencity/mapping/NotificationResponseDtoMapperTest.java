@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import greencity.ModelUtils;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +27,8 @@ class NotificationResponseDtoMapperTest {
 
     @Test
     void testConvert() {
-        NotificationResponseDto actual = notificationMapper.convert(NOTIFICATION);
+        List<NotificationResponseDto> actual = notificationMapper.convert(NOTIFICATION);
 
-        assertEquals(NOTIFICATION_RESPONSE_DTO, actual);
+        assertIterableEquals(List.of(NOTIFICATION_RESPONSE_DTO), actual);
     }
 }

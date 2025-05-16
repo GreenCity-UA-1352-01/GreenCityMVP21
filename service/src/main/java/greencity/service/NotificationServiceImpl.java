@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.notification.BaseNotificationResponseDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.notification.UpdateNotificationStatusRequestDto;
@@ -19,15 +20,20 @@ import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
 import greencity.entity.NotificationCounter;
+import greencity.entity.NotificationReceiver;
+import greencity.enums.NotificationType;
 import greencity.entity.User;
 import greencity.enums.NotificationOrigin;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
+import greencity.mapping.NotificationsGroupedResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
 import greencity.repository.NotificationRepo;
+import java.util.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationCounterRepo notificationCounterRepo;
     private final NotificationMapper notificationMapper;
     private final NotificationResponseDtoMapper notificationResponseDtoMapper;
+    private final NotificationsGroupedResponseDtoMapper notificationsGroupedResponseDtoMapper;
 
     /**
      * {@inheritDoc}
@@ -46,16 +53,28 @@ public class NotificationServiceImpl implements NotificationService {
      * If notification counter for receiver is present in the database, increments count of notifications by 1.
      *
      * @param dto notification data transfer object
-     * @return created notification data transfer object
+     * @return list of created notifications
      * @author Roman Diakov
      * @author Rostyslav Zadyraichuk
      */
     @Override
     @Transactional
-    public NotificationResponseDto createNotification(NotificationRequestDto dto) {
+    public List<NotificationResponseDto> createNotifications(NotificationRequestDto dto) {
         Notification notification = notificationMapper.convert(dto);
         notification = notificationsRepo.save(notification);
-        final User receiver = notification.getReceiver();
+        List<NotificationReceiver> receivers = notification.getNotificationReceivers();
+
+        receivers.forEach(nr -> {
+            notificationCounterRepo.findById(nr.getId()).ifPresentOrElse(notificationCounter ->
+                    notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
+                () -> {
+                    NotificationCounter newNotificationCounter = NotificationCounter.builder()
+                        .countOfNotifications(1)
+                        .user(nr.getReceiver())
+                        .build();
+                    notificationCounterRepo.save(newNotificationCounter);
+                });
+        });
 
         notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(notificationCounter ->
                 notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
@@ -119,7 +138,56 @@ public class NotificationServiceImpl implements NotificationService {
 
 
 
+
+    /**
+     * Retrieves all notifications for a specific user. If user has no notifications, returns an empty set.
+     *
+     * <p>
+     * The notifications are grouped by notification type and object id and sorted by creation date,
+     * type, object id, and status.
+     *
+     * @param userId the id of the user.
+     * @return a set containing the notifications.
+     * @author Marian Shtangret
+     * @author Rostyslav Zadyraichuk
+     */
     @Override
+    public Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId) {
+        List<Notification> notifications = notificationsRepo.findNotificationsForUser(userId);
+        if (notifications.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Map<NotificationGroupKey, List<NotificationResponseDto>> groupedNotifications = new HashMap<>();
+        var result = new TreeSet<>(Comparator
+            .comparing(BaseNotificationResponseDto::getCreationDate, Comparator.reverseOrder())
+            .thenComparing(BaseNotificationResponseDto::getNotificationType)
+            .thenComparing(BaseNotificationResponseDto::getObjectId)
+            .thenComparing(BaseNotificationResponseDto::getStatus)
+        );
+
+        for (Notification notification : notifications) {
+            List<NotificationResponseDto> dtos = notificationResponseDtoMapper.convert(notification);
+            NotificationGroupKey key = new NotificationGroupKey(
+                notification.getNotificationType(),
+                notification.getObjectId()
+            );
+            if (key.getType().isGroupable()) {
+                groupedNotifications
+                    .computeIfAbsent(key, k -> new ArrayList<>())
+                    .addAll(dtos);
+            } else {
+                result.addAll(dtos);
+            }
+        }
+
+        for (var entry : groupedNotifications.entrySet()) {
+            result.add(notificationsGroupedResponseDtoMapper.convert(entry.getValue()));
+        }
+
+        return result;
+    }
+
     @Transactional
     public void deleteCommentLikeNotification(Long initiatorId,
                                               Long receiverId,
@@ -154,33 +222,6 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    /**
-     * Returns all notifications for specified user id and notification origin.
-     * Origin can be null, then notifications from all origins will be returned.
-     *
-     * @param userId   user id
-     * @param origin   notification origin
-     * @param pageable page request
-     * @return notification response dto with pagination
-     * @author Marian Shtangret
-     * @author Rostyslav Zadyraichuk
-     */
-    @Override
-    public PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId,
-                                                                           NotificationOrigin origin,
-                                                                           Pageable pageable) {
-        Page<Notification> notifications = origin == null
-            ? notificationsRepo.findNotificationsForUser(userId, pageable)
-            : notificationsRepo.findNotificationsForUser(userId, origin, pageable);
-        return new PageableDto<>(notifications.stream()
-                .map(notificationResponseDtoMapper::convert)
-                .toList(),
-            notifications.getTotalElements(),
-            notifications.getNumber(),
-            notifications.getTotalPages()
-        );
-    }
-
     @Transactional
     public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink) {
         boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink);
@@ -199,5 +240,13 @@ public class NotificationServiceImpl implements NotificationService {
             counter.setCountOfNotifications(counter.getCountOfNotifications() - 1);
             notificationCounterRepo.save(counter);
         }
+    }
+  
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode
+    private static class NotificationGroupKey {
+        private final NotificationType type;
+        private final Long objectId;
     }
 }

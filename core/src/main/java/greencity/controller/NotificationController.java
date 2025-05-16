@@ -14,8 +14,14 @@ import greencity.annotations.ApiPageableWithoutSort;
 import greencity.annotations.CurrentUserId;
 import greencity.constant.ErrorMessage;
 import greencity.constant.HttpStatuses;
-import greencity.dto.PageableDto;
+import greencity.dto.notification.BaseNotificationResponseDto;
 import greencity.dto.notification.NotificationResponseDto;
+import greencity.dto.notification.NotificationsGroupedResponseDto;
+import greencity.service.NotificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import greencity.enums.NotificationOrigin;
 import greencity.exception.exceptions.InvalidOriginException;
 import greencity.service.NotificationService;
@@ -24,8 +30,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -79,27 +85,20 @@ public class NotificationController {
      */
     @Operation(summary = "Find all notifications by user.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content(
+                array = @ArraySchema(schema = @Schema(oneOf = {
+                    NotificationResponseDto.class,
+                    NotificationsGroupedResponseDto.class
+                }))
+            )),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
-    @ApiPageableWithoutSort
     @GetMapping("/user/{userId}")
-    public ResponseEntity<PageableDto<NotificationResponseDto>> getUserNotifications(
-            @PathVariable @CurrentUserId Long userId,
-            @RequestParam(required = false) String origin,
-            @Parameter(hidden = true) Pageable pageable) {
-        NotificationOrigin originEnum = origin == null ? null : convertOrigin(origin);
+    public ResponseEntity<Set<BaseNotificationResponseDto>> getUserNotifications(
+        @PathVariable @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationsService.getAllNotificationsForUser(userId, originEnum, pageable));
-    }
-
-    private NotificationOrigin convertOrigin(String origin) {
-        try {
-            return NotificationOrigin.valueOf(origin);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidOriginException(ErrorMessage.INVALID_ORIGIN + origin);
-        }
+            .body(notificationsService.getAllNotificationsForUser(userId));
     }
 }

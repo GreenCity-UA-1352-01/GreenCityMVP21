@@ -14,8 +14,10 @@ import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDateTimeFormatter;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
+import greencity.dto.notification.NotificationsGroupedResponseDto;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
@@ -68,7 +70,8 @@ public class ModelUtils {
     }
 
     public static TagVO getEventTagVO() {
-        return new TagVO(1L, TagType.EVENT, getEventTagTranslationsVO(), Collections.emptyList(), Collections.emptySet());
+        return new TagVO(1L, TagType.EVENT, getEventTagTranslationsVO(), Collections.emptyList(),
+            Collections.emptySet());
     }
 
     public static Tag getHabitTag() {
@@ -103,9 +106,9 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getEventTagTranslationsVO() {
         return Arrays.asList(
-                TagTranslationVO.builder().id(1L).name("Соціальний").build(),
-                TagTranslationVO.builder().id(2L).name("Social").build(),
-                TagTranslationVO.builder().id(3L).name("Соціальний").build());
+            TagTranslationVO.builder().id(1L).name("Соціальний").build(),
+            TagTranslationVO.builder().id(2L).name("Social").build(),
+            TagTranslationVO.builder().id(3L).name("Соціальний").build());
     }
 
     public static TagDto getTagDto() {
@@ -413,7 +416,7 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getTagTranslationsVO() {
         return Arrays.asList(TagTranslationVO.builder().id(1L).name("Новини")
-            .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
+                .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
             TagTranslationVO.builder().id(2L).name("News").languageVO(LanguageVO.builder().id(2L).code("en").build())
                 .build());
     }
@@ -693,82 +696,82 @@ public class ModelUtils {
 
     public static CustomShoppingListItemResponseDto getCustomShoppingListItemResponseDtoWithStatusInProgress() {
         return CustomShoppingListItemResponseDto.builder()
-                .id(2L)
-                .text("item")
-                .status(ShoppingListItemStatus.INPROGRESS)
-                .build();
+            .id(2L)
+            .text("item")
+            .status(ShoppingListItemStatus.INPROGRESS)
+            .build();
     }
 
     public static CreateEventDto getCreateEventDto() {
         return CreateEventDto.builder()
-                .title("title")
-                .description("description")
-                .dates(List.of(getEventDateLocationDto()))
-                .tags(List.of(getEventTag().getType().toString()))
-                .mainImage("mainImage")
-                .open(true)
-                .online(false)
-                .initiativeTypes(List.of("INITIATIVE_TYPE"))
-                .build();
+            .title("title")
+            .description("description")
+            .dates(List.of(getEventDateLocationDto()))
+            .tags(List.of(getEventTag().getType().toString()))
+            .mainImage("mainImage")
+            .open(true)
+            .online(false)
+            .initiativeTypes(List.of("INITIATIVE_TYPE"))
+            .build();
     }
 
     public static CreateEventDtoResponse getCreateEventDtoResponse() {
         Tag tag = getEventTag();
         List<String> tagTranslations = tag.getTagTranslations().stream()
-                .map(TagTranslation::getName)
-                .collect(Collectors.toList());
+            .map(TagTranslation::getName)
+            .collect(Collectors.toList());
 
         return CreateEventDtoResponse.builder()
-                .eventId(1L)
-                .title("title")
-                .description("description")
-                .open(true)
-                .tags(tagTranslations)
-                .dates(List.of(getEventDateLocationDto()))
-                .images(List.of("mainImage"))
-                .createdDateTime(ZonedDateTime.now())
-                .build();
+            .eventId(1L)
+            .title("title")
+            .description("description")
+            .open(true)
+            .tags(tagTranslations)
+            .dates(List.of(getEventDateLocationDto()))
+            .images(List.of("mainImage"))
+            .createdDateTime(ZonedDateTime.now())
+            .build();
     }
 
 
     public static EventDateLocationDto getEventDateLocationDto() {
         return EventDateLocationDto.builder()
-                .startDateTime(FIXED_EVENT_START)
-                .endDateTime(FIXED_EVENT_END)
-                .location("location")
-                .build();
+            .startDateTime(FIXED_EVENT_START)
+            .endDateTime(FIXED_EVENT_END)
+            .location("location")
+            .build();
     }
 
     public static EventDateTimeLocationRequestDto getEventDateTimeLocationRequestDto() {
         return EventDateTimeLocationRequestDto.builder()
-                .id(1L)
-                .startDateTime(FIXED_EVENT_START)
-                .endDateTime(FIXED_EVENT_END)
-                .location("location")
-                .build();
+            .id(1L)
+            .startDateTime(FIXED_EVENT_START)
+            .endDateTime(FIXED_EVENT_END)
+            .location("location")
+            .build();
     }
 
     public static Event getEvent() {
         return Event.builder()
-                .title("title")
-                .description("description")
-                .dateTimes(List.of(EventDateTimeLocation.builder()
-                        .startDateTime(FIXED_EVENT_START)
-                        .endDateTime(FIXED_EVENT_END)
-                        .location("location")
-                        .link("link")
-                        .build()))
-                .mainImage(EventImage.builder()
-                        .id(1L)
-                        .imagePath("mainImage")
-                        .build())
-                .initiator(getUser())
-                .eventImages(new ArrayList<>(List.of(
-                        EventImage.builder().imagePath("https://cdn.com/file/main.jpg").build()
-                )))
-                .tags(Set.of(getEventTag()))
-                .isOpen(true)
-                .build();
+            .title("title")
+            .description("description")
+            .dateTimes(List.of(EventDateTimeLocation.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .link("link")
+                .build()))
+            .mainImage(EventImage.builder()
+                .id(1L)
+                .imagePath("mainImage")
+                .build())
+            .initiator(getUser())
+            .eventImages(new ArrayList<>(List.of(
+                EventImage.builder().imagePath("https://cdn.com/file/main.jpg").build()
+            )))
+            .tags(Set.of(getEventTag()))
+            .isOpen(true)
+            .build();
 
     }
     public static EventVO getEventVO() {
@@ -797,62 +800,86 @@ public class ModelUtils {
 
     private static Event getEventWithoutDates() {
         return Event.builder()
-                .id(1L)
-                .title("test")
-                .description("test")
-                .initiator(getUser())
-                .tags(Set.copyOf(getTags()))
-                .isOpen(true)
-                .build();
+            .id(1L)
+            .title("test")
+            .description("test")
+            .initiator(getUser())
+            .tags(Set.copyOf(getTags()))
+            .isOpen(true)
+            .build();
     }
 
     private static List<EventDateTimeLocation> getEventDateTimeLocationsWithoutEvent() {
         return Arrays.asList(
-                EventDateTimeLocation.builder()
-                        .id(1L)
-                        .startDateTime(ZonedDateTime.now().minusDays(1).minusHours(1))
-                        .endDateTime(ZonedDateTime.now().minusDays(1))
-                        .location("test")
-                        .build(),
-                EventDateTimeLocation.builder()
-                        .id(2L)
-                        .startDateTime(ZonedDateTime.now().plusDays(1))
-                        .endDateTime(ZonedDateTime.now().plusDays(1).plusHours(1))
-                        .link("test")
-                        .build()
+            EventDateTimeLocation.builder()
+                .id(1L)
+                .startDateTime(ZonedDateTime.now().minusDays(1).minusHours(1))
+                .endDateTime(ZonedDateTime.now().minusDays(1))
+                .location("test")
+                .build(),
+            EventDateTimeLocation.builder()
+                .id(2L)
+                .startDateTime(ZonedDateTime.now().plusDays(1))
+                .endDateTime(ZonedDateTime.now().plusDays(1).plusHours(1))
+                .link("test")
+                .build()
         );
     }
 
     public static UpdateEventDtoRequest getUpdateEventDtoRequest() {
         return UpdateEventDtoRequest.builder()
+            .id(1L)
+            .title("Update Title")
+            .description("description with more than 20 characters")
+            .dateTimes(List.of(EventDateTimeLocationRequestDto.builder()
                 .id(1L)
-                .title("Update Title")
-                .description("description with more than 20 characters")
-                .dateTimes(List.of(EventDateTimeLocationRequestDto.builder()
-                        .id(1L)
-                        .startDateTime(UPDATE_EVENT_START)
-                        .endDateTime(UPDATE_EVENT_END)
-                        .location("Update location")
-                        .link("Update link")
-                        .build()))
-                .mainImage("UpdateMain.jpg")
-                .images(List.of(
-                        "https://csb10032000a548f571.blob.core.windows.net/allfiles/e04cc9f5-4fc5-438d-9dfe-48dc80a86704cute-cat-indoors.jpg"
-                ))
-                .tags(List.of("Соціальний"))
-                .isOpen(true)
-                .build();
+                .startDateTime(UPDATE_EVENT_START)
+                .endDateTime(UPDATE_EVENT_END)
+                .location("Update location")
+                .link("Update link")
+                .build()))
+            .mainImage("UpdateMain.jpg")
+            .images(List.of(
+                "https://csb10032000a548f571.blob.core.windows.net/allfiles/e04cc9f5-4fc5-438d-9dfe-48dc80a86704cute-cat-indoors.jpg"
+            ))
+            .tags(List.of("Соціальний"))
+            .isOpen(true)
+            .build();
+    }
+
+    public static NotificationReceiver getNotificationReceiver() {
+        NotificationReceiver notificationReceiver = getNotificationReceiverWithoutNotification();
+        Notification notification = getNotificationWithoutReceivers();
+        notification.getNotificationReceivers().add(notificationReceiver);
+        notificationReceiver.setNotification(notification);
+        return notificationReceiver;
     }
 
     public static Notification getNotification() {
+        NotificationReceiver notificationReceiver = getNotificationReceiverWithoutNotification();
+        Notification notification = getNotificationWithoutReceivers();
+        notification.getNotificationReceivers().add(notificationReceiver);
+        notificationReceiver.setNotification(notification);
+        return notification;
+    }
+
+    private static NotificationReceiver getNotificationReceiverWithoutNotification() {
+        return NotificationReceiver.builder()
+            .id(1L)
+            .receiver(getUser())
+            .status(NotificationStatus.UNREAD)
+            .build();
+    }
+
+    private static Notification getNotificationWithoutReceivers() {
         return Notification.builder()
             .id(1L)
             .action("test")
+            .objectId(1L)
             .objectName("test")
-            .objectLink("link")
             .creationDate(zonedDateTime)
-            .status(NotificationStatus.UNREAD)
-            .receiver(getUser().setId(2L))
+            .notificationType(NotificationType.EVENT_COMMENT)
+            .objectType(NotificationObjectType.EVENT)
             .initiator(getUser().setId(1L))
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
@@ -868,11 +895,13 @@ public class ModelUtils {
     public static NotificationRequestDto getNotificationRequestDto() {
         return NotificationRequestDto.builder()
             .initiatorId(1L)
-            .receiverId(2L)
-            .objectName("test")
-            .objectLink("link")
             .action("test")
+            .receiverIds(List.of(2L))
+            .objectId(1L)
+            .objectName("test")
+            .objectType(NotificationObjectType.EVENT)
             .creationDate(zonedDateTime)
+            .notificationType(NotificationType.EVENT_COMMENT)
             .status(NotificationStatus.UNREAD)
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
@@ -882,12 +911,34 @@ public class ModelUtils {
         return NotificationResponseDto.builder()
             .id(1L)
             .initiatorId(1L)
-            .receiverId(2L)
+            .initiatorName("Taras")
+            .receiverId(1L)
+            .objectId(1L)
             .objectName("test")
-            .objectLink("link")
+            .objectLink("/event/1")
+            .objectType(NotificationObjectType.EVENT)
             .action("test")
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
+            .notificationType(NotificationType.EVENT_COMMENT)
+            .build();
+    }
+
+    public static NotificationsGroupedResponseDto getNotificationsGroupedResponseDto() {
+        String dateTime = NotificationDateTimeFormatter.format(zonedDateTime);
+        return NotificationsGroupedResponseDto.builder()
+            .ids(Set.of(1L))
+            .action("Taras commented on your event test. %s".formatted(dateTime))
+            .objectId(1L)
+            .objectName("test")
+            .objectLink("/event/1")
+            .objectType(NotificationObjectType.EVENT)
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .receiverId(1L)
+            .initiatorIds(Set.of(1L))
+            .initiatorNames(Set.of("Taras"))
+            .notificationType(NotificationType.EVENT_COMMENT)
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }

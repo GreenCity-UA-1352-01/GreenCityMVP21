@@ -20,6 +20,6 @@ public class NotificationListener {
      */
     @EventListener
     public void handleNotification(NotificationRequestDto notificationRequestDto) {
-        notificationService.createNotification(notificationRequestDto);
+        notificationService.createNotifications(notificationRequestDto);
     }
 }

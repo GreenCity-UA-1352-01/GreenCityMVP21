@@ -1,13 +1,16 @@
 package greencity.notification;
 
 import greencity.dto.notification.NotificationRequestDto;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import java.util.List;
 
 @Component
 @AllArgsConstructor
+@Validated
 public class NotificationPublisher {
     private final ApplicationEventPublisher publisher;
 
@@ -19,7 +22,7 @@ public class NotificationPublisher {
      * @author Roman Diakov & Rostyslav Zadyraichuk
      * @see NotificationListener
      */
-    public void publish(List<NotificationRequestDto> notifications) {
+    public void publish(List<@Valid NotificationRequestDto> notifications) {
         if (notifications == null || notifications.isEmpty()) {
             throw new IllegalArgumentException("Notification event must not be null");
         }
