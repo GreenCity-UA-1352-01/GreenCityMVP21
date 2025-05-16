@@ -2,11 +2,13 @@ package greencity.service;
 
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.enums.NotificationStatus;
+import greencity.enums.FriendsStatus;
 import jakarta.persistence.EntityNotFoundException;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.EcoFriendProfileDto;
 import greencity.dto.friend.EcoFriendsResponse;
 import greencity.entity.User;
+import greencity.entity.Friend;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.EcoFriendProfileDtoMapper;
 import greencity.mapping.EcoFriendsResponseMapper;
@@ -186,5 +188,20 @@ public class FriendServiceImpl implements FriendService {
         if (deletedCount == 0) {
             throw new NotFoundException("Friendship not found between users");
         }
+    }
+
+    @Transactional
+    public void acceptFriendRequest(Long currentUserId, Long requesterId) {
+        Friend awaited = friendRepository.findByUserIdAndFriendIdAndStatus(currentUserId, requesterId, FriendsStatus.AWAITED)
+                .orElseThrow(() -> new NotFoundException("Friend request not found"));
+
+        Friend requested = friendRepository.findByUserIdAndFriendIdAndStatus(requesterId, currentUserId, FriendsStatus.REQUESTED)
+                .orElseThrow(() -> new NotFoundException("Friend request not found"));
+
+        awaited.setStatus(FriendsStatus.FRIEND);
+        requested.setStatus(FriendsStatus.FRIEND);
+
+        friendRepository.save(awaited);
+        friendRepository.save(requested);
     }
 }
