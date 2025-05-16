@@ -30,6 +30,7 @@ public class NotificationMapper extends AbstractConverter<NotificationRequestDto
             .status(dto.getStatus())
             .receiver(receiver)
             .initiator(initiator)
+            .origin(dto.getOrigin())
             .build();
     }
 }

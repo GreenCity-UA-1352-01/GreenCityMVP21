@@ -14,4 +14,8 @@ public interface NotificationService {
      * @author Rostyslav Zadyraichuk
      */
     NotificationResponseDto createNotification(NotificationRequestDto dto);
+
+    void deleteLikeNotification(Long initiatorId,
+                            Long receiverId,
+                            Long eventId);
 }

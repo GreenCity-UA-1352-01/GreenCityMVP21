@@ -208,6 +208,7 @@ public class SecurityConfig {
                                 "/econews/dislike",
                                 "/econews/comments/{econewsId}",
                                 "/econews/comments/like",
+                                "/events/{eventId}/like",
                                 CUSTOM_SHOPPING_LIST_ITEMS,
                                 "/files/image",
                                 "/files/convert",
@@ -221,7 +222,8 @@ public class SecurityConfig {
                                 USER_SHOPPING_LIST,
                                 "/user/{userId}/habit",
                                 "/habit/custom",
-                                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
+                                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
+                                "/events/comments/{eventId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.PUT,
                                 "/habit/statistic/{id}",

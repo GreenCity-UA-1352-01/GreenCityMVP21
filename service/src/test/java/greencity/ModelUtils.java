@@ -4,10 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.*;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
@@ -518,8 +515,8 @@ public class ModelUtils {
     }
 
     public static UpdateEcoNewsDto getUpdateEcoNewsDto() {
-        return new UpdateEcoNewsDto("1", "title", "text", "shortInfo", Collections.singletonList("tag"),
-            "image", "source", "text");
+        return new UpdateEcoNewsDto(1L, "title", "text", "shortInfo", Collections.singletonList("tag"),
+            "image", "source");
     }
 
     public static SearchNewsDto getSearchNewsDto() {

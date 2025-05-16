@@ -1,16 +1,16 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.annotations.ValidEventImages;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -95,5 +95,67 @@ public class EventController {
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id, @CurrentUser UserVO user) {
         eventService.deleteById(id, user);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
+    /**
+     * Like an event by its ID.
+     * Only for authorized users.
+     *
+     * @param eventId   ID of the event to like
+     * @param user currently authenticated user
+     *
+     * @return HTTP 200 if liked successfully
+     */
+
+    @Operation(summary = "Like an event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @NotifyUser
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likeEvent(@PathVariable("id") Long eventId,
+                                          @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.likeEvent(eventId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Unlike an event by its ID.
+     * Only for authorized users.
+     *
+     * @param eventId   ID of the event to unlike
+     * @param user currently authenticated user
+     *
+     * @return HTTP 200 if unliked successfully
+     */
+    @Operation(summary = "Unlike an event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikeEvent(@PathVariable("id") Long eventId,
+                                            @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventService.unlikeEvent(eventId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Obtain event")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = EventVO.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventVO> getEventById(@PathVariable Long eventId) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(eventService.findById(eventId));
     }
 }
