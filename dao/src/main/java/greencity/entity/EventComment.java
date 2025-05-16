@@ -3,7 +3,9 @@ package greencity.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.*;
@@ -42,6 +44,7 @@ public class EventComment {
     private EventComment parentComment;
 
     @OneToMany(mappedBy = "parentComment", cascade = {CascadeType.ALL})
+    @Builder.Default
     private List<EventComment> comments = new ArrayList<>();
 
     @ManyToOne
@@ -61,5 +64,6 @@ public class EventComment {
         joinColumns = @JoinColumn(name = "event_comment_id"),
         inverseJoinColumns = @JoinColumn(name = "user_liked_id")
     )
-    private Set<User> usersLiked;
+    @Builder.Default
+    private Set<User> usersLiked = new HashSet<>();
 }
