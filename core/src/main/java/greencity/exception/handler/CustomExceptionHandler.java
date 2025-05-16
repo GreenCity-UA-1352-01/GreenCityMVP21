@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -613,7 +612,31 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InvalidEventDateException.class)
-    public final ResponseEntity<Object> handleInvalidEventDateException(InvalidEventDateException ex, WebRequest request) {
+    public final ResponseEntity<Object> handleInvalidEventDateException(InvalidEventDateException ex,
+                                                                        WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link ConflictException}.
+     * Returns a response entity with status 409 (Conflict) and a descriptive error message.
+     *
+     * @param ex the thrown ConflictException
+     * @return a response with HTTP 409 status and error message in the body
+     * @author Rostyslav Kushpit
+     */
+    @ExceptionHandler(ConflictException.class)
+    public final ResponseEntity<Object> handleConflictException(ConflictException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidOriginException.class)
+    public final ResponseEntity<Object> handleInvalidOriginException(InvalidOriginException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
@@ -646,5 +669,4 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new HashMap<>(errorAttributes.getErrorAttributes(webRequest,
                 ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE)));
     }
-
 }

@@ -1,15 +1,19 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
 import greencity.entity.NotificationCounter;
 import greencity.entity.User;
+import greencity.enums.NotificationOrigin;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
 import greencity.repository.NotificationRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +25,17 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final NotificationResponseDtoMapper notificationResponseDtoMapper;
 
+    /**
+     * {@inheritDoc}
+     * If notification counter for receiver is not present in the database, creates new one with count of
+     * notifications set to 1.
+     * If notification counter for receiver is present in the database, increments count of notifications by 1.
+     *
+     * @param dto notification data transfer object
+     * @return created notification data transfer object
+     * @author Roman Diakov
+     * @author Rostyslav Zadyraichuk
+     */
     @Override
     @Transactional
     public NotificationResponseDto createNotification(NotificationRequestDto dto) {
@@ -36,5 +51,106 @@ public class NotificationServiceImpl implements NotificationService {
                 .build())
         );
         return notificationResponseDtoMapper.convert(notification);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEventLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long id) {
+        String eventObjectLink = "/events/" + id;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, eventObjectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    eventObjectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+
+
+
+    @Override
+    @Transactional
+    public void deleteCommentLikeNotification(Long initiatorId,
+                                              Long receiverId,
+                                              Long id) {
+        String commentObjectLink = "/comments/" + id;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    commentObjectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteHabitLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long habitId) {
+        String objectLink = "/habit/" + habitId;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                initiatorId,
+                receiverId,
+                "likes",
+                objectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+
+    /**
+     * Returns all notifications for specified user id and notification origin.
+     * Origin can be null, then notifications from all origins will be returned.
+     *
+     * @param userId   user id
+     * @param origin   notification origin
+     * @param pageable page request
+     * @return notification response dto with pagination
+     * @author Marian Shtangret
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    public PageableDto<NotificationResponseDto> getAllNotificationsForUser(Long userId,
+                                                                           NotificationOrigin origin,
+                                                                           Pageable pageable) {
+        Page<Notification> notifications = origin == null
+            ? notificationsRepo.findNotificationsForUser(userId, pageable)
+            : notificationsRepo.findNotificationsForUser(userId, origin, pageable);
+        return new PageableDto<>(notifications.stream()
+                .map(notificationResponseDtoMapper::convert)
+                .toList(),
+            notifications.getTotalElements(),
+            notifications.getNumber(),
+            notifications.getTotalPages()
+        );
+    }
+
+    @Transactional
+    public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink) {
+        boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink);
+        if (exists) {
+            notificationsRepo.deleteByUsersAndLink(
+                    initiatorId, receiverId, objectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+
+    private void decrementCounter(Long receiverId) {
+        NotificationCounter counter = notificationCounterRepo.findById(receiverId)
+                .orElse(null);
+        if (counter != null && counter.getCountOfNotifications() > 0) {
+            counter.setCountOfNotifications(counter.getCountOfNotifications() - 1);
+            notificationCounterRepo.save(counter);
+        }
     }
 }

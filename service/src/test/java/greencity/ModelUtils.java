@@ -15,6 +15,7 @@ import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.notification.NotificationRequestDto;
+import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
@@ -38,6 +39,8 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static greencity.enums.UserStatus.ACTIVATED;
 
 public class ModelUtils {
@@ -768,6 +771,21 @@ public class ModelUtils {
                 .build();
 
     }
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .build();
+    }
+    public static EventDateTimeLocation getEventDateTimeLocation() {
+        return EventDateTimeLocation.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
+                .build();
+
+    }
 
     public static Event getEventWithoutImages() {
         Event event = getEventWithoutDates();
@@ -826,6 +844,27 @@ public class ModelUtils {
                 .build();
     }
 
+    public static Notification getNotification() {
+        return Notification.builder()
+            .id(1L)
+            .action("test")
+            .objectName("test")
+            .objectLink("link")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .receiver(getUser().setId(2L))
+            .initiator(getUser().setId(1L))
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
+    }
+
+    public static NotificationCounter getNotificationCounter() {
+        return NotificationCounter.builder()
+            .countOfNotifications(1)
+            .user(getUser().setId(2L))
+            .build();
+    }
+
     public static NotificationRequestDto getNotificationRequestDto() {
         return NotificationRequestDto.builder()
             .initiatorId(1L)
@@ -833,7 +872,23 @@ public class ModelUtils {
             .objectName("test")
             .objectLink("link")
             .action("test")
+            .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
+    }
+
+    public static NotificationResponseDto getNotificationResponseDto() {
+        return NotificationResponseDto.builder()
+            .id(1L)
+            .initiatorId(1L)
+            .receiverId(2L)
+            .objectName("test")
+            .objectLink("link")
+            .action("test")
+            .creationDate(zonedDateTime)
+            .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 
