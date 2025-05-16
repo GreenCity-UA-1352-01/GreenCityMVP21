@@ -148,6 +148,7 @@ public final class ErrorMessage {
     public static final String EVENT_ALREADY_LIKED = "User has already liked this event";
     public static final String COMMENT_ALREADY_LIKED = "User has already liked this comment";
     public static final String HABIT_ALREADY_LIKED = "User has already liked this habit";
+    public static final String INVALID_ORIGIN = "String cannot be converted to origin: ";
     private ErrorMessage() {
     }
 }

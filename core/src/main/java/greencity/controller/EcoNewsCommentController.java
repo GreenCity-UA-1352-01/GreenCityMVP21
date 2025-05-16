@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.ApiPageableWithoutSort;
 import greencity.annotations.CurrentUser;
+import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
@@ -51,6 +52,7 @@ public class EcoNewsCommentController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("{econewsId}")
+    @NotifyUser
     public ResponseEntity<AddEcoNewsCommentDtoResponse> save(@PathVariable Long econewsId,
         @Valid @RequestBody AddEcoNewsCommentDtoRequest request,
         @Parameter(hidden = true) @CurrentUser UserVO user) {
