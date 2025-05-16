@@ -2,6 +2,17 @@ package greencity.service;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.*;
+import greencity.dto.notification.NotificationRequestDto;
+import greencity.dto.user.UserVO;
+import greencity.entity.*;
+import greencity.entity.localization.TagTranslation;
+import greencity.enums.NotificationOrigin;
+import greencity.enums.NotificationStatus;
+import greencity.enums.Role;
+import greencity.enums.TagType;
+import greencity.exception.exceptions.*;
+import greencity.mapping.NotificationMapper;
+import greencity.notification.NotificationPublisher;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
@@ -16,6 +27,7 @@ import greencity.repository.CancelledEventsRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
+import greencity.repository.EventLikeRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,6 +48,8 @@ public class EventServiceImpl implements EventService {
     private final CancelledEventsRepository cancelledEventsRepository;
     private final FileService fileService;
     private final EventDateTimeLocationService eventDateTimeLocationService;
+    private final EventLikeRepository eventLikeRepository;
+    private final NotificationService notificationService;
     private final ModelMapper modelMapper;
 
 
@@ -267,6 +281,65 @@ public class EventServiceImpl implements EventService {
                 .forEach(image -> fileService.delete(image.getImagePath()));
     }
 
+    /**
+     * {@inheritDoc}
+     * Method for liking an event by its ID.
+     * If the user has already liked this event, a {@link ConflictException} is thrown
+     * and no notification is sent. This ensures idempotency and prevents duplicate notifications.
+     *
+     * @param id   the ID of the event to be liked
+     * @param user the user who is liking the event
+     * @throws ConflictException if the event was already liked by the user
+     * @author Rostyslav Kushpit
+     */
+    @Override
+    @Transactional
+    public void likeEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+        if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            throw new ConflictException(ErrorMessage.EVENT_ALREADY_LIKED);
+        }
+
+        EventLike like = EventLike.builder()
+                .event(event)
+                .user(getUserById(user.getId()))
+                .likedAt(ZonedDateTime.now())
+                .build();
+        eventLikeRepository.save(like);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Method for unlike some event by its id.
+     *
+     * @param id   the ID of the event to be unliked
+     * @param user the user who is unliking the event
+     * @author Roman Diakov
+     */
+    @Override
+    @Transactional
+    public void unlikeEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+        if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
+            notificationService.deleteEventLikeNotification(user.getId(), event.getInitiator().getId(), id);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param id event id
+     * @return {@link EventVO} with founded event
+     * @throws NotFoundException if event not found
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    public EventVO findById(Long id) {
+        Optional<Event> eventOpt = eventRepository.findById(id);
+        Event event = eventOpt.orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+        return modelMapper.map(event, EventVO.class);
+
     @Transactional
     @Override
     public void cancelEventById(Long id, UserVO user, String reason) {
@@ -375,11 +448,6 @@ public class EventServiceImpl implements EventService {
         return event.getAttenders().stream()
                 .map(attender -> attender.getAttender().getId())
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public EventVO findById(Long id) {
-        return modelMapper.map(getEventById(id), EventVO.class);
     }
 
     @Override

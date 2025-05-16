@@ -17,6 +17,18 @@ public interface NotificationService {
      */
     NotificationResponseDto createNotification(NotificationRequestDto dto);
 
+    void deleteEventLikeNotification(Long initiatorId,
+                                     Long receiverId,
+                                     Long eventId);
+
+    void deleteHabitLikeNotification(Long initiatorId,
+                                     Long receiverId,
+                                     Long habitId);
+
+    void deleteCommentLikeNotification(Long initiatorId,
+                            Long receiverId,
+                            Long eventId);
+  
     /**
      * Retrieves all notifications for a specific user.
      *

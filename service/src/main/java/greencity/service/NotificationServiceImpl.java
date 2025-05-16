@@ -43,18 +43,68 @@ public class NotificationServiceImpl implements NotificationService {
         notification = notificationsRepo.save(notification);
         final User receiver = notification.getReceiver();
 
-        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(
-            notificationCounter ->
+        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(notificationCounter ->
                 notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-            () -> {
-                NotificationCounter newNotificationCounter = NotificationCounter.builder()
-                    .countOfNotifications(1)
-                    .user(receiver)
-                    .build();
-                notificationCounterRepo.save(newNotificationCounter);
-            }
+            () -> notificationCounterRepo.save(NotificationCounter.builder()
+                .countOfNotifications(1)
+                .user(receiver)
+                .build())
         );
         return notificationResponseDtoMapper.convert(notification);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEventLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long id) {
+        String eventObjectLink = "/events/" + id;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, eventObjectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    eventObjectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+
+
+
+    @Override
+    @Transactional
+    public void deleteCommentLikeNotification(Long initiatorId,
+                                              Long receiverId,
+                                              Long id) {
+        String commentObjectLink = "/comments/" + id;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    commentObjectLink
+            );
+            decrementCounter(receiverId);
+        }
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteHabitLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long habitId) {
+        String objectLink = "/habit/" + habitId;
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                initiatorId,
+                receiverId,
+                "likes",
+                objectLink
+            );
+            decrementCounter(receiverId);
+        }
     }
 
     /**
@@ -86,7 +136,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink) {
-        boolean exists = notificationsRepo.existsByUsersAndLink(initiatorId, receiverId, objectLink);
+        boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink);
         if (exists) {
             notificationsRepo.deleteByUsersAndLink(
                     initiatorId, receiverId, objectLink
@@ -94,6 +144,7 @@ public class NotificationServiceImpl implements NotificationService {
             decrementCounter(receiverId);
         }
     }
+
     private void decrementCounter(Long receiverId) {
         NotificationCounter counter = notificationCounterRepo.findById(receiverId)
                 .orElse(null);

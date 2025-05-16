@@ -15,17 +15,18 @@ public class NotificationPublisher {
     /**
      * Publishes a notification event, that can be handled by a listener.
      *
-     * @param event the notification event to publish, must not be null
+     * @param notifications list of notifications to be published
      * @throws IllegalArgumentException if the event is null
      * @author Roman Diakov & Rostyslav Zadyraichuk
      * @see NotificationListener
      */
-    public void publish(List<NotificationRequestDto> event) {
-        if (event == null || event.isEmpty()) {
+    public void publish(List<NotificationRequestDto> notifications) {
+        if (notifications == null || notifications.isEmpty()) {
             throw new IllegalArgumentException("Notification event must not be null");
         }
-        for (NotificationRequestDto notificationRequestDto : event) {
-            publisher.publishEvent(notificationRequestDto);
-        }
+
+        notifications.stream()
+            .filter(n -> !n.getReceiverId().equals(n.getInitiatorId()))
+            .forEach(publisher::publishEvent);
     }
 }

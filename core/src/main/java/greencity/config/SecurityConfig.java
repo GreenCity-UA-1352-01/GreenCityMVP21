@@ -204,6 +204,8 @@ public class SecurityConfig {
                                 "/notifications/user/{userId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.POST,
+                                "/habit/{habitId}/unlike",
+                                "/habit/{habitId}/like",
                                 "/events/create",
                                 "/events/subscribe/{id}",
                                 "/category",
@@ -212,6 +214,7 @@ public class SecurityConfig {
                                 "/econews/dislike",
                                 "/econews/comments/{econewsId}",
                                 "/econews/comments/like",
+                                "/events/{eventId}/like",
                                 CUSTOM_SHOPPING_LIST_ITEMS,
                                 "/files/image",
                                 "/files/convert",
@@ -225,7 +228,9 @@ public class SecurityConfig {
                                 USER_SHOPPING_LIST,
                                 "/user/{userId}/habit",
                                 "/habit/custom",
-                                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
+                                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
+                                "/events/comments/{eventId}",
+                                "/events/comments/{commentId}/like")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.PUT,
                                 "/habit/statistic/{id}",

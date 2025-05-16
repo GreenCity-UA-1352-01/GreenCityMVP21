@@ -14,8 +14,10 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.notification.NotificationPublisher;
 import greencity.repository.CancelledEventsRepository;
 import greencity.repository.EventRepository;
+import greencity.repository.EventLikeRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,14 +51,19 @@ class EventServiceImplTest {
     @Mock
     private EventRepository eventRepository;
     @Mock
+    private EventLikeRepository eventLikeRepository;
+    @Mock
     private FileService fileService;
     @Mock
     private EventDateTimeLocationService eventDateTimeLocationService;
     @Mock
+    private NotificationService notificationService;
+    @Mock
     private ModelMapper modelMapper;
     @Mock
+    private NotificationPublisher  notificationPublisher;
+    @Mock
     CancelledEventsRepository cancelledEventsRepository;
-
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -242,6 +249,8 @@ class EventServiceImplTest {
                 cancelledEventsRepository,
                 fileService,
                 eventDateTimeLocationService,
+                eventLikeRepository,
+                notificationService,
                 modelMapper2
         );
 
@@ -313,6 +322,8 @@ class EventServiceImplTest {
                 cancelledEventsRepository,
                 fileService,
                 eventDateTimeLocationService,
+                eventLikeRepository,
+                notificationService,
                 modelMapper2
         );
 
@@ -369,6 +380,8 @@ class EventServiceImplTest {
                 cancelledEventsRepository,
                 fileService,
                 eventDateTimeLocationService,
+                eventLikeRepository,
+                notificationService,
                 modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
@@ -771,4 +784,3 @@ class EventServiceImplTest {
     }
 
 }
-

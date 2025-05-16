@@ -30,14 +30,43 @@ public interface EventService {
      */
     void deleteById(Long id, UserVO user);
 
+    /**
+     * Finds an event by its ID.
+     *
+     * @param id the ID of the event to find
+     * @return the {@link EventVO} associated with the given ID
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    EventVO findById(Long id);
+
+    /**
+     * Like an event.
+     *
+     * @param id   the ID of the event to be liked
+     * @param user the user requesting the like
+     *
+     * @author Rostyslav Kushpit
+     */
+    void likeEvent(Long id, UserVO user);
+
+    /**
+     * Unlike an event.
+     *
+     * @param id   the ID of the event to be unliked
+     * @param user the user requesting the unlike
+     *
+     * @author Roman Diakov
+     */
+    void unlikeEvent(Long id, UserVO user);
+
     void cancelEventById(Long id, UserVO user, String reason);
 
     void attendEvent(Long id, UserVO user);
 
     void acceptAttenderToEvent(Long eventId, Long userId, UserVO user);
 
-    EventVO findById(Long id);
-
     void unsubscribeFromEvent(Long id, UserVO user);
+
     List<Long> findAttendersIdByEventId(Long id);
 }

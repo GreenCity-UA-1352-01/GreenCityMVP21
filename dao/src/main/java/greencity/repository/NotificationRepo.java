@@ -20,20 +20,28 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
     Page<Notification> findNotificationsForUser(Long userId, NotificationOrigin origin, Pageable pageable);
 
     @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE " +
-            "n.initiator.id = :initiatorId AND " +
-            "n.receiver.id = :receiverId AND " +
-            "n.objectLink = :link")
-    boolean existsByUsersAndLink(@Param("initiatorId") Long initiatorId,
-                                                          @Param("receiverId") Long receiverId,
-                                                          @Param("link") String objectLink);
+        "n.initiator.id = :initiatorId AND " +
+        "n.receiver.id = :receiverId AND " +
+        "n.action = 'likes' AND " +
+        "n.objectLink = :link")
+    boolean existsLikeNotification(@Param("initiatorId") Long initiatorId,
+                                   @Param("receiverId") Long receiverId,
+                                   @Param("link") String objectLink);
+
+    @Modifying
+    void deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+        Long initiatorId,
+        Long receiverId,
+        String action,
+        String objectLink
+    );
 
     @Modifying
     @Query("DELETE FROM Notification n WHERE " +
-            "n.initiator.id = :initiatorId AND " +
-            "n.receiver.id = :receiverId AND " +
-            "n.objectLink = :link")
+        "n.initiator.id = :initiatorId AND " +
+        "n.receiver.id = :receiverId AND " +
+        "n.objectLink = :link")
     void deleteByUsersAndLink(@Param("initiatorId") Long initiatorId,
-                                                       @Param("receiverId") Long receiverId,
-                                                       @Param("link") String objectLink);
-
+                              @Param("receiverId") Long receiverId,
+                              @Param("link") String objectLink);
 }
