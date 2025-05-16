@@ -1,6 +1,7 @@
 package greencity.dto.notification;
 
 import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationOrigin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -34,4 +35,7 @@ public class NotificationRequestDto {
     @NotNull
     @Min(1)
     private Long initiatorId;
+
+    @NotNull
+    private NotificationOrigin origin;
 }

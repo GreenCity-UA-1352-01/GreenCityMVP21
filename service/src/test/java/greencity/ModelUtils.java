@@ -838,6 +838,7 @@ public class ModelUtils {
             .status(NotificationStatus.UNREAD)
             .receiver(getUser().setId(2L))
             .initiator(getUser().setId(1L))
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 
@@ -857,6 +858,7 @@ public class ModelUtils {
             .action("test")
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 
@@ -870,6 +872,7 @@ public class ModelUtils {
             .action("test")
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 }
