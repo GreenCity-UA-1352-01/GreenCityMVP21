@@ -1,12 +1,10 @@
 package greencity.service;
 
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
 
 public interface EventService {
     CreateEventDtoResponse createEvent(CreateEventDto dto, List<MultipartFile> images, UserVO userVO);
@@ -28,8 +26,18 @@ public interface EventService {
      *
      * @param id   the ID of the event to be deleted
      * @param user the user requesting the deletion
-     *
      * @author Rostyslav Zadyraichuk
      */
     void deleteById(Long id, UserVO user);
+
+    void cancelEventById(Long id, UserVO user, String reason);
+
+    void attendEvent(Long id, UserVO user);
+
+    void acceptAttenderToEvent(Long eventId, Long userId, UserVO user);
+
+    EventVO findById(Long id);
+
+    void unsubscribeFromEvent(Long id, UserVO user);
+    List<Long> findAttendersIdByEventId(Long id);
 }

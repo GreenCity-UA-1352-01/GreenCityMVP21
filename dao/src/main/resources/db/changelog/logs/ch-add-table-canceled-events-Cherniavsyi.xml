@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="createCancelledEventsTable" author="Cherniavskyi">
+        <createTable tableName="cancelled_events">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_cancelled_event_event"
+                             referencedTableName="events" referencedColumnNames="id"/>
+            </column>
+
+            <column name="cancelled_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="cancelled_by_user_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="reason" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="cancelled_events"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addFKsToCancelledEvents" author="Cherniavskyi Pavlo">
+
+        <addForeignKeyConstraint
+                baseTableName="cancelled_events"
+                baseColumnNames="cancelled_by_user_id"
+                constraintName="fk_cancelled_events_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="cancelled_events"
+                    constraintName="fk_cancelled_events_user"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

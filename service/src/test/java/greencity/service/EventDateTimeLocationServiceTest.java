@@ -106,7 +106,7 @@ public class EventDateTimeLocationServiceTest {
         // When & Then
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> eventDateTimeLocationService.isFutureEvent(eventDateTimeLocations));
-        assertEquals(ErrorMessage.CANNOT_EDIT_PAST_EVENT, exception.getMessage());
+        assertEquals(ErrorMessage.THE_EVENT_IS_PAST, exception.getMessage());
     }
 
     @Test

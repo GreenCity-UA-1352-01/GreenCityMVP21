@@ -4,10 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.*;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
@@ -767,6 +764,21 @@ public class ModelUtils {
                 )))
                 .tags(Set.of(getEventTag()))
                 .isOpen(true)
+                .build();
+
+    }
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+                .id(1L)
+                .title("title")
+                .description("description")
+                .build();
+    }
+    public static EventDateTimeLocation getEventDateTimeLocation() {
+        return EventDateTimeLocation.builder()
+                .startDateTime(FIXED_EVENT_START)
+                .endDateTime(FIXED_EVENT_END)
+                .location("location")
                 .build();
 
     }
