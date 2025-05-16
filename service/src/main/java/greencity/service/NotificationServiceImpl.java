@@ -38,23 +38,19 @@ public class NotificationServiceImpl implements NotificationService {
         notification = notificationsRepo.save(notification);
         final User receiver = notification.getReceiver();
 
-        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(
-            notificationCounter ->
+        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(notificationCounter ->
                 notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-            () -> {
-                NotificationCounter newNotificationCounter = NotificationCounter.builder()
-                    .countOfNotifications(1)
-                    .user(receiver)
-                    .build();
-                notificationCounterRepo.save(newNotificationCounter);
-            }
+            () -> notificationCounterRepo.save(NotificationCounter.builder()
+                .countOfNotifications(1)
+                .user(receiver)
+                .build())
         );
         return notificationResponseDtoMapper.convert(notification);
     }
 
     @Override
     @Transactional
-    public void deleteLikeNotification(Long initiatorId,
+    public void deleteEventLikeNotification(Long initiatorId,
                                        Long receiverId,
                                        Long id) {
         String eventObjectLink = "/events/" + id;
@@ -75,6 +71,22 @@ public class NotificationServiceImpl implements NotificationService {
                     receiverId,
                     "likes",
                     commentObjectLink
+            );
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteHabitLikeNotification(Long initiatorId,
+                                            Long receiverId,
+                                            Long habitId) {
+        String objectLink = "/habit/" + habitId;
+        if(notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
+            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+                    initiatorId,
+                    receiverId,
+                    "likes",
+                    objectLink
             );
         }
     }

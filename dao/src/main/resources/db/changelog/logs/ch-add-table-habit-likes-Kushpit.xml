@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="addhabitlikestableKushpit" author="Rostyslav Kushpit">
+        <createTable tableName="habit_likes">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="habit_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_liked_habit"
+                             references="habits(id)" />
+            </column>
+
+            <column name="liked_by_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_liked_by_user"
+                             references="users(id)" />
+            </column>
+
+            <column name="liked_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="habit_likes"
+                columnNames="liked_by_id, habit_id"
+                constraintName="uc_liked_by_and_habit"/>
+
+        <createIndex tableName="habit_likes"
+                     indexName="idx_liked_by_id">
+            <column name="liked_by_id"/>
+        </createIndex>
+
+        <createIndex tableName="habit_likes"
+                     indexName="idx_habit_id">
+            <column name="habit_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
