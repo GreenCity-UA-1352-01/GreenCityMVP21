@@ -1,6 +1,7 @@
 package greencity.aspects;
 
 import greencity.dto.notification.NotificationRequestDto;
+import greencity.notification.NotificationEventFactory;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,12 @@ public class NotificationAspect {
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();
 
-        List<NotificationRequestDto> event = registry.getFactory(method).createEvent(args);
-        publisher.publish(event);
+        NotificationEventFactory factory = registry.getFactory(method);
+        if (factory == null) {
+            throw new IllegalStateException("There is no factory for method " + method);   
+        }
+        
+        List<NotificationRequestDto> events = factory.createEvent(args);
+        publisher.publish(events);
     }
 }

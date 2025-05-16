@@ -1,9 +1,9 @@
 package greencity.entity;
 
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.ZonedDateTime;
 
 @Entity
@@ -43,4 +43,8 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", referencedColumnName = "id")
     private User initiator;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private NotificationOrigin origin;
 }

@@ -355,6 +355,7 @@ public class EcoNewsController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/like")
+    @NotifyUser
     public void like(@RequestParam("id") Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         ecoNewsService.like(user, id);
     }

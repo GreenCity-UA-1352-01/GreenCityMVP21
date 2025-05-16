@@ -149,7 +149,7 @@ public final class ErrorMessage {
     public static final String USER_IS_ALREADY_REQUESTED = "Already requested for this event";
     public static final String USER_IS_INITIATOR = "You are initiator of this event";
     public static final String USER_IS_NOT_ATTENDER = "You are not subscribed to this event";
-
+    public static final String INVALID_ORIGIN = "String cannot be converted to origin: ";
 
     private ErrorMessage() {
     }
