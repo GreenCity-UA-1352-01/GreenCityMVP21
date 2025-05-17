@@ -1,16 +1,13 @@
 package greencity.service;
 
-import greencity.dto.notification.BaseNotificationResponseDto;
-import greencity.dto.notification.NotificationRequestDto;
-import greencity.dto.notification.NotificationResponseDto;
+import greencity.dto.notification.*;
+import greencity.enums.NotificationObjectType;
 import java.util.List;
 import java.util.Set;
 import greencity.dto.user.UserVO;
-import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.enums.NotificationOrigin;
-import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
     /**
@@ -35,7 +32,8 @@ public interface NotificationService {
 
     void deleteCommentLikeNotification(Long initiatorId,
                             Long receiverId,
-                            Long eventId);
+                            NotificationObjectType objectType,
+                            Long objectId);
   
     /**
      * Method to retrieve all notifications for a specific user.
@@ -45,7 +43,7 @@ public interface NotificationService {
      * @author Marian Shtangret
      * @author Rostyslav Zadyraichuk
      */
-    Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId);
+    Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId, NotificationOrigin origin);
 
-    void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink);
+    void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, Long newsId);
 }

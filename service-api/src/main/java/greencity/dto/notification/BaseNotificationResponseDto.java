@@ -1,6 +1,7 @@
 package greencity.dto.notification;
 
 import greencity.enums.NotificationObjectType;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
 import java.time.ZonedDateTime;
@@ -20,5 +21,6 @@ public abstract class BaseNotificationResponseDto {
     private ZonedDateTime creationDate;
     private NotificationStatus status;
     private NotificationType notificationType;
+    private NotificationOrigin origin;
     private Long receiverId;
 }

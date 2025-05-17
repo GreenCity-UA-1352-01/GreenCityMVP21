@@ -1,40 +1,32 @@
 package greencity.service;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.notification.BaseNotificationResponseDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.notification.UpdateNotificationStatusRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationStatus;
-import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.InvalidStatusException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.NotificationCounterRepo;
+import greencity.repository.NotificationReceiverRepo;
 import greencity.repository.NotificationRepo;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import java.util.Objects;
-import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationRequestDto;
-import greencity.dto.notification.NotificationResponseDto;
-import greencity.entity.Notification;
 import greencity.entity.NotificationCounter;
 import greencity.entity.NotificationReceiver;
 import greencity.enums.NotificationType;
-import greencity.entity.User;
 import greencity.enums.NotificationOrigin;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.mapping.NotificationsGroupedResponseDtoMapper;
-import greencity.repository.NotificationCounterRepo;
-import greencity.repository.NotificationRepo;
 import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -42,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationsRepo;
     private final NotificationCounterRepo notificationCounterRepo;
+    private final NotificationReceiverRepo notificationReceiverRepo;
     private final NotificationMapper notificationMapper;
     private final NotificationResponseDtoMapper notificationResponseDtoMapper;
     private final NotificationsGroupedResponseDtoMapper notificationsGroupedResponseDtoMapper;
@@ -63,30 +56,33 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = notificationMapper.convert(dto);
         notification = notificationsRepo.save(notification);
         List<NotificationReceiver> receivers = notification.getNotificationReceivers();
+//
+//        receivers.forEach(nr -> {
+//            notificationCounterRepo.findById(nr.getId()).ifPresentOrElse(notificationCounter ->
+//                    notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
+//                () -> {
+//                    NotificationCounter newNotificationCounter = NotificationCounter.builder()
+//                        .countOfNotifications(1)
+//                        .user(nr.getReceiver())
+//                        .build();
+//                    notificationCounterRepo.save(newNotificationCounter);
+//                });
+//        });
 
-        receivers.forEach(nr -> {
-            notificationCounterRepo.findById(nr.getId()).ifPresentOrElse(notificationCounter ->
+        receivers.forEach(receiver -> {
+            notificationCounterRepo.findById(receiver.getId()).ifPresentOrElse(notificationCounter ->
                     notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-                () -> {
-                    NotificationCounter newNotificationCounter = NotificationCounter.builder()
-                        .countOfNotifications(1)
-                        .user(nr.getReceiver())
-                        .build();
-                    notificationCounterRepo.save(newNotificationCounter);
-                });
+                () -> notificationCounterRepo.save(NotificationCounter.builder()
+                    .countOfNotifications(1)
+                    .user(receiver.getReceiver())
+                    .build())
+            );
         });
 
-        notificationCounterRepo.findById(dto.getReceiverId()).ifPresentOrElse(notificationCounter ->
-                notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-            () -> notificationCounterRepo.save(NotificationCounter.builder()
-                .countOfNotifications(1)
-                .user(receiver)
-                .build())
-        );
         return notificationResponseDtoMapper.convert(notification);
     }
-  
-      /**
+
+    /**
      * Updates the status of a specific notification for the current user.
      *
      * <p>This method first checks whether the notification with the given ID exists and belongs
@@ -95,28 +91,40 @@ public class NotificationServiceImpl implements NotificationService {
      * is thrown. The status is then updated to the specified value.</p>
      *
      * @param request the request DTO containing the notification ID and new status
-     * @param user the currently authenticated user
-     *
-     * @throws NotFoundException if no notification with the given ID is found
-     * @throws IllegalArgumentException if the notification does not belong to the provided user
-     * @throws IllegalArgumentException if the status string is invalid and cannot be converted to {@link NotificationStatus}
+     * @param user    the currently authenticated user
+     * @throws NotFoundException      if the notification receiver with the given ID does not exist
+     * @throws InvalidStatusException if the status cannot be converted to a {@link NotificationStatus}
      */
     @Override
-    public void updateNotificationStatus(
-            UpdateNotificationStatusRequestDto request,
-            UserVO user
-    ) {
-        Notification notification = notificationsRepo.findById(request.getId())
-                .orElseThrow(() -> new NotFoundException("Notification with ID " + request.getId() + " not found."));
+    public void updateNotificationStatus(UpdateNotificationStatusRequestDto request,
+                                         UserVO user) {
+//        Notification notification = notificationsRepo.findById(request.getId())
+//            .orElseThrow(() -> new NotFoundException("Notification with ID " + request.getId() + " not found."));
+//        List<NotificationReceiver> receivers = notification.getNotificationReceivers();
+//
+//        if (!Objects.equals(notification.getReceiver().getId(), user.getId())) {
+//            throw new BadRequestException(
+//                "Notification with ID " + request.getId() + " does not belong to user with ID " + user.getId() + ".");
+//        }
+//
+//        NotificationStatus enumStatus = NotificationStatus.valueOf(request.getStatus().toUpperCase());
+//
+//        notification.setStatus(enumStatus);
+//        notificationsRepo.save(notification);
+        NotificationReceiver notificationReceiver = notificationReceiverRepo
+            .findNotificationReceiver(request.getId(), user.getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_RECEIVER_NOT_FOUND + request.getId()));
 
-        if (!Objects.equals(notification.getReceiver().getId(), user.getId())) {
-            throw new BadRequestException("Notification with ID " + request.getId() + " does not belong to user with ID " + user.getId() + ".");
+        notificationReceiver.setStatus(convertStatus(request.getStatus()));
+        notificationReceiverRepo.save(notificationReceiver);
+    }
+
+    private NotificationStatus convertStatus(String status) {
+        try {
+            return NotificationStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidStatusException(ErrorMessage.INVALID_ORIGIN + status);
         }
-
-        NotificationStatus enumStatus = NotificationStatus.valueOf(request.getStatus().toUpperCase());
-
-        notification.setStatus(enumStatus);
-        notificationsRepo.save(notification);
     }
 
     @Override
@@ -124,20 +132,18 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteEventLikeNotification(Long initiatorId,
                                             Long receiverId,
                                             Long id) {
-        String eventObjectLink = "/events/" + id;
-        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, eventObjectLink)) {
-            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
-                    initiatorId,
-                    receiverId,
-                    "likes",
-                    eventObjectLink
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, NotificationType.EVENT_LIKE,
+            NotificationObjectType.EVENT, id)) {
+            notificationsRepo.deleteLikeNotification(
+                initiatorId,
+                receiverId,
+                NotificationType.EVENT_LIKE,
+                NotificationObjectType.EVENT,
+                id
             );
             decrementCounter(receiverId);
         }
     }
-
-
-
 
     /**
      * Retrieves all notifications for a specific user. If user has no notifications, returns an empty set.
@@ -152,8 +158,8 @@ public class NotificationServiceImpl implements NotificationService {
      * @author Rostyslav Zadyraichuk
      */
     @Override
-    public Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId) {
-        List<Notification> notifications = notificationsRepo.findNotificationsForUser(userId);
+    public Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId, NotificationOrigin origin) {
+        List<Notification> notifications = notificationsRepo.findNotificationsForUser(userId, origin);
         if (notifications.isEmpty()) {
             return Collections.emptySet();
         }
@@ -191,14 +197,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void deleteCommentLikeNotification(Long initiatorId,
                                               Long receiverId,
-                                              Long id) {
-        String commentObjectLink = "/comments/" + id;
-        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, commentObjectLink)) {
-            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
-                    initiatorId,
-                    receiverId,
-                    "likes",
-                    commentObjectLink
+                                              NotificationObjectType objectType,
+                                              Long objectId) {
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, NotificationType.COMMENT_LIKE,
+                objectType, objectId)) {
+            notificationsRepo.deleteLikeNotification(
+                initiatorId,
+                receiverId,
+                NotificationType.COMMENT_LIKE,
+                objectType,
+                objectId
             );
             decrementCounter(receiverId);
         }
@@ -210,24 +218,26 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteHabitLikeNotification(Long initiatorId,
                                             Long receiverId,
                                             Long habitId) {
-        String objectLink = "/habit/" + habitId;
-        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink)) {
-            notificationsRepo.deleteByInitiatorIdAndReceiverIdAndActionAndObjectLink(
+        if (notificationsRepo.existsLikeNotification(initiatorId, receiverId, NotificationType.HABIT_LIKE,
+            NotificationObjectType.HABIT, habitId)) {
+            notificationsRepo.deleteLikeNotification(
                 initiatorId,
                 receiverId,
-                "likes",
-                objectLink
+                NotificationType.HABIT_LIKE,
+                NotificationObjectType.HABIT,
+                habitId
             );
             decrementCounter(receiverId);
         }
     }
 
     @Transactional
-    public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, String objectLink) {
-        boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId, objectLink);
+    public void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, Long newsId) {
+        boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId,
+            NotificationType.ECO_NEWS_LIKE, NotificationObjectType.ECO_NEWS, newsId);
         if (exists) {
-            notificationsRepo.deleteByUsersAndLink(
-                    initiatorId, receiverId, objectLink
+            notificationsRepo.existsLikeNotification(
+                initiatorId, receiverId, NotificationType.ECO_NEWS_LIKE, NotificationObjectType.ECO_NEWS, newsId
             );
             decrementCounter(receiverId);
         }
@@ -235,13 +245,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void decrementCounter(Long receiverId) {
         NotificationCounter counter = notificationCounterRepo.findById(receiverId)
-                .orElse(null);
+            .orElse(null);
         if (counter != null && counter.getCountOfNotifications() > 0) {
             counter.setCountOfNotifications(counter.getCountOfNotifications() - 1);
             notificationCounterRepo.save(counter);
         }
     }
-  
+
     @AllArgsConstructor
     @Getter
     @EqualsAndHashCode

@@ -3,7 +3,6 @@ package greencity.entity;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

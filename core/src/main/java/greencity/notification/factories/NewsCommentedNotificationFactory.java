@@ -6,11 +6,13 @@ import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EcoNewsService;
 import greencity.notification.CommentDateTimeFormatter;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
@@ -52,12 +54,12 @@ public class NewsCommentedNotificationFactory implements NotificationEventFactor
 
         return NotificationRequestDto.builder()
                 .action(action)
-                .objectName("EcoNews")
-                .objectLink("/econews/comments/" + newsId)
+                .objectName(shortenedTitle)
                 .creationDate(creationDate)
-                .status(NotificationStatus.UNREAD)
-                .receiverId(receiver.getId())
+                .receiverIds(Set.of(receiver.getId()))
                 .initiatorId(initiator.getId())
+                .objectType(NotificationObjectType.ECO_NEWS)
+                .notificationType(NotificationType.ECO_NEWS_COMMENT)
                 .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }

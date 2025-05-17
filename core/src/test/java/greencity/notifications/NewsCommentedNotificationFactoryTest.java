@@ -5,9 +5,9 @@ import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
-import greencity.enums.NotificationStatus;
 import greencity.notification.factories.NewsCommentedNotificationFactory;
 import greencity.service.EcoNewsService;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,11 +61,9 @@ public class NewsCommentedNotificationFactoryTest {
         NotificationRequestDto result = factory.createEvent(new Object[] {newsId, null, initiator});
 
         assertNotNull(result);
-        assertEquals("/econews/comments/" + newsId, result.getObjectLink());
-        assertEquals("EcoNews", result.getObjectName());
-        assertEquals(receiver.getId(), result.getReceiverId());
+        assertEquals("Eco News 1", result.getObjectName());
+        assertIterableEquals(Set.of(receiver.getId()), result.getReceiverIds());
         assertEquals(initiator.getId(), result.getInitiatorId());
-        assertEquals(NotificationStatus.UNREAD, result.getStatus());
         assertTrue(result.getAction().contains("commented"));
     }
 }

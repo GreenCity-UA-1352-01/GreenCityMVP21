@@ -5,17 +5,17 @@ import greencity.controller.EventController;
 import greencity.dto.event.EventVO;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EventService;
+import java.util.HashSet;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -37,7 +37,7 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
     }
 
     @Override
-    public List<NotificationRequestDto> createEvent(Object[] args) {
+    public NotificationRequestDto createEvent(Object[] args) {
         Long eventId = (Long) args[0];
         UserVO initiator = (UserVO) args[1];
 
@@ -45,21 +45,19 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
         EventVO event = eventService.findById(eventId);
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
-        String action = "Unfortunately event %s was cancelled. %s".formatted(title, CommentDateTimeFormatter.format(creationDate));
+        String action = "Unfortunately event %s was cancelled. %s".formatted(title,
+            CommentDateTimeFormatter.format(creationDate));
         List<Long> receivers = eventService.findAttendersIdByEventId(eventId);
-        List<NotificationRequestDto> notifications = new ArrayList<>();
-        for (Long receiver : receivers) {
-            notifications.add(NotificationRequestDto.builder()
-                    .action(action)
-                    .objectName("Event")
-                    .objectLink("/events/" + event.getId())
-                    .creationDate(ZonedDateTime.now())
-                    .status(NotificationStatus.UNREAD)
-                    .receiverId(receiver)
-                    .initiatorId(initiator.getId())
-                    .origin(NotificationOrigin.GREEN_CITY)
-                    .build());
-        }
-        return notifications;
+
+        return NotificationRequestDto.builder()
+            .action(action)
+            .objectName(event.getTitle())
+            .creationDate(ZonedDateTime.now())
+            .receiverIds(new HashSet<>(receivers))
+            .initiatorId(initiator.getId())
+            .objectType(NotificationObjectType.EVENT)
+            .notificationType(NotificationType.EVENT_CANCEL)
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
     }
 }

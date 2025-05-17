@@ -154,6 +154,9 @@ public final class ErrorMessage {
     public static final String USER_IS_INITIATOR = "You are initiator of this event";
     public static final String USER_IS_NOT_ATTENDER = "You are not subscribed to this event";
     public static final String INVALID_ORIGIN = "String cannot be converted to origin: ";
+    public static final String INVALID_STATUS = "String cannot be converted to status: ";
+    public static final String UNREGISTERED_FACTORY = "There is no factory for method: ";
+    public static final String NOTIFICATION_RECEIVER_NOT_FOUND = "Notification receiver with id not found: ";
 
     private ErrorMessage() {
     }

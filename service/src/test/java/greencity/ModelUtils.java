@@ -774,13 +774,7 @@ public class ModelUtils {
             .build();
 
     }
-    public static EventVO getEventVO() {
-        return EventVO.builder()
-                .id(1L)
-                .title("title")
-                .description("description")
-                .build();
-    }
+
     public static EventDateTimeLocation getEventDateTimeLocation() {
         return EventDateTimeLocation.builder()
                 .startDateTime(FIXED_EVENT_START)
@@ -896,13 +890,12 @@ public class ModelUtils {
         return NotificationRequestDto.builder()
             .initiatorId(1L)
             .action("test")
-            .receiverIds(List.of(2L))
+            .receiverIds(Set.of(2L))
             .objectId(1L)
             .objectName("test")
             .objectType(NotificationObjectType.EVENT)
             .creationDate(zonedDateTime)
             .notificationType(NotificationType.EVENT_COMMENT)
-            .status(NotificationStatus.UNREAD)
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
@@ -921,6 +914,7 @@ public class ModelUtils {
             .creationDate(zonedDateTime)
             .status(NotificationStatus.UNREAD)
             .notificationType(NotificationType.EVENT_COMMENT)
+            .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }
 

@@ -5,10 +5,13 @@ import greencity.controller.HabitController;
 import greencity.dto.habit.HabitDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
+import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.HabitService;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -35,16 +38,23 @@ public class HabitLikeNotificationFactory implements NotificationEventFactory {
         Long habitId = (Long) args[0];
         UserVO user = (UserVO) args[1];
         HabitDto habitDto = habitService.getHabitById(habitId);
-        System.out.println(habitDto);
+
+        ZonedDateTime creationDate = ZonedDateTime.now();
+        String habitName = habitDto.getHabitTranslation().getName();
+        String title = habitName.length() > 20
+            ? habitName.substring(0, 17) + "..."
+            : habitName;
+        String action = "%s liked your habit %s. %s".formatted(user.getName(), title,
+            CommentDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
-                .action("likes")
-                .objectName("Habit")
-                .objectLink("/habit/" + habitId)
+                .action(action)
+                .objectName(title)
                 .creationDate(ZonedDateTime.now())
-                .status(NotificationStatus.UNREAD)
-                .receiverId(habitDto.getUsersIdWhoCreatedCustomHabit())
+                .receiverIds(Set.of(habitDto.getUsersIdWhoCreatedCustomHabit()))
                 .initiatorId(user.getId())
+                .objectType(NotificationObjectType.HABIT)
+                .notificationType(NotificationType.HABIT_LIKE)
                 .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }

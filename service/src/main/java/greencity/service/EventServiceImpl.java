@@ -2,23 +2,13 @@ package greencity.service;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.*;
-import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
-import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.*;
-import greencity.mapping.NotificationMapper;
-import greencity.notification.NotificationPublisher;
-import greencity.dto.user.UserVO;
-import greencity.entity.*;
-import greencity.entity.localization.TagTranslation;
 import greencity.enums.EventAttenderStatus;
-import greencity.enums.Role;
-import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
@@ -34,7 +24,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,7 +40,6 @@ public class EventServiceImpl implements EventService {
     private final EventLikeRepository eventLikeRepository;
     private final NotificationService notificationService;
     private final ModelMapper modelMapper;
-
 
     @Override
     @Transactional
@@ -200,7 +188,9 @@ public class EventServiceImpl implements EventService {
         });
     }
 
-    private void uploadNewImages(Event event, List<MultipartFile> newImages, Map<String, String> filenameToUploadedPath) {
+    private void uploadNewImages(Event event,
+                                 List<MultipartFile> newImages,
+                                 Map<String, String> filenameToUploadedPath) {
         for (MultipartFile file : newImages) {
             String uploadedPath = fileService.upload(file);
             filenameToUploadedPath.put(file.getOriginalFilename(), uploadedPath);
@@ -231,7 +221,10 @@ public class EventServiceImpl implements EventService {
     }
 
     private String getFileNameFromUrl(String urlOrPath) {
-        if (urlOrPath == null || urlOrPath.isBlank()) return "";
+        if (urlOrPath == null || urlOrPath.isBlank()) {
+            return "";
+        }
+
         int slashIndex = urlOrPath.lastIndexOf('/');
         return slashIndex >= 0 ? urlOrPath.substring(slashIndex + 1) : urlOrPath;
     }
@@ -339,20 +332,19 @@ public class EventServiceImpl implements EventService {
         Optional<Event> eventOpt = eventRepository.findById(id);
         Event event = eventOpt.orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
         return modelMapper.map(event, EventVO.class);
+    }
 
     @Transactional
     @Override
     public void cancelEventById(Long id, UserVO user, String reason) {
         Event event = getEventById(id);
-        User initiator = getUserById(user.getId());
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
 
+        User initiator = getUserById(user.getId());
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
-
-        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
-
-        checkIfEventNotCancelled(event);
 
         CancelledEvent cancelledEvent = CancelledEvent.builder()
                 .event(event)
@@ -379,7 +371,6 @@ public class EventServiceImpl implements EventService {
         }
         event.getAttenders().add(eventAttender);
         eventRepository.save(event);
-
     }
 
     @Transactional
@@ -397,7 +388,6 @@ public class EventServiceImpl implements EventService {
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
         eventAttender.setStatus(EventAttenderStatus.ACCEPTED);
-
     }
 
     private EventAttender createEventAttender(Event event, UserVO user) {
@@ -442,6 +432,7 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException(ErrorMessage.EVENT_ALREADY_CANCELLED);
         }
     }
+
     @Override
     public List<Long> findAttendersIdByEventId(Long eventId) {
         Event event = getEventById(eventId);

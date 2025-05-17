@@ -13,9 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.stereotype.Controller;
-
 import java.lang.reflect.Method;
-import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,23 +39,21 @@ class NotificationAspectTest {
     void testAfterMethodWithList() throws NoSuchMethodException {
         Method testMethod = TestController.class.getMethod("test");
         NotificationRequestDto event = ModelUtils.getNotificationRequestDto();
-        List<NotificationRequestDto> eventList = List.of(event);
         Object[] args = new Object[]{};
 
         when(joinPoint.getSignature()).thenReturn(methodSignature);
         when(methodSignature.getMethod()).thenReturn(testMethod);
         when(joinPoint.getArgs()).thenReturn(args);
         when(registry.getFactory(testMethod)).thenReturn(factory);
-        when(factory.createEvent(args)).thenReturn(eventList);
+        when(factory.createEvent(args)).thenReturn(event);
 
         aspect.afterMethod(joinPoint);
 
-        verify(publisher).publish(eventList);
+        verify(publisher).publish(event);
     }
 
-
     @Controller
-    static class TestController {
+    private static class TestController {
         public void test() {
         }
     }

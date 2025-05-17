@@ -5,15 +5,16 @@ import greencity.controller.EcoNewsController;
 import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EcoNewsService;
 import greencity.service.NotificationService;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -41,7 +42,6 @@ public class NewsLikedNotificationFactory implements NotificationEventFactory {
 
         EcoNewsVO news = ecoNewsService.findById(newsId);
         UserVO receiver = news.getAuthor();
-        String objectLink = "/econews/" + newsId;
 
         boolean isLiked = news.getUsersLikedNews().stream()
                 .anyMatch(u -> u.getId().equals(initiator.getId()));
@@ -50,7 +50,7 @@ public class NewsLikedNotificationFactory implements NotificationEventFactory {
             notificationService.deleteLikeNewsNotificationIfExists(
                     initiator.getId(),
                     receiver.getId(),
-                    objectLink
+                    newsId
             );
             return null;
         }
@@ -66,12 +66,12 @@ public class NewsLikedNotificationFactory implements NotificationEventFactory {
 
         return NotificationRequestDto.builder()
                 .action(action)
-                .objectName("EcoNews")
-                .objectLink(objectLink)
+                .objectName(shortenedTitle)
                 .creationDate(creationDate)
-                .status(NotificationStatus.UNREAD)
-                .receiverId(receiver.getId())
+                .receiverIds(Set.of(receiver.getId()))
                 .initiatorId(initiator.getId())
+                .objectType(NotificationObjectType.ECO_NEWS)
+                .notificationType(NotificationType.ECO_NEWS_LIKE)
                 .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }

@@ -1,6 +1,5 @@
 package greencity.service;
 
-import greencity.annotations.NotifyUser;
 import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.EventCommentVO;
@@ -12,6 +11,7 @@ import greencity.entity.Event;
 import greencity.entity.EventComment;
 import greencity.entity.EventCommentLike;
 import greencity.entity.User;
+import greencity.enums.NotificationObjectType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.mapping.AddEventCommentDtoResponseMapper;
 import greencity.mapping.EventCommentMapper;
@@ -20,7 +20,6 @@ import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventCommentLikeRepository;
 import greencity.repository.EventCommentRepo;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
@@ -126,7 +125,8 @@ public class EventCommentServiceImpl implements EventCommentService {
 
         eventCommentLikeRepo.deleteByEventCommentAndUser(eventComment, modelMapper.map(user, User.class));
 
-        notificationService.deleteCommentLikeNotification(user.getId(), eventComment.getUser().getId(), commentId);
+        notificationService.deleteCommentLikeNotification(user.getId(), eventComment.getUser().getId(),
+            NotificationObjectType.EVENT, commentId);
     }
 
     /**
@@ -144,6 +144,4 @@ public class EventCommentServiceImpl implements EventCommentService {
                 () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
         return modelMapper.map(eventComment, EventCommentVO.class);
     }
-
-
 }

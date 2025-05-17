@@ -45,6 +45,7 @@ public class NotificationsGroupedResponseDtoMapper
             .notificationType(notification.getNotificationType())
             .initiatorIds(initiatorIds)
             .initiatorNames(initiatorNames)
+            .origin(notification.getOrigin())
             .receiverId(notification.getReceiverId())
             .build();
         dto.setAction(dto.getNotificationType().getGroupedMessageConverter().apply(dto));

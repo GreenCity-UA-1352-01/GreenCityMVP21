@@ -1,23 +1,21 @@
 package greencity.notification.factories;
 
-
 import greencity.annotations.NotificationHandler;
 import greencity.controller.EventController;
 import greencity.dto.event.EventVO;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EventService;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -38,7 +36,7 @@ public class SubscribeEventNotificationFactory implements NotificationEventFacto
     }
 
     @Override
-    public List<NotificationRequestDto> createEvent(Object[] args) {
+    public NotificationRequestDto createEvent(Object[] args) {
         Long eventId = (Long) args[0];
         UserVO initiator = (UserVO) args[1];
         String name = initiator.getName();
@@ -47,23 +45,18 @@ public class SubscribeEventNotificationFactory implements NotificationEventFacto
         EventVO event = eventService.findById(eventId);
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
-        String action = "User with name %s successfully subscribed to event %s. %s".formatted(name, title, CommentDateTimeFormatter.format(creationDate));
+        String action = "User with name %s successfully subscribed to event %s. %s".formatted(name, title,
+            CommentDateTimeFormatter.format(creationDate));
 
-        // Create a list to hold all notifications
-        List<NotificationRequestDto> notifications = new ArrayList<>();
-
-        // Add notification for the event initiator
-        notifications.add(NotificationRequestDto.builder()
-                .action(action)
-                .objectName("Event")
-                .objectLink("/events/" + event.getId())
-                .creationDate(ZonedDateTime.now())
-                .status(NotificationStatus.UNREAD)
-                .receiverId(event.getInitiator().getId())
-                .initiatorId(initiator.getId())
-                .origin(NotificationOrigin.GREEN_CITY)
-                .build());
-
-        return notifications;
+        return NotificationRequestDto.builder()
+            .action(action)
+            .objectName(title)
+            .creationDate(ZonedDateTime.now())
+            .receiverIds(Set.of(event.getInitiator().getId()))
+            .initiatorId(initiator.getId())
+            .objectType(NotificationObjectType.EVENT)
+            .notificationType(NotificationType.EVENT_SUBSCRIBE)
+            .origin(NotificationOrigin.GREEN_CITY)
+            .build();
     }
 }

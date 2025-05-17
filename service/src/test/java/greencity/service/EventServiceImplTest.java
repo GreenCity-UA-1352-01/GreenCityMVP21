@@ -460,7 +460,15 @@ class EventServiceImplTest {
     void updateEvent_ShouldRemoveImages_ThatAreMissingInRequest() {
         ModelMapper modelMapper2 = new ModelMapper();
         EventServiceImpl service = new EventServiceImpl(
-                userRepo, tagsRepo, eventRepository, cancelledEventsRepository, fileService, eventDateTimeLocationService, modelMapper2
+            userRepo,
+            tagsRepo,
+            eventRepository,
+            cancelledEventsRepository,
+            fileService,
+            eventDateTimeLocationService,
+            eventLikeRepository,
+            notificationService,
+            modelMapper2
         );
         UpdateEventDtoRequest request = ModelUtils.getUpdateEventDtoRequest();
         request.setImages(List.of(

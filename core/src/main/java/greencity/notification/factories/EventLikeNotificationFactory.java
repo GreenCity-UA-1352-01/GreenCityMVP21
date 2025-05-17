@@ -5,15 +5,16 @@ import greencity.controller.EventController;
 import greencity.dto.event.EventVO;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
+import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-
 import greencity.service.EventService;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -37,15 +38,21 @@ public class EventLikeNotificationFactory implements NotificationEventFactory {
         UserVO user = (UserVO) args[1];
         EventVO event = eventService.findById(id);
 
+        ZonedDateTime creationDate = ZonedDateTime.now();
+        String title = event.getTitle().length() > 20
+            ? event.getTitle().substring(0, 17) + "..."
+            : event.getTitle();
+        String action = "%s liked your event %s. %s".formatted(user.getName(), title,
+            CommentDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
-                .action("likes")
+                .action(action)
                 .objectName(event.getTitle())
-                .objectLink("/events/" + event.getId())
                 .creationDate(ZonedDateTime.now())
-                .status(NotificationStatus.UNREAD)
-                .receiverId(event.getInitiator().getId())
+                .receiverIds(Set.of(event.getInitiator().getId()))
                 .initiatorId(user.getId())
+                .objectType(NotificationObjectType.EVENT)
+                .notificationType(NotificationType.EVENT_LIKE)
                 .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }

@@ -642,6 +642,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
+    @ExceptionHandler(UnregisteredFactoryException.class)
+    public final ResponseEntity<Object> handleUnregisteredFactoryException(UnregisteredFactoryException ex,
+                                                                           WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+    }
+
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException ex) {
         List<ValidationExceptionDto> collect =

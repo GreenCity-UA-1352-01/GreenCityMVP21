@@ -1,20 +1,20 @@
 package greencity.controller;
 
+import greencity.config.SecurityConfig;
 import greencity.dto.notification.NotificationResponseDto;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
+import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.NotificationService;
 import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import greencity.GreenCityApplication;
-import greencity.config.SecurityConfig;
 import greencity.dto.notification.UpdateNotificationStatusRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.security.jwt.JwtTool;
 import greencity.service.LanguageService;
-import greencity.service.NotificationService;
 import greencity.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,15 +22,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationResponseDto;
-import greencity.enums.NotificationStatus;
-import greencity.service.NotificationService;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,10 +38,10 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(NotificationController.class)
-@ContextConfiguration (classes = NotificationController.class)
+@ContextConfiguration (classes = {NotificationController.class})
+@Import({SecurityConfig.class, CustomExceptionHandler.class})
 class NotificationControllerTest {
 
     @Autowired
@@ -173,22 +166,25 @@ class NotificationControllerTest {
     public void updateNotificationStatus_NotificationNotExists_NotFoundExceptionThrown() throws Exception {
 
         var updateNotificationStatusRequestDto =
-                UpdateNotificationStatusRequestDto
-                        .builder()
-                        .id(1L)
-                        .status("WRONG")
-                        .build();
+            UpdateNotificationStatusRequestDto
+                .builder()
+                .id(1L)
+                .status("WRONG")
+                .build();
 
-        doThrow(new NotFoundException("Notification with ID " + updateNotificationStatusRequestDto.getId() + " not found."))
-                .when(notificationService)
-                .updateNotificationStatus(any(), any());
+        doThrow(
+            new NotFoundException("Notification with ID " + updateNotificationStatusRequestDto.getId() + " not found."))
+            .when(notificationService)
+            .updateNotificationStatus(any(), any());
 
         mockMvc.perform(put("/notifications/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateNotificationStatusRequestDto)))
-                .andExpect(status().isNotFound());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateNotificationStatusRequestDto)))
+            .andExpect(status().isNotFound());
 
-        verify(notificationService, times(1)).updateNotificationStatus(any(UpdateNotificationStatusRequestDto.class), any());
+        verify(notificationService, times(1)).updateNotificationStatus(any(UpdateNotificationStatusRequestDto.class),
+            any());
+    }
 
     @WithMockUser(username = "user12@gmail.com")
     @Test
@@ -204,7 +200,8 @@ class NotificationControllerTest {
                 .initiatorId(2L)
                 .build();
 
-        when(notificationService.getAllNotificationsForUser(eq(userId))).thenReturn(Set.of(dto));
+        when(notificationService.getAllNotificationsForUser(eq(userId), eq(NotificationOrigin.GREEN_CITY)))
+            .thenReturn(Set.of(dto));
 
         mockMvc.perform(get("/notifications/user/{userId}", userId))
                 .andExpect(status().isOk())

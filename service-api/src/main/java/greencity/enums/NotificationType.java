@@ -27,6 +27,12 @@ public enum NotificationType {
         GroupedMessageConverter::actionMessage),
     EVENT_CANCEL("Unfortunately, event %s was cancelled. %s", 1, false,
         GroupedMessageConverter::actionMessage),
+    EVENT_SUBSCRIBE("%s subscribed from event %s. %s", 2, true,
+        GroupedMessageConverter::objectNameMessage),
+    EVENT_UNSUBSCRIBE("%s unsubscribed from event %s. %s", 2, true,
+        GroupedMessageConverter::objectNameMessage),
+    EVENT_ATTENDER_ACCEPT("Initiator accepted you to %s event. %s", 1, false,
+        GroupedMessageConverter::noObjectNameMessage),
     FRIENDSHIP_REQUEST_ACCEPT("%s accepted your friend request. %s", 1, false,
         GroupedMessageConverter::actionMessage),
     FRIENDSHIP_REQUEST("%s sent you a friend request. %s", 1, false,
@@ -40,21 +46,21 @@ public enum NotificationType {
     ECO_NEWS_COMMENT("%s commented on your news %s. %s", 2, true,
         GroupedMessageConverter::objectNameMessage);
 
-    private final String messageTemplate;
+    private final String groupMessageTemplate;
     private final int shownInitiatorsCount;
     private final boolean isGroupable;
     private final Function<NotificationsGroupedResponseDto, String> groupedMessageConverter;
 
     private static class GroupedMessageConverter {
         public static String objectNameMessage(NotificationsGroupedResponseDto notificationsGroup) {
-            return String.format(notificationsGroup.getNotificationType().getMessageTemplate(),
+            return String.format(notificationsGroup.getNotificationType().getGroupMessageTemplate(),
                 formatInitiators(notificationsGroup),
                 notificationsGroup.getObjectName(),
                 NotificationDateTimeFormatter.format(notificationsGroup.getCreationDate()));
         }
 
         public static String objectNameAndTypeMessage(NotificationsGroupedResponseDto notificationsGroup) {
-            return String.format(notificationsGroup.getNotificationType().getMessageTemplate(),
+            return String.format(notificationsGroup.getNotificationType().getGroupMessageTemplate(),
                 formatInitiators(notificationsGroup),
                 notificationsGroup.getObjectType().name().toLowerCase(),
                 notificationsGroup.getObjectName(),
@@ -62,7 +68,7 @@ public enum NotificationType {
         }
 
         public static String noObjectNameMessage(NotificationsGroupedResponseDto notificationsGroup) {
-            return String.format(notificationsGroup.getNotificationType().getMessageTemplate(),
+            return String.format(notificationsGroup.getNotificationType().getGroupMessageTemplate(),
                 formatInitiators(notificationsGroup),
                 NotificationDateTimeFormatter.format(notificationsGroup.getCreationDate()));
         }

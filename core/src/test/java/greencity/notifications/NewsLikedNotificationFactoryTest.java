@@ -65,9 +65,8 @@ public class NewsLikedNotificationFactoryTest {
         NotificationRequestDto result = factory.createEvent(new Object[] {newsId, initiator});
 
         assertNotNull(result);
-        assertEquals("/econews/" + newsId, result.getObjectLink());
-        assertEquals("EcoNews", result.getObjectName());
-        assertEquals(receiver.getId(), result.getReceiverId());
+        assertEquals("Eco News 1", result.getObjectName());
+        assertIterableEquals(Set.of(receiver.getId()), result.getReceiverIds());
         assertEquals(initiator.getId(), result.getInitiatorId());
         assertTrue(result.getAction().contains("likes your news"));
     }
@@ -91,7 +90,7 @@ public class NewsLikedNotificationFactoryTest {
 
         assertNull(result);
         verify(notificationService).deleteLikeNewsNotificationIfExists(
-                initiator.getId(), receiver.getId(), "/econews/" + newsId
+                initiator.getId(), receiver.getId(), newsId
         );
     }
 }

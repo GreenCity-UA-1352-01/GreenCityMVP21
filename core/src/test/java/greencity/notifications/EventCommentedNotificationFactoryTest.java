@@ -1,4 +1,4 @@
-package greencity.notification.factories;
+package greencity.notifications;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -8,12 +8,15 @@ import greencity.dto.event.EventVO;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.factories.EventCommentedNotificationFactory;
 import greencity.service.EventService;
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,12 +59,12 @@ class EventCommentedNotificationFactoryTest {
         NotificationRequestDto expected = NotificationRequestDto.builder()
             .action("%s commented on your event %s. %s"
                 .formatted(user.getName(), event.getTitle(), CommentDateTimeFormatter.format(ZonedDateTime.now())))
-            .objectName("Event")
-            .objectLink("/events/" + event.getId())
-            .status(NotificationStatus.UNREAD)
+            .objectName("title")
             .creationDate(actual.getCreationDate())
-            .receiverId(event.getInitiator().getId())
+            .receiverIds(Set.of(event.getInitiator().getId()))
             .initiatorId(user.getId())
+            .objectType(NotificationObjectType.EVENT)
+            .notificationType(NotificationType.EVENT_COMMENT)
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
 

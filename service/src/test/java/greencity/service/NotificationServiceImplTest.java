@@ -1,5 +1,6 @@
 package greencity.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -91,12 +92,14 @@ class NotificationServiceImplTest {
 
     @Test
     void testGetAllNotificationsForUser_whenEmptyNotifications_shouldReturnEmptySet() {
-        when(notificationRepo.findNotificationsForUser(USER_ID)).thenReturn(Collections.emptyList());
+        when(notificationRepo.findNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN))
+            .thenReturn(Collections.emptyList());
 
-        Set<BaseNotificationResponseDto> actual = notificationService.getAllNotificationsForUser(USER_ID);
+        Set<BaseNotificationResponseDto> actual = notificationService
+            .getAllNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
 
         assertTrue(actual.isEmpty());
-        verify(notificationRepo).findNotificationsForUser(USER_ID);
+        verify(notificationRepo).findNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
         verify(notificationResponseDtoMapper, never()).convert(NOTIFICATION);
         verify(notificationsGroupedResponseDtoMapper, never()).convert(List.of(NOTIFICATION_RESPONSE_DTO));
     }
@@ -114,16 +117,17 @@ class NotificationServiceImplTest {
             List.of((NotificationResponseDto) notificationForSortingDto)
         );
 
-        when(notificationRepo.findNotificationsForUser(anyLong()))
+        when(notificationRepo.findNotificationsForUser(anyLong(), any(NotificationOrigin.class)))
             .thenReturn(List.of(NOTIFICATION, notificationForSorting));
 
-        Set<BaseNotificationResponseDto> actual = notificationService.getAllNotificationsForUser(USER_ID);
+        Set<BaseNotificationResponseDto> actual = notificationService
+            .getAllNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
 
         assertEquals(2, actual.size());
         Iterator<BaseNotificationResponseDto> iterator = actual.iterator();
         assertEquals(groupedNotificationForSortingDto, iterator.next());
         assertEquals(GROUPED_RESPONSE_DTO, iterator.next());
-        verify(notificationRepo).findNotificationsForUser(USER_ID);
+        verify(notificationRepo).findNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
         verify(notificationResponseDtoMapper, atLeast(1)).convert(any(Notification.class));
         verify(notificationsGroupedResponseDtoMapper, atLeast(1)).convert(anyList());
     }
@@ -139,10 +143,11 @@ class NotificationServiceImplTest {
             List.of((NotificationResponseDto) notificationForGroupingDto)
         );
 
-        when(notificationRepo.findNotificationsForUser(anyLong()))
+        when(notificationRepo.findNotificationsForUser(anyLong(), any(NotificationOrigin.class)))
             .thenReturn(List.of(NOTIFICATION, notificationForGrouping));
 
-        Set<BaseNotificationResponseDto> actual = notificationService.getAllNotificationsForUser(USER_ID);
+        Set<BaseNotificationResponseDto> actual = notificationService
+            .getAllNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
 
         assertEquals(1, actual.size());
         assertEquals(NotificationsGroupedResponseDto.class, actual.toArray()[0].getClass());
@@ -150,7 +155,7 @@ class NotificationServiceImplTest {
         BaseNotificationResponseDto actualGrouped = iterator.next();
         assertNotEquals(GROUPED_RESPONSE_DTO, actualGrouped);
         assertEquals(groupedNotificationForGroupingDto, actualGrouped);
-        verify(notificationRepo).findNotificationsForUser(USER_ID);
+        verify(notificationRepo).findNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
         verify(notificationResponseDtoMapper, atLeast(1)).convert(any(Notification.class));
         verify(notificationsGroupedResponseDtoMapper, atLeast(1)).convert(anyList());
     }
@@ -159,13 +164,12 @@ class NotificationServiceImplTest {
     void testGetAllNotificationsForUser_shouldReturnMixedResults() {
         Notification nonGroupableNotification = ModelUtils.getNotification()
             .setNotificationType(NotificationType.EVENT_UPDATE_NAME);
-        BaseNotificationResponseDto nonGroupableNotificationDto = ModelUtils.getNotificationResponseDto()
-            .setNotificationType(NotificationType.EVENT_UPDATE_NAME);
 
-        when(notificationRepo.findNotificationsForUser(anyLong()))
+        when(notificationRepo.findNotificationsForUser(anyLong(), any(NotificationOrigin.class)))
             .thenReturn(List.of(NOTIFICATION, nonGroupableNotification));
 
-        Set<BaseNotificationResponseDto> actual = notificationService.getAllNotificationsForUser(USER_ID);
+        Set<BaseNotificationResponseDto> actual = notificationService
+            .getAllNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
         List<? extends Class<? extends BaseNotificationResponseDto>> actualClasses = actual.stream()
             .map(BaseNotificationResponseDto::getClass)
             .toList();
@@ -173,79 +177,8 @@ class NotificationServiceImplTest {
         assertEquals(2, actual.size());
         assertTrue(actualClasses.contains(NotificationResponseDto.class));
         assertTrue(actualClasses.contains(NotificationsGroupedResponseDto.class));
-        verify(notificationRepo).findNotificationsForUser(USER_ID);
+        verify(notificationRepo).findNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
         verify(notificationResponseDtoMapper, atLeast(1)).convert(any(Notification.class));
         verify(notificationsGroupedResponseDtoMapper, atLeast(1)).convert(anyList());
-
-    @Test
-    void testGetAllNotificationsForUser_whenOriginIsNull() {
-        Long userId = 1L;
-        Notification notification = Notification.builder()
-            .id(1L)
-            .action("liked")
-            .objectName("Test News")
-            .creationDate(ZonedDateTime.now())
-            .status(NotificationStatus.UNREAD)
-            .receiver(ModelUtils.getUser().setId(userId))
-            .initiator(ModelUtils.getUser().setId(2L))
-            .build();
-
-        NotificationResponseDto dto = NotificationResponseDto.builder()
-            .id(1L)
-            .action("liked")
-            .objectName("Test News")
-            .creationDate(notification.getCreationDate())
-            .status(NotificationStatus.UNREAD)
-            .receiverId(userId)
-            .initiatorId(2L)
-            .build();
-        Page<Notification> page = new PageImpl<>(List.of(notification));
-
-        when(notificationRepo.findNotificationsForUser(userId, PAGEABLE))
-            .thenReturn(page);
-
-        PageableDto<NotificationResponseDto> result =
-            notificationService.getAllNotificationsForUser(userId, null, PAGEABLE);
-
-        assertThat(result.getPage()).hasSize(1);
-        assertThat(result.getPage().getFirst().getId()).isEqualTo(dto.getId());
-        verify(notificationRepo).findNotificationsForUser(userId, PAGEABLE);
-        verify(notificationRepo, never()).findNotificationsForUser(userId, null, PAGEABLE);
-    }
-
-    @Test
-    void testGetAllNotificationsForUser_whenOriginIsPresent() {
-        Long userId = 1L;
-        Notification notification = Notification.builder()
-            .id(1L)
-            .action("liked")
-            .objectName("Test News")
-            .creationDate(ZonedDateTime.now())
-            .status(NotificationStatus.UNREAD)
-            .receiver(ModelUtils.getUser().setId(userId))
-            .initiator(ModelUtils.getUser().setId(2L))
-            .build();
-
-        NotificationResponseDto dto = NotificationResponseDto.builder()
-            .id(1L)
-            .action("liked")
-            .objectName("Test News")
-            .creationDate(notification.getCreationDate())
-            .status(NotificationStatus.UNREAD)
-            .receiverId(userId)
-            .initiatorId(2L)
-            .build();
-        Page<Notification> page = new PageImpl<>(List.of(notification));
-
-        when(notificationRepo.findNotificationsForUser(userId, NOTIFICATION_ORIGIN, PAGEABLE))
-            .thenReturn(page);
-
-        PageableDto<NotificationResponseDto> result =
-            notificationService.getAllNotificationsForUser(userId, NOTIFICATION_ORIGIN, PAGEABLE);
-
-        assertThat(result.getPage()).hasSize(1);
-        assertThat(result.getPage().getFirst().getId()).isEqualTo(dto.getId());
-        verify(notificationRepo).findNotificationsForUser(userId, NOTIFICATION_ORIGIN, PAGEABLE);
-        verify(notificationRepo, never()).findNotificationsForUser(userId, PAGEABLE);
     }
 }

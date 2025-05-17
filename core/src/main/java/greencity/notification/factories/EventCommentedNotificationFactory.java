@@ -6,13 +6,15 @@ import greencity.dto.event.EventVO;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
-import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.CommentDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EventService;
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -44,17 +46,17 @@ public class EventCommentedNotificationFactory implements NotificationEventFacto
         String title = event.getTitle().length() > 20
             ? event.getTitle().substring(0, 17) + "..."
             : event.getTitle();
-        String action = "%s commented on your event %s. %s"
-            .formatted(initiator.getName(), title, CommentDateTimeFormatter.format(creationDate));
+        String action = "%s commented on your event %s. %s".formatted(initiator.getName(), title,
+            CommentDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
             .action(action)
-            .objectName("Event")
-            .objectLink("/events/" + event.getId())
+            .objectName(event.getTitle())
             .creationDate(ZonedDateTime.now())
-            .status(NotificationStatus.UNREAD)
-            .receiverId(event.getInitiator().getId())
+            .receiverIds(Set.of(event.getInitiator().getId()))
             .initiatorId(initiator.getId())
+            .objectType(NotificationObjectType.EVENT)
+            .notificationType(NotificationType.EVENT_COMMENT)
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }

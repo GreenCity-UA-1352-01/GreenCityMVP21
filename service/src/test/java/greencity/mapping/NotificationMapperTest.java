@@ -7,6 +7,7 @@ import greencity.ModelUtils;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.entity.Notification;
 import greencity.repository.UserRepo;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +36,12 @@ class NotificationMapperTest {
     @Test
     void testConvert() {
         when(userRepo.findById(any())).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(userRepo.findAllById(anyCollection())).thenReturn(List.of(ModelUtils.getUser()));
 
         Notification actual = notificationMapper.convert(NOTIFICATION_REQUEST_DTO);
 
         assertEquals(NOTIFICATION, actual);
-        verify(userRepo, times(2)).findById(any());
+        verify(userRepo).findById(any());
+        verify(userRepo).findAllById(anyCollection());
     }
 }
