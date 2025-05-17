@@ -228,6 +228,18 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteNotification(Long notificationId, UserVO user) {
+        NotificationReceiver receiver = notificationReceiverRepo
+                .findNotificationReceiver(notificationId, user.getId())
+                .orElseThrow(() -> new NotFoundException(
+                        ErrorMessage.NOTIFICATION_RECEIVER_NOT_FOUND + notificationId));
+
+        notificationReceiverRepo.delete(receiver);
+        decrementCounter(user.getId());
+    }
+
     @AllArgsConstructor
     @Getter
     @EqualsAndHashCode

@@ -65,6 +65,21 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{notificationId}")
+    @Operation(summary = "Delete a notification for the current user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notification deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Notification not found"),
+            @ApiResponse(responseCode = "403", description = "User not authorized to delete this notification"),
+    })
+    public ResponseEntity<Void> deleteNotification(
+            @PathVariable Long notificationId,
+            @Parameter(hidden = true) @CurrentUser UserVO user
+    ) {
+        notificationsService.deleteNotification(notificationId, user);
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * Retrieves all notifications for a specified user.
      * If the origin is null, notifications from all origins will be returned.
