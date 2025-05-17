@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="addEventsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="events">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name ="title" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="main_image_id" type="BIGINT"/>
+            <column name="initiator_id" type="BIGINT">
+                <constraints foreignKeyName="FK_events_initiator_id" references="users (id)" nullable="false"/>
+            </column>
+            <column name="is_open" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_for_all_friends" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="events"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addEventImagesTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="event_images">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name ="image_path" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_event_images_event_id" references="events (id)"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="event_images"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="updateEventsTableWithFKZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addForeignKeyConstraint
+                baseTableName="events"
+                baseColumnNames="main_image_id"
+                constraintName="FK_events_main_image_id"
+                referencedTableName="event_images"
+                referencedColumnNames="id"
+                deferrable="true"
+                initiallyDeferred="true"
+        />
+    </changeSet>
+
+    <changeSet id="addEventDateTimeLocationsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="event_date_time_locations">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name ="start_date_time" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name ="end_date_time" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name ="location" type="VARCHAR"/>
+            <column name ="link" type="VARCHAR"/>
+            <column name="event_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_event_date_time_location_event_id" references="events (id)" nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="event_date_time_locations"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addEventsTagsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="events_tags">
+            <column name="event_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_tags_event_id" references="events (id)"/>
+            </column>
+            <column name="tag_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_tags_tag_id" references="tags (id)"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="events_tags"/>
+        </rollback>
+    </changeSet>
+
+    <!-- removed table -->
+    <changeSet id="addEventsInvitedUsersTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="events_invited_users">
+            <column name="event_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_invited_users_event_id" references="events (id)"/>
+            </column>
+            <column name="user_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_invited_users_user_id" references="users (id)"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="events_invited_users"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="modifyEventTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <dropNotNullConstraint tableName="events" columnName="main_image_id"/>
+        <dropColumn tableName="events" columnName="is_for_all_friends"/>
+        <dropTable tableName="events_invited_users"/>
+        <rollback>
+            <addNotNullConstraint tableName="events" columnName="main_image_id"/>
+            <addColumn tableName="events">
+                <column name="is_for_all_friends" type="BOOLEAN">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+            <createTable tableName="events_invited_users">
+                <column name="event_id"  type="BIGINT">
+                    <constraints foreignKeyName="FK_events_invited_users_event_id" references="events (id)"/>
+                </column>
+                <column name="user_id"  type="BIGINT">
+                    <constraints foreignKeyName="FK_events_invited_users_user_id" references="users (id)"/>
+                </column>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addEventsAttendersTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="events_attenders">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="event_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_attenders_event_id"
+                             references="events (id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="attender_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_events_attenders_attender_id"
+                             references="users (id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="events_attenders" columnNames="event_id, attender_id"/>
+        <rollback>
+            <dropTable tableName="events_attenders"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="modifyEventsConstraintsZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addPrimaryKey tableName="events_tags" columnNames="event_id, tag_id" constraintName="PK_events_tags"/>
+        <dropForeignKeyConstraint baseTableName="event_images" constraintName="FK_event_images_event_id"/>
+        <addForeignKeyConstraint baseTableName="event_images"
+                                 baseColumnNames="event_id"
+                                 constraintName="FK_event_images_event_id"
+                                 referencedTableName="events"
+                                 referencedColumnNames="id"
+                                 deleteCascade="true"/>
+        <rollback>
+            <dropPrimaryKey tableName="events_tags" constraintName="PK_events_tags"/>
+            <dropForeignKeyConstraint baseTableName="event_images" constraintName="FK_event_images_event_id"/>
+            <addForeignKeyConstraint baseTableName="event_images"
+                                     baseColumnNames="event_id"
+                                     constraintName="FK_event_images_event_id"
+                                     referencedTableName="events"
+                                     referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

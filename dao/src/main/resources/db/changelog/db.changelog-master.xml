@@ -177,5 +177,8 @@
     <include file="db/changelog/logs/ch-drop-news-subscribers-table-Bokalo.xml"/>
     <include file="db/changelog/logs/ch-drop-user-friends-table-Bokalo.xml"/>
     <include file="db/changelog/logs/ch-news-subscription-create-table.xml"/>
+    <include file="db/changelog/logs/ch-add-table-friends-Rakuta.xml"/>
+    <include file="db/changelog/logs/ch-add-table-events-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notifications-Zadyraichuk.xml"/>
 </databaseChangeLog>
 
