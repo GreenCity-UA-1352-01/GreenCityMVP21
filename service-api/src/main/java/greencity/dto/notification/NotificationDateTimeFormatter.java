@@ -1,4 +1,4 @@
-package greencity.notification;
+package greencity.dto.notification;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -6,9 +6,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class CommentDateTimeFormatter {
+public class NotificationDateTimeFormatter {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
+
+    private NotificationDateTimeFormatter() {
+    }
 
     public static String format(ZonedDateTime dateTime) {
         ZonedDateTime now = ZonedDateTime.now(dateTime.getZone());
@@ -24,7 +27,7 @@ public class CommentDateTimeFormatter {
         } else if (date.equals(yesterday)) {
             dateString = "Yesterday";
         } else {
-            return DATE_FORMATTER.format(date);
+            dateString = DATE_FORMATTER.format(date);
         }
 
         return String.format("%s %s", dateString, TIME_FORMATTER.format(time).toLowerCase());

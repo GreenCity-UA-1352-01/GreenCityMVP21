@@ -48,11 +48,11 @@ public class EventDateTimeLocationServiceTest {
     @BeforeEach
     void setUp() {
         event = ModelUtils.getEvent();
-        event.getDateTimes().getFirst().setId(1L);
+        event.getDateTimes().get(0).setId(1L);
         dtoList = new ArrayList<>();
         dtoList.add(getEventDateTimeLocationRequestDto());
         eventDateTimeLocations = new ArrayList<>();
-        eventDateTimeLocations.add(event.getDateTimes().getFirst());
+        eventDateTimeLocations.add(event.getDateTimes().get(0));
         System.out.println(event.getDateTimes());
     }
 
@@ -67,8 +67,8 @@ public class EventDateTimeLocationServiceTest {
     @Test
     void testStartEndDateTimeCheck_ThrowsException_WhenCheckStartDateAfterEndDate() {
         // Given invalid start and end dates (start after end)
-        dtoList.getFirst().setStartDateTime(FIXED_EVENT_END);
-        dtoList.getFirst().setEndDateTime(FIXED_EVENT_START);
+        dtoList.get(0).setStartDateTime(FIXED_EVENT_END);
+        dtoList.get(0).setEndDateTime(FIXED_EVENT_START);
 
         // When & Then
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -79,8 +79,8 @@ public class EventDateTimeLocationServiceTest {
     @Test
     void testStartEndDateTimeCheck_ThrowsException_WhenCheckStartDateEqualsEndDate() {
         // Given invalid start and end dates (equal dates)
-        dtoList.getFirst().setStartDateTime(FIXED_EVENT_START);
-        dtoList.getFirst().setEndDateTime(FIXED_EVENT_START);
+        dtoList.get(0).setStartDateTime(FIXED_EVENT_START);
+        dtoList.get(0).setEndDateTime(FIXED_EVENT_START);
 
         // When & Then
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -91,8 +91,8 @@ public class EventDateTimeLocationServiceTest {
     @Test
     void testIsFutureEvent_Success() {
         // Given a list with at least one future event
-        eventDateTimeLocations.getFirst().setStartDateTime(FIXED_EVENT_START);
-        eventDateTimeLocations.getFirst().setEndDateTime(FIXED_EVENT_END);
+        eventDateTimeLocations.get(0).setStartDateTime(FIXED_EVENT_START);
+        eventDateTimeLocations.get(0).setEndDateTime(FIXED_EVENT_END);
 
         // When & Then
         assertDoesNotThrow(() -> eventDateTimeLocationService.isFutureEvent(eventDateTimeLocations));
@@ -101,18 +101,18 @@ public class EventDateTimeLocationServiceTest {
     @Test
     void testIsFutureEvent_ThrowsException_WhenNoFutureEvents() {
         // Given a list with only past events
-        eventDateTimeLocations.getFirst().setStartDateTime(FIXED_EVENT_START.minusYears(1));
+        eventDateTimeLocations.get(0).setStartDateTime(FIXED_EVENT_START.minusYears(1));
 
         // When & Then
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> eventDateTimeLocationService.isFutureEvent(eventDateTimeLocations));
-        assertEquals(ErrorMessage.CANNOT_EDIT_PAST_EVENT, exception.getMessage());
+        assertEquals(ErrorMessage.THE_EVENT_IS_PAST, exception.getMessage());
     }
 
     @Test
     void testRemoveOldEventDateTimeLocations() {
         // Given
-        EventDateTimeLocation dateTime1 = eventDateTimeLocations.getFirst();
+        EventDateTimeLocation dateTime1 = eventDateTimeLocations.get(0);
         EventDateTimeLocation dateTime2 = EventDateTimeLocation.builder()
                 .id(2L)
                 .startDateTime(FIXED_EVENT_START.plusDays(2))
@@ -127,13 +127,13 @@ public class EventDateTimeLocationServiceTest {
 
         // Then
         assertEquals(1, event.getDateTimes().size());
-        assertEquals(1L, event.getDateTimes().getFirst().getId());
+        assertEquals(1L, event.getDateTimes().get(0).getId());
     }
 
     @Test
     void testUpdateEventDateTimeLocation_ThrowsNotFoundException() {
         // Given
-        dtoList.getFirst().setId(1L);
+        dtoList.get(0).setId(1L);
 
         when(evDateTimeLocRepo.findById(1L)).thenReturn(Optional.empty());
 

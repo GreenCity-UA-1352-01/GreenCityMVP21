@@ -26,7 +26,7 @@ class NotificationListenerTest {
 
         notificationListener.handleNotification(event);
 
-        verify(service, times(1)).createNotification(event);
+        verify(service, times(1)).createNotifications(event);
     }
 
 }

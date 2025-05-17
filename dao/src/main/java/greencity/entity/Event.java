@@ -2,7 +2,6 @@ package greencity.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.Set;
 @Setter
 @Builder
 @EqualsAndHashCode(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
-@ToString//(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
+@ToString(exclude = {"dateTimes", "mainImage", "eventImages", "tags"})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,6 +51,15 @@ public class Event {
             orphanRemoval = true
     )
     @Builder.Default
+    private List<EventAttender> attenders = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
+    @Builder.Default
     private List<EventImage> eventImages = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -66,6 +74,4 @@ public class Event {
     @Column(name = "is_open", nullable = false)
     @Builder.Default
     private boolean isOpen = true;
-
-
 }

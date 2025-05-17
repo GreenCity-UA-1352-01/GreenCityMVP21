@@ -4,14 +4,13 @@ import greencity.annotations.UniqueSessionDates;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class UniqueSessionDatesValidator implements ConstraintValidator<UniqueSessionDates, List<EventDateTimeLocationRequestDto>> {
-
+public class UniqueSessionDatesValidator
+        implements ConstraintValidator<UniqueSessionDates, List<EventDateTimeLocationRequestDto>> {
     @Override
     public boolean isValid(List<EventDateTimeLocationRequestDto> dtoList, ConstraintValidatorContext context) {
         if (dtoList == null) {

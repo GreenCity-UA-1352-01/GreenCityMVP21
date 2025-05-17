@@ -2,24 +2,20 @@ package greencity.dto.event;
 
 import greencity.annotations.UniqueSessionDates;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
-import greencity.dto.eventimage.EventImageRequestDto;
-import greencity.dto.tag.TagUaEnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class UpdateEventDtoRequest {
     @NotNull
     @Min(1)
     private Long id;
+
     @NotBlank(message = "The title of event can not be empty")
     @Size(max = 70, message = "The title of event can not be longer than 70 characters")
     private String title;
@@ -40,9 +36,11 @@ public class UpdateEventDtoRequest {
     )
     private String mainImage;
 
-    @Size( max = 5, message = "Images must be >= 0 and smaller than 6")
+    @Size(max = 5, message = "Images must be >= 0 and smaller than 6")
     private List<String> images;
+
     @NotEmpty(message = "The tags of event can not be empty")
     private List<String> tags;
+
     private boolean isOpen;
 }

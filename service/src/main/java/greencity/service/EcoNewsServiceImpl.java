@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -417,7 +416,10 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         comment.getUsersLiked().add(user);
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture
-                .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+                .runAsync(() -> ratingCalculation.ratingCalculation(
+                    RatingCalculationEnum.LIKE_COMMENT,
+                    user,
+                    accessToken));
     }
 
     /**
@@ -431,7 +433,10 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         comment.getUsersLiked().removeIf(u -> u.getId().equals(user.getId()));
         CompletableFuture
-                .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+                .runAsync(() -> ratingCalculation.ratingCalculation(
+                    RatingCalculationEnum.LIKE_COMMENT,
+                    user,
+                    accessToken));
     }
 
     @Override
@@ -477,7 +482,6 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public void update(EcoNewsDtoManagement ecoNewsDtoManagement, MultipartFile image) {
-
         EcoNews toUpdate = modelMapper.map(findById(ecoNewsDtoManagement.getId()), EcoNews.class);
         enhanceWithNewManagementData(toUpdate, ecoNewsDtoManagement, image);
 
@@ -636,13 +640,12 @@ public class EcoNewsServiceImpl implements EcoNewsService {
      */
     public List<SearchCriteria> buildSearchCriteria(EcoNewsViewDto ecoNewsViewDto) {
         List<SearchCriteria> criteriaList = new ArrayList<>();
-        SearchCriteria searchCriteria;
-
         setValueIfNotEmpty(criteriaList, EcoNews_.ID, ecoNewsViewDto.getId());
         setValueIfNotEmpty(criteriaList, EcoNews_.TITLE, ecoNewsViewDto.getTitle());
         setValueIfNotEmpty(criteriaList, EcoNews_.AUTHOR, ecoNewsViewDto.getAuthor());
         setValueIfNotEmpty(criteriaList, EcoNews_.TEXT, ecoNewsViewDto.getText());
         setValueIfNotEmpty(criteriaList, EcoNews_.TAGS, ecoNewsViewDto.getTags());
+        SearchCriteria searchCriteria;
 
         if (!ecoNewsViewDto.getStartDate().isEmpty() && !ecoNewsViewDto.getEndDate().isEmpty()) {
             searchCriteria = SearchCriteria.builder()
@@ -784,7 +787,10 @@ public class EcoNewsServiceImpl implements EcoNewsService {
             ecoNewsRepo.save(toSave);
             String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
             CompletableFuture.runAsync(
-                    () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_ECO_NEWS, byEmail, accessToken));
+                    () -> ratingCalculation.ratingCalculation(
+                        RatingCalculationEnum.ADD_ECO_NEWS,
+                        byEmail,
+                        accessToken));
         } catch (DataIntegrityViolationException e) {
             throw new NotSavedException(ErrorMessage.ECO_NEWS_NOT_SAVED);
         }

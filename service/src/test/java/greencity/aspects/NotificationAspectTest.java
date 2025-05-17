@@ -5,7 +5,6 @@ import greencity.dto.notification.NotificationRequestDto;
 import greencity.notification.NotificationEventFactory;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
-import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Test;
@@ -14,8 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.stereotype.Controller;
+import java.lang.reflect.Method;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationAspectTest {
@@ -35,7 +36,7 @@ class NotificationAspectTest {
     private NotificationAspect aspect;
 
     @Test
-    void testAfterMethod() throws NoSuchMethodException {
+    void testAfterMethodWithList() throws NoSuchMethodException {
         Method testMethod = TestController.class.getMethod("test");
         NotificationRequestDto event = ModelUtils.getNotificationRequestDto();
         Object[] args = new Object[]{};
@@ -52,7 +53,7 @@ class NotificationAspectTest {
     }
 
     @Controller
-    static class TestController {
+    private static class TestController {
         public void test() {
         }
     }

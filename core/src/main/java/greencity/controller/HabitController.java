@@ -52,14 +52,14 @@ public class HabitController {
     @Operation(summary = "Find habit by id.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-                content = @Content(schema = @Schema(implementation = HabitDto.class))),
+            content = @Content(schema = @Schema(implementation = HabitDto.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
     @GetMapping("/{id}")
     @ApiLocale
     public ResponseEntity<HabitDto> getHabitById(@PathVariable Long id,
-        @Parameter(hidden = true) @ValidLanguage Locale locale) {
+                                                 @Parameter(hidden = true) @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(habitService.getByIdAndLanguageCode(id, locale.getLanguage()));
     }
@@ -173,11 +173,10 @@ public class HabitController {
      * @param tags          {@link List} of {@link String}.
      * @param isCustomHabit {@link Boolean} value.
      * @param complexities  {@link List} of {@link Integer}.
-     *
      * @author Lilia Mokhnatska
      */
     private boolean isValid(Optional<List<String>> tags, Optional<Boolean> isCustomHabit,
-        Optional<List<Integer>> complexities) {
+                            Optional<List<Integer>> complexities) {
         return ((tags.isPresent() && !tags.get().isEmpty()) || isCustomHabit.isPresent()
             || (complexities.isPresent() && !complexities.get().isEmpty()));
     }
@@ -204,14 +203,13 @@ public class HabitController {
      *
      * @param request {@link AddCustomHabitDtoRequest} - new custom habit dto.
      * @return dto {@link AddCustomHabitDtoResponse}
-     *
      * @author Lilia Mokhnatska.
      */
     @Operation(summary = "Add new custom habit.")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
-                content = @Content(schema = @Schema(implementation = AddCustomHabitDtoResponse.class))),
+            content = @Content(schema = @Schema(implementation = AddCustomHabitDtoResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
@@ -249,5 +247,32 @@ public class HabitController {
         @Parameter(hidden = true) @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(habitService.getFriendsAssignedToHabitProfilePictures(habitId, userVO.getId()));
+    }
+
+    @Operation(summary = "Like a habit.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("{habitId}/like")
+    @NotifyUser
+    public ResponseEntity<Void> likeHabit(@PathVariable Long habitId,
+                                          @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        habitService.likeHabit(habitId, userVO.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Unlike a habit.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("{habitId}/unlike")
+    public ResponseEntity<Void> unlikeHabit(@PathVariable Long habitId,
+                                            @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        habitService.unlikeHabit(habitId, userVO.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

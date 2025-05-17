@@ -8,7 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class EcoFriendsResponse {
-
     private Long id;
     private String name;
     private String city;

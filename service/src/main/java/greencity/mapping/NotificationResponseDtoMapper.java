@@ -2,21 +2,34 @@ package greencity.mapping;
 
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.entity.Notification;
+import java.util.ArrayList;
+import java.util.List;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NotificationResponseDtoMapper extends AbstractConverter<Notification, NotificationResponseDto> {
+public class NotificationResponseDtoMapper extends AbstractConverter<Notification, List<NotificationResponseDto>> {
     @Override
-    public NotificationResponseDto convert(Notification notification) {
-        return NotificationResponseDto.builder()
-            .action(notification.getAction())
-            .objectName(notification.getObjectName())
-            .objectLink(notification.getObjectLink())
-            .creationDate(notification.getCreationDate())
-            .status(notification.getStatus())
-            .receiverId(notification.getReceiver().getId())
-            .initiatorId(notification.getInitiator().getId())
-            .build();
+    public List<NotificationResponseDto> convert(Notification notification) {
+        List<NotificationResponseDto> dtos = new ArrayList<>();
+        notification.getNotificationReceivers().forEach(nr -> {
+            NotificationResponseDto dto = NotificationResponseDto.builder()
+                .id(notification.getId())
+                .action(notification.getAction())
+                .objectId(notification.getObjectId())
+                .objectName(notification.getObjectName())
+                .objectType(notification.getObjectType())
+                .creationDate(notification.getCreationDate())
+                .status(nr.getStatus())
+                .notificationType(notification.getNotificationType())
+                .receiverId(nr.getReceiver().getId())
+                .initiatorId(notification.getInitiator().getId())
+                .initiatorName(notification.getInitiator().getName())
+                .origin(notification.getOrigin())
+                .build();
+            dto.setObjectLink(dto.getObjectType().getLinkBuilder().apply(dto));
+            dtos.add(dto);
+        });
+        return dtos;
     }
 }

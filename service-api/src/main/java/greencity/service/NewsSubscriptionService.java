@@ -5,7 +5,6 @@ package greencity.service;
  * Defines the contract for subscribing a user by email.
  */
 public interface NewsSubscriptionService {
-
     /**
      * Subscribes a user to the news updates by their email address.
      *

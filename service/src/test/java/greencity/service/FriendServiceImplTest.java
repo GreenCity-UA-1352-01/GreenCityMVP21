@@ -49,6 +49,10 @@ class FriendServiceImplTest {
 
     @Mock
     private FriendRepo friendRepo;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private NotificationWebSocketService notificationWebSocketService;
     @Spy
     private SearchFriendDtoResponseMapper mapper;
     @InjectMocks

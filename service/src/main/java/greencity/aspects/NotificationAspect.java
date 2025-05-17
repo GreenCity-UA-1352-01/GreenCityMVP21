@@ -1,9 +1,11 @@
 package greencity.aspects;
 
-import greencity.dto.notification.NotificationRequestDto;
+import greencity.constant.ErrorMessage;
+import greencity.exception.exceptions.UnregisteredFactoryException;
 import greencity.notification.NotificationHandlerRegistry;
 import greencity.notification.NotificationPublisher;
 import java.lang.reflect.Method;
+import greencity.notification.NotificationEventFactory;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -31,7 +33,11 @@ public class NotificationAspect {
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();
 
-        NotificationRequestDto event = registry.getFactory(method).createEvent(args);
-        publisher.publish(event);
+        NotificationEventFactory factory = registry.getFactory(method);
+        if (factory == null) {
+            throw new UnregisteredFactoryException(ErrorMessage.UNREGISTERED_FACTORY + method);
+        }
+
+        publisher.publish(factory.createEvent(args));
     }
 }

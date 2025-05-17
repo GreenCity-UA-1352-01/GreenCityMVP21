@@ -3,9 +3,12 @@ package greencity.mapping;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.entity.Notification;
+import greencity.entity.NotificationReceiver;
 import greencity.entity.User;
+import greencity.enums.NotificationStatus;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -17,19 +20,29 @@ public class NotificationMapper extends AbstractConverter<NotificationRequestDto
 
     @Override
     public Notification convert(NotificationRequestDto dto) {
-        User receiver = userRepo.findById(dto.getReceiverId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + dto.getReceiverId()));
         User initiator = userRepo.findById(dto.getInitiatorId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + dto.getReceiverId()));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + dto.getInitiatorId()));
+        List<User> receivers = userRepo.findAllById(dto.getReceiverIds());
 
-        return Notification.builder()
+        Notification notification = Notification.builder()
             .action(dto.getAction())
+            .objectId(dto.getObjectId())
             .objectName(dto.getObjectName())
-            .objectLink(dto.getObjectLink())
+            .objectType(dto.getObjectType())
             .creationDate(dto.getCreationDate())
-            .status(dto.getStatus())
-            .receiver(receiver)
+            .notificationType(dto.getNotificationType())
             .initiator(initiator)
+            .origin(dto.getOrigin())
             .build();
+        List<NotificationReceiver> notificationReceivers = receivers.stream()
+            .map(receiver -> NotificationReceiver.builder()
+                .receiver(receiver)
+                .notification(notification)
+                .status(NotificationStatus.UNREAD)
+                .build())
+            .toList();
+        notification.setNotificationReceivers(notificationReceivers);
+
+        return notification;
     }
 }

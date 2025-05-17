@@ -206,7 +206,7 @@ class ShoppingListItemSpecificationTest {
         return SearchCriteria.builder()
                 .type(Translation_.CONTENT)
                 .key(Translation_.CONTENT)
-                .value(entity.getTranslations().getFirst().getContent())
+                .value(entity.getTranslations().get(0).getContent())
                 .build();
     }
 

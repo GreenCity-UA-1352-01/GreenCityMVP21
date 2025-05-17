@@ -59,4 +59,80 @@
             <dropColumn tableName="notifications" columnName="object_link"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="modifyNotificationTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addColumn tableName="notifications">
+            <column name="object_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="object_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <dropColumn tableName="notifications" columnName="object_link"/>
+        <dropColumn tableName="notifications" columnName="status"/>
+        <dropColumn tableName="notifications" columnName="receiver_id"/>
+        <rollback>
+            <dropColumn tableName="notifications" columnName="object_id"/>
+            <dropColumn tableName="notifications" columnName="object_type"/>
+            <dropColumn tableName="notifications" columnName="notification_type"/>
+            <addColumn tableName="notifications">
+                <column name="object_link" type="VARCHAR(300)"/>
+                <column name="status" type="VARCHAR(20)"/>
+                <column name="receiver_id" type="BIGINT">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="addNotificationReceiverTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="notifications_receivers">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="notification_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiver_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="notifications_receivers"
+                                 baseColumnNames="notification_id"
+                                 constraintName="FK_NOTIFICATIONS_USERS_NOTIFICATION_ID"
+                                 referencedTableName="notifications"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="notifications_receivers"
+                                 baseColumnNames="receiver_id"
+                                 constraintName="FK_NOTIFICATIONS_USERS_RECEIVER_ID"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <createIndex tableName="notifications_receivers" indexName="IDX_NOTIFICATIONS_USERS_USER_ID">
+            <column name="receiver_id"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="notifications_receivers"/>
+            <dropIndex tableName="notifications_receivers" indexName="IDX_NOTIFICATIONS_USERS_USER_ID"/>
+        </rollback>
+    </changeSet>
+  
+    <changeSet id="addOriginColumnToNotificationsTableZadyraichuk" author="Rostyslav Zadyraichuk">
+      <addColumn tableName="notifications">
+          <column name="origin" type="VARCHAR(30)">
+              <constraints nullable="false"/>
+          </column>
+      </addColumn>
+      <rollback>
+          <dropColumn tableName="notifications" columnName="origin"/>
+      </rollback>
+  </changeSet>
 </databaseChangeLog>

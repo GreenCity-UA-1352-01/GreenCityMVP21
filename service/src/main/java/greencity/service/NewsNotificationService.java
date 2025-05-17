@@ -10,8 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -21,7 +19,6 @@ public class NewsNotificationService {
 
     @Async
     public void notifySubscribers(EcoNews ecoNews) {
-
         int pageSize = 100;
         int pageNumber = 0;
         Page<NewsSubscription> subscriptionPage;
@@ -33,7 +30,8 @@ public class NewsNotificationService {
                 emailService.sendEmail(
                         subscription.getEmail(),
                         "New eco news!",
-                        "Hello! New Eco news has been added: \"" + ecoNews.getTitle() + "\".\nGo to the site to see more."
+                        "Hello! New Eco news has been added: \"" + ecoNews.getTitle()
+                            + "\".\nGo to the site to see more."
                 );
             }
 

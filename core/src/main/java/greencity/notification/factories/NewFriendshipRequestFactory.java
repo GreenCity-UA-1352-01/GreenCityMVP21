@@ -4,13 +4,16 @@ import greencity.annotations.NotificationHandler;
 import greencity.controller.FriendController;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.enums.NotificationType;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.UserService;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -31,24 +34,24 @@ public class NewFriendshipRequestFactory implements NotificationEventFactory {
 
     @Override
     public NotificationRequestDto createEvent(Object[] args) {
-
         Long friendId = (Long) args[0];
 
         UserVO sender = (UserVO) args[1];
         UserVO acceptor =  userService.findById(friendId);
 
         String action = "%s sent you a friend request. %s"
-                .formatted(sender.getName(), CommentDateTimeFormatter.format(ZonedDateTime.now()));
+                .formatted(sender.getName(), NotificationDateTimeFormatter.format(ZonedDateTime.now()));
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(sender.getId())
                 .objectName("Friendship")
-                .objectLink("/friends/friend/" + acceptor.getId())
                 .creationDate(ZonedDateTime.now())
-                .status(NotificationStatus.UNREAD)
-                .receiverId(acceptor.getId())
+                .receiverIds(Set.of(acceptor.getId()))
                 .initiatorId(sender.getId())
+                .objectType(NotificationObjectType.USER)
+                .notificationType(NotificationType.FRIENDSHIP_REQUEST)
+                .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }
-
 }

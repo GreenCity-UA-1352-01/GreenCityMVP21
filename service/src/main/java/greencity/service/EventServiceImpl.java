@@ -1,32 +1,29 @@
 package greencity.service;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.CreateEventDto;
-import greencity.dto.event.CreateEventDtoResponse;
-import greencity.dto.event.UpdateEventDtoRequest;
-import greencity.dto.event.UpdateEventDtoResponse;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
-import greencity.entity.Event;
-import greencity.entity.EventImage;
-import greencity.entity.Tag;
-import greencity.entity.User;
+import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.Role;
 import greencity.enums.TagType;
+import greencity.exception.exceptions.*;
+import greencity.enums.EventAttenderStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.repository.CancelledEventsRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.TagsRepo;
 import greencity.repository.UserRepo;
+import greencity.repository.EventLikeRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,8 +34,11 @@ public class EventServiceImpl implements EventService {
     private final UserRepo userRepo;
     private final TagsRepo tagsRepo;
     private final EventRepository eventRepository;
+    private final CancelledEventsRepository cancelledEventsRepository;
     private final FileService fileService;
     private final EventDateTimeLocationService eventDateTimeLocationService;
+    private final EventLikeRepository eventLikeRepository;
+    private final NotificationService notificationService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -78,10 +78,7 @@ public class EventServiceImpl implements EventService {
         updateEventImages(event, images, updateEventDtoRequest);
 
         eventRepository.save(event);
-        System.out.println(event);
-        UpdateEventDtoResponse response = modelMapper.map(event, UpdateEventDtoResponse.class);
-        System.out.println(response);
-        return response;
+        return modelMapper.map(event, UpdateEventDtoResponse.class);
     }
 
     private List<String> tagsConverter(Event event) {
@@ -191,7 +188,9 @@ public class EventServiceImpl implements EventService {
         });
     }
 
-    private void uploadNewImages(Event event, List<MultipartFile> newImages, Map<String, String> filenameToUploadedPath) {
+    private void uploadNewImages(Event event,
+                                 List<MultipartFile> newImages,
+                                 Map<String, String> filenameToUploadedPath) {
         for (MultipartFile file : newImages) {
             String uploadedPath = fileService.upload(file);
             filenameToUploadedPath.put(file.getOriginalFilename(), uploadedPath);
@@ -222,7 +221,10 @@ public class EventServiceImpl implements EventService {
     }
 
     private String getFileNameFromUrl(String urlOrPath) {
-        if (urlOrPath == null || urlOrPath.isBlank()) return "";
+        if (urlOrPath == null || urlOrPath.isBlank()) {
+            return "";
+        }
+
         int slashIndex = urlOrPath.lastIndexOf('/');
         return slashIndex >= 0 ? urlOrPath.substring(slashIndex + 1) : urlOrPath;
     }
@@ -270,5 +272,184 @@ public class EventServiceImpl implements EventService {
         }
         event.getEventImages()
                 .forEach(image -> fileService.delete(image.getImagePath()));
+    }
+
+    /**
+     * {@inheritDoc}
+     * Method for liking an event by its ID.
+     * If the user has already liked this event, a {@link ConflictException} is thrown
+     * and no notification is sent. This ensures idempotency and prevents duplicate notifications.
+     *
+     * @param id   the ID of the event to be liked
+     * @param user the user who is liking the event
+     * @throws ConflictException if the event was already liked by the user
+     * @author Rostyslav Kushpit
+     */
+    @Override
+    @Transactional
+    public void likeEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+        if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            throw new ConflictException(ErrorMessage.EVENT_ALREADY_LIKED);
+        }
+
+        EventLike like = EventLike.builder()
+                .event(event)
+                .user(getUserById(user.getId()))
+                .likedAt(ZonedDateTime.now())
+                .build();
+        eventLikeRepository.save(like);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Method for unlike some event by its id.
+     *
+     * @param id   the ID of the event to be unliked
+     * @param user the user who is unliking the event
+     * @author Roman Diakov
+     */
+    @Override
+    @Transactional
+    public void unlikeEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+        if (eventLikeRepository.existsByEventIdAndUserId(id, user.getId())) {
+            eventLikeRepository.deleteByEventIdAndUserId(id, user.getId());
+            notificationService.deleteEventLikeNotification(user.getId(), event.getInitiator().getId(), id);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param id event id
+     * @return {@link EventVO} with founded event
+     * @throws NotFoundException if event not found
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    public EventVO findById(Long id) {
+        Optional<Event> eventOpt = eventRepository.findById(id);
+        Event event = eventOpt.orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + id));
+        return modelMapper.map(event, EventVO.class);
+    }
+
+    @Transactional
+    @Override
+    public void cancelEventById(Long id, UserVO user, String reason) {
+        Event event = getEventById(id);
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
+
+        User initiator = getUserById(user.getId());
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+
+        CancelledEvent cancelledEvent = CancelledEvent.builder()
+                .event(event)
+                .canceledAt(ZonedDateTime.now())
+                .user(initiator)
+                .reason(reason)
+                .build();
+        cancelledEventsRepository.save(cancelledEvent);
+    }
+
+    @Transactional
+    @Override
+    public void attendEvent(Long id, UserVO user) {
+        Event event = getEventById(id);
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
+        checkIfAttenderIsNotInitiator(event, user);
+        checkIfAlreadyAttender(event, user.getId());
+        checkIfAlreadyRequested(event, user.getId());
+        EventAttender eventAttender = createEventAttender(event, user);
+
+        if (!event.isOpen()) {
+            eventAttender.setStatus(EventAttenderStatus.REQUESTED);
+        }
+        event.getAttenders().add(eventAttender);
+        eventRepository.save(event);
+    }
+
+    @Transactional
+    @Override
+    public void acceptAttenderToEvent(Long eventId, Long userId, UserVO user) {
+        Event event = getEventById(eventId);
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(event.getInitiator().getId())) {
+            throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
+        checkIfAlreadyAttender(event, userId);
+        EventAttender eventAttender = event.getAttenders().stream()
+                .filter(attender -> attender.getAttender().getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
+        eventAttender.setStatus(EventAttenderStatus.ACCEPTED);
+    }
+
+    private EventAttender createEventAttender(Event event, UserVO user) {
+        return EventAttender.builder()
+                .event(event)
+                .attender(getUserById(user.getId()))
+                .status(EventAttenderStatus.ACCEPTED)
+                .build();
+    }
+
+    private void checkIfAlreadyAttender(Event event, Long userVOId) {
+        event.getAttenders().stream()
+                .filter(attender -> attender.getAttender().getId().equals(userVOId))
+                .findFirst()
+                .ifPresent(attender -> {
+                    if (attender.getStatus() == EventAttenderStatus.ACCEPTED) {
+                        throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_ATTENDER);
+                    }
+                });
+    }
+
+    private void checkIfAlreadyRequested(Event event, Long userVOId) {
+        event.getAttenders().stream()
+                .filter(attender -> attender.getAttender().getId().equals(userVOId))
+                .findFirst()
+                .ifPresent(attender -> {
+                    if (attender.getStatus() == EventAttenderStatus.REQUESTED) {
+                        throw new BadRequestException(ErrorMessage.USER_IS_ALREADY_REQUESTED);
+                    }
+                });
+    }
+
+
+    private void checkIfAttenderIsNotInitiator(Event event, UserVO user) {
+        if (event.getInitiator().getId().equals(getUserById(user.getId()).getId())) {
+            throw new BadRequestException(ErrorMessage.USER_IS_INITIATOR);
+        }
+    }
+
+    private void checkIfEventNotCancelled(Event event) {
+        if (!cancelledEventsRepository.findByEventId(event.getId()).isEmpty()) {
+            throw new BadRequestException(ErrorMessage.EVENT_ALREADY_CANCELLED);
+        }
+    }
+
+    @Override
+    public List<Long> findAttendersIdByEventId(Long eventId) {
+        Event event = getEventById(eventId);
+        return event.getAttenders().stream()
+                .map(attender -> attender.getAttender().getId())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void unsubscribeFromEvent(Long id, UserVO userVO) {
+        Event event = getEventById(id);
+        eventDateTimeLocationService.isFutureEvent(event.getDateTimes());
+        checkIfEventNotCancelled(event);
+        User findUser = getUserById(userVO.getId());
+        if (!event.getAttenders().removeIf(attender -> attender.getAttender().getId().equals(findUser.getId()))) {
+            throw new NotFoundException(ErrorMessage.USER_IS_NOT_ATTENDER);
+        }
+        eventRepository.save(event);
     }
 }

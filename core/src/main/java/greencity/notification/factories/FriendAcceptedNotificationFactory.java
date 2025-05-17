@@ -4,13 +4,15 @@ import greencity.annotations.NotificationHandler;
 import greencity.controller.FriendController;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
-import greencity.enums.NotificationStatus;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.enums.NotificationObjectType;
+import greencity.enums.NotificationOrigin;
+import greencity.enums.NotificationType;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.UserService;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -39,16 +41,18 @@ public class FriendAcceptedNotificationFactory implements NotificationEventFacto
         ZonedDateTime creationDate = ZonedDateTime.now();
 
         String action = "%s accepted your friend request. %s"
-                .formatted(acceptor.getName(), CommentDateTimeFormatter.format(creationDate));
+                .formatted(acceptor.getName(), NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(sender.getId())
                 .objectName("Friendship")
-                .objectLink("/friends/friend/" + acceptor.getId())
                 .creationDate(creationDate)
-                .status(NotificationStatus.UNREAD)
-                .receiverId(sender.getId())
-                .initiatorId(acceptor.getId())
+                .receiverIds(Set.of(acceptor.getId()))
+                .initiatorId(sender.getId())
+                .objectType(NotificationObjectType.USER)
+                .notificationType(NotificationType.FRIENDSHIP_REQUEST_ACCEPT)
+                .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }
 }

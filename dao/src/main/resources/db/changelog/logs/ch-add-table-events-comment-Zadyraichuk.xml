@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="addEventCommentTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="event_comment">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="text" type="VARCHAR(8000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_comment_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addEventCommentConstraintsZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addForeignKeyConstraint baseTableName="event_comment"
+                                 baseColumnNames="parent_comment_id"
+                                 constraintName="FK_event_comment_parent_id"
+                                 onDelete="CASCADE"
+                                 referencedTableName="event_comment"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="event_comment"
+                                 baseColumnNames="user_id"
+                                 constraintName="FK_event_comment_user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="event_comment"
+                                 baseColumnNames="event_id"
+                                 constraintName="FK_event_comment_event_id"
+                                 onDelete="CASCADE"
+                                 referencedTableName="events"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+    
+    <changeSet id="addEventCommentUserLikedTableZadyraichuk" author="Rostyslav Zadyraichuk">
+        <createTable tableName="event_comment_users_liked">
+            <column name="event_comment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_liked_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addEventCommentUserLikedConstraintsZadyraichuk" author="Rostyslav Zadyraichuk">
+        <addForeignKeyConstraint baseTableName="event_comment_users_liked"
+                                 baseColumnNames="event_comment_id"
+                                 constraintName="FK_event_comment_users_liked_comment_id"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="event_comment"/>
+
+        <addForeignKeyConstraint baseTableName="event_comment_users_liked"
+                                 baseColumnNames="user_liked_id"
+                                 constraintName="FK_event_comment_users_liked_user_id"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+</databaseChangeLog>

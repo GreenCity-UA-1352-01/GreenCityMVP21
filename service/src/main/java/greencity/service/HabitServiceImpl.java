@@ -10,6 +10,7 @@ import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.dto.user.UserProfilePictureDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
+import greencity.exception.exceptions.ConflictException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.WrongEmailException;
 import greencity.mapping.*;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,7 @@ public class HabitServiceImpl implements HabitService {
     private final HabitTranslationDtoMapper habitTranslationDtoMapper;
     private final CustomShoppingListMapper customShoppingListMapper;
     private final HabitTranslationMapper habitTranslationMapper;
+    private final HabitDtoManualMapper habitDtoManualMapper;
     private final CustomHabitMapper customHabitMapper;
     private final ShoppingListItemTranslationRepo shoppingListItemTranslationRepo;
     private final CustomShoppingListItemRepo customShoppingListItemRepo;
@@ -45,7 +48,9 @@ public class HabitServiceImpl implements HabitService {
     private final UserRepo userRepo;
     private final TagsRepo tagsRepo;
     private final FileService fileService;
+    private final NotificationService notificationService;
     private final HabitAssignRepo habitAssignRepo;
+    private final HabitLikeRepository habitLikeRepo;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_HABIT_IMAGE;
 
     /**
@@ -353,5 +358,43 @@ public class HabitServiceImpl implements HabitService {
         List<User> users = userRepo.getFriendsAssignedToHabit(userId, habitId);
         return users.stream().map(user -> modelMapper.map(user, UserProfilePictureDto.class))
             .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    @Override
+    public void likeHabit(Long habitId, Long userId) {
+        Habit habit = habitRepo.findById(habitId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.HABIT_NOT_FOUND_BY_ID + habitId));
+
+        if (habitLikeRepo.existsByHabitIdAndLikedById(habitId, userId)) {
+            throw new ConflictException(ErrorMessage.HABIT_ALREADY_LIKED);
+        }
+
+        HabitLike habitLike = HabitLike.builder()
+                .likedBy(userRepo.findById(userId).orElseThrow(
+                        () -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId)))
+                .habit(habit)
+                .likedAt(ZonedDateTime.now())
+                .build();
+        habitLikeRepo.save(habitLike);
+    }
+
+    @Override
+    @Transactional
+    public void unlikeHabit(Long habitId, Long userId) {
+        Habit habit = habitRepo.findById(habitId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.HABIT_NOT_FOUND_BY_ID + habitId));
+
+        if (habitLikeRepo.existsByHabitIdAndLikedById(habitId, userId)) {
+            habitLikeRepo.deleteByHabitIdAndLikedById(habitId, userId);
+            notificationService.deleteHabitLikeNotification(userId,habit.getUserId(),habitId);
+        }
+    }
+
+    @Override
+    public HabitDto getHabitById(Long id) {
+        return habitDtoManualMapper.toDto(habitRepo.findById(id).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.HABIT_NOT_FOUND_BY_ID + id)));
     }
 }

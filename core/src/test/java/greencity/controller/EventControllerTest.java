@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -41,6 +42,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,7 +59,7 @@ class EventControllerTest {
     @Mock
     private UserService userService;
 
-    @Mock
+    @Spy
     private ModelMapper modelMapper;
 
     @InjectMocks
@@ -269,4 +271,35 @@ class EventControllerTest {
         verifyNoInteractions(userService, eventService, modelMapper);
     }
 
+    @Test
+    void likeEvent_Success() throws Exception {
+        Long eventId = 1L;
+        UserVO userVO = getUserVO();
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        doNothing().when(eventService).likeEvent(eq(eventId), any(UserVO.class));
+
+        mockMvc.perform(post("/events/{id}/like", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal))
+                .andExpect(status().isOk());
+
+        verify(eventService).likeEvent(eq(eventId), any(UserVO.class));
+    }
+
+    @Test
+    void unlikeEvent_Success() throws Exception {
+        Long eventId = 1L;
+        UserVO userVO = getUserVO();
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        doNothing().when(eventService).unlikeEvent(eq(eventId), any(UserVO.class));
+
+        mockMvc.perform(delete("/events/{id}/like", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal))
+                .andExpect(status().isOk());
+
+        verify(eventService).unlikeEvent(eq(eventId), any(UserVO.class));
+    }
 }

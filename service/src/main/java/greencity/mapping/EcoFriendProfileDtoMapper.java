@@ -5,7 +5,6 @@ import greencity.entity.User;
 import greencity.mapping.records.FriendProfileData;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 
 @Component
@@ -19,8 +18,8 @@ public class EcoFriendProfileDtoMapper extends AbstractConverter<FriendProfileDa
                 .profilePicturePath(user.getProfilePicturePath())
                 .rating(user.getRating())
                 .userCredo(user.getUserCredo())
-                .isOnline(user.getLastActivityTime() != null &&
-                        user.getLastActivityTime().isAfter(LocalDateTime.now().minusMinutes(5)))
+                .isOnline(user.getLastActivityTime() != null
+                    && user.getLastActivityTime().isAfter(LocalDateTime.now().minusMinutes(5)))
                 .habitsInProgress(source.habitsInProgress())
                 .habitsAcquired(source.habitsAcquired())
                 .newsPublished(source.newsPublished())

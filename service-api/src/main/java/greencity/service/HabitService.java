@@ -129,4 +129,26 @@ public interface HabitService {
      * @return List of friends' profile pictures.
      */
     List<UserProfilePictureDto> getFriendsAssignedToHabitProfilePictures(Long habitId, Long userId);
+
+    /**
+     * Adds a like from a user to a specific HabitAssign record.
+     *
+     * <p>
+     * This method checks whether the user has already liked the given HabitAssign.
+     * If the like already exists, no additional like is created, and the operation is ignored
+     * or may throw a {@link greencity.exception.exceptions.ConflictException}, depending on the implementation.
+     *
+     * @param habitId the ID of the {@code HabitAssign} id that is being liked
+     * @param userId the ID of the {@code User} id who is liking the HabitAssign
+     *
+     * @throws greencity.exception.exceptions.ConflictException
+     *         if the user has already liked this HabitAssign (implementation-specific)
+     *
+     * @author Rostyslav Kushpit
+     */
+    void likeHabit(Long habitId, Long userId);
+
+    void unlikeHabit(Long habitId, Long userId);
+
+    HabitDto getHabitById(Long id);
 }

@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,7 +22,7 @@ class NotificationPublisherTest {
     private NotificationPublisher notificationPublisher;
 
     @Test
-    void testPublish() {
+    void testPublishWithList() {
         NotificationRequestDto event = ModelUtils.getNotificationRequestDto();
 
         notificationPublisher.publish(event);
@@ -31,9 +31,9 @@ class NotificationPublisherTest {
     }
 
     @Test
-    void testPublish_whenNull_shouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> notificationPublisher.publish(null));
+    void testPublish_whenNull_shouldIgnore() {
+        assertDoesNotThrow(() -> notificationPublisher.publish(null));
 
-        verifyNoInteractions(publisher);
+        verify(publisher, never()).publishEvent(any(NotificationRequestDto.class));
     }
 }

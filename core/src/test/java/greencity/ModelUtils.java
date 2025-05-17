@@ -9,6 +9,10 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
+import greencity.dto.event.*;
+import greencity.dto.eventcomment.AddEventCommentDtoRequest;
+import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EventCommentAuthorDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.event.UpdateEventDtoResponse;
@@ -454,6 +458,58 @@ public class ModelUtils {
                                 .build()))
                 .tags(Set.of(getTagEventVO()))
                 .isOpen(true)
+                .build();
+    }
+
+    public static EventDateLocationDto getEventDateLocationDto() {
+        return EventDateLocationDto.builder()
+            .startDateTime(FIXED_EVENT_START)
+            .endDateTime(FIXED_EVENT_END)
+            .location("location")
+            .onlineLink("link")
+            .build();
+    }
+
+    public static EventImageDto getEventImageDto() {
+        return EventImageDto.builder()
+            .imagePath("main.jpg")
+            .isMainImage(true)
+            .build();
+    }
+
+    public static EventVO getEventVO() {
+        return EventVO.builder()
+                .id(1L)
+                .title("title")
+                .description("description with more than 20 characters")
+                .dateTimes(List.of(getEventDateLocationDto()))
+                .mainImage(getEventImageDto())
+                .eventImages(List.of(getEventImageDto()))
+                .tags(Set.of(getTagEventVO()))
+                .isOpen(true)
+                .initiator(getUserVO())
+                .build();
+    }
+
+    public static AddEventCommentDtoRequest getAddEventCommentDtoRequest() {
+        return AddEventCommentDtoRequest.builder()
+                .text("text")
+                .build();
+    }
+
+    public static EventCommentAuthorDto getEventCommentAuthorDto() {
+        return EventCommentAuthorDto.builder()
+                .id(1L)
+                .name("name")
+                .build();
+    }
+
+    public static AddEventCommentDtoResponse getAddEventCommentDtoResponse() {
+        return AddEventCommentDtoResponse.builder()
+                .id(1L)
+                .author(getEventCommentAuthorDto())
+                .text("text")
+                .modifiedDate(LocalDateTime.now())
                 .build();
     }
 

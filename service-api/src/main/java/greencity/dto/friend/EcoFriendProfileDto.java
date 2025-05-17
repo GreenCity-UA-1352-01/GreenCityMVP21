@@ -8,7 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EcoFriendProfileDto {
-
     private Long id;
     private String name;
     private String profilePicturePath;
