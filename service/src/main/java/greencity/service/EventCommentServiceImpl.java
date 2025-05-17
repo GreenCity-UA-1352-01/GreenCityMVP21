@@ -13,6 +13,7 @@ import greencity.entity.EventCommentLike;
 import greencity.entity.User;
 import greencity.enums.NotificationObjectType;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.AddEventCommentDtoResponseMapper;
 import greencity.mapping.EventCommentMapper;
 import greencity.exception.exceptions.ConflictException;
@@ -143,5 +144,28 @@ public class EventCommentServiceImpl implements EventCommentService {
         EventComment eventComment = eventCommentRepo.findById(id).orElseThrow(
                 () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
         return modelMapper.map(eventComment, EventCommentVO.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param commentId the ID of the event comment to delete
+     * @param user      the user who is deleting the comment
+     * @throws BadRequestException if the comment is not found
+     * @throws UserHasNoPermissionToAccessException if the user is not the author of the comment
+     * @author Roman Diakov
+     */
+    @Override
+    @Transactional
+    public void deleteComment(Long commentId, UserVO user) {
+        EventComment eventComment = eventCommentRepo.findById(commentId).orElseThrow(
+                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+
+        if (!eventComment.getUser().getId().equals(user.getId())) {
+            throw new UserHasNoPermissionToAccessException("You can only delete your own comments");
+        }
+
+        eventComment.setDeleted(true);
+        eventCommentRepo.save(eventComment);
     }
 }

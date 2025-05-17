@@ -39,5 +39,18 @@ public interface EventCommentService {
      */
     void unlikeComment(Long commentId, UserVO user);
 
+    /**
+     * This method allows the current user to delete their own comment.
+     * If the user is not the author of the comment, an exception will be thrown.
+     * The comment is soft deleted by setting the deleted flag to true.
+     *
+     * @param commentId the ID of the event comment to delete
+     * @param user the user who is deleting the comment
+     * @throws greencity.exception.exceptions.BadRequestException if the comment is not found
+     * @throws greencity.exception.exceptions.UserHasNoPermissionToAccessException if the user is not the author of the comment
+     * @author Roman Diakov
+     */
+    void deleteComment(Long commentId, UserVO user);
+
     EventCommentVO findById(Long id);
 }

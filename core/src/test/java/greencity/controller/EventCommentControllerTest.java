@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -99,5 +100,26 @@ class EventCommentControllerTest {
             .andExpect(status().isBadRequest());
 
         verify(eventCommentService, never()).save(any(), any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void testDeleteEventComment() throws Exception {
+        Long commentId = 1L;
+
+        mockMvc.perform(delete(CONTROLLER_LINK + "/{commentId}", commentId))
+            .andExpect(status().isOk());
+
+        verify(eventCommentService).deleteComment(eq(commentId), any(UserVO.class));
+    }
+
+    @Test
+    void testDeleteEventComment_whenNotAuthenticated() throws Exception {
+        Long commentId = 1L;
+
+        mockMvc.perform(delete(CONTROLLER_LINK + "/{commentId}", commentId))
+            .andExpect(status().isUnauthorized());
+
+        verify(eventCommentService, never()).deleteComment(any(), any());
     }
 }
