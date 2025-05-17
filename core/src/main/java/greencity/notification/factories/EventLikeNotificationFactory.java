@@ -8,7 +8,7 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
@@ -43,7 +43,7 @@ public class EventLikeNotificationFactory implements NotificationEventFactory {
             ? event.getTitle().substring(0, 17) + "..."
             : event.getTitle();
         String action = "%s liked your event %s. %s".formatted(user.getName(), title,
-            CommentDateTimeFormatter.format(creationDate));
+            NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
                 .action(action)

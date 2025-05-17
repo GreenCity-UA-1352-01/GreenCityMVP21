@@ -80,7 +80,7 @@ class EventCommentServiceImplTest {
 
         when(eventService.findById(EVENT.getId())).thenReturn(EVENT);
         when(eventCommentRepository.findById(request.getParentCommentId()))
-            .thenThrow(BadRequestException.class);
+            .thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class,
             () -> eventCommentService.save(EVENT.getId(), request, USER));

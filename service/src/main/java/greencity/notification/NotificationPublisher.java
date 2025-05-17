@@ -17,9 +17,9 @@ public class NotificationPublisher {
 
     /**
      * Publishes a notification event, that can be handled by a listener.
+     * If notification is null, does nothing.
      *
      * @param notification the notification to be published
-     * @throws IllegalArgumentException if the event is null
      * @author Roman Diakov & Rostyslav Zadyraichuk
      * @see NotificationListener
      */

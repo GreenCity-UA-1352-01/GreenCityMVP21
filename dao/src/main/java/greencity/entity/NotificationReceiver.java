@@ -20,12 +20,12 @@ public class NotificationReceiver {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notification_id", referencedColumnName = "id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Notification notification;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id", referencedColumnName = "id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User receiver;

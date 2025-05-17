@@ -77,7 +77,8 @@
         <dropColumn tableName="notifications" columnName="receiver_id"/>
         <rollback>
             <dropColumn tableName="notifications" columnName="object_id"/>
-            <dropColumn tableName="notifications" columnName="type"/>
+            <dropColumn tableName="notifications" columnName="object_type"/>
+            <dropColumn tableName="notifications" columnName="notification_type"/>
             <addColumn tableName="notifications">
                 <column name="object_link" type="VARCHAR(300)"/>
                 <column name="status" type="VARCHAR(20)"/>

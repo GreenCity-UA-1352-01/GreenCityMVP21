@@ -8,7 +8,7 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EventService;
 import java.util.Set;
@@ -46,12 +46,12 @@ public class AcceptEventAttenderNotificationFactory implements NotificationEvent
         String title = event.getTitle().length() > 20 ? event.getTitle().substring(0, 17) + "..." : event.getTitle();
 
         String action = "Initiator accepted you to %s event. %s".formatted(title,
-            CommentDateTimeFormatter.format(creationDate));
+            NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
             .action(action)
             .objectName(event.getTitle())
-            .creationDate(ZonedDateTime.now())
+            .creationDate(creationDate)
             .receiverIds(Set.of(userId))
             .initiatorId(initiator.getId())
             .objectType(NotificationObjectType.EVENT)

@@ -83,7 +83,7 @@ public enum NotificationType {
             int initiatorsCount = Math.min(initiatorNames.size(),
                 notificationsGroup.getNotificationType().getShownInitiatorsCount());
             switch (initiatorNames.size()) {
-                case 1 -> names = initiatorNames.getFirst();
+                case 1 -> names = initiatorNames.get(0);
                 case 2 -> names = String.join(" and ", initiatorNames.subList(0, initiatorsCount));
                 default -> names = String.join(", ", initiatorNames.subList(0, initiatorsCount))
                     + " and other users";

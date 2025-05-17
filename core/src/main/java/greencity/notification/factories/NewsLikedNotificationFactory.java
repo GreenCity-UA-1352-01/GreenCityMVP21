@@ -8,7 +8,7 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EcoNewsService;
 import greencity.service.NotificationService;
@@ -62,7 +62,7 @@ public class NewsLikedNotificationFactory implements NotificationEventFactory {
                 : newsTitle;
 
         String action = "%s likes your news %s. %s"
-                .formatted(initiator.getName(), shortenedTitle, CommentDateTimeFormatter.format(creationDate));
+                .formatted(initiator.getName(), shortenedTitle, NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
                 .action(action)

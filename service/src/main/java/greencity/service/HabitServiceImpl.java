@@ -374,7 +374,7 @@ public class HabitServiceImpl implements HabitService {
 
         HabitLike habitLike = HabitLike.builder()
                 .likedBy(userRepo.findById(userId).orElseThrow(
-                        () -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID)))
+                        () -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId)))
                 .habit(habit)
                 .likedAt(ZonedDateTime.now())
                 .build();

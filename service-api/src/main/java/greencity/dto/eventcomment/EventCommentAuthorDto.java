@@ -1,6 +1,7 @@
 package greencity.dto.eventcomment;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -10,7 +11,7 @@ import lombok.*;
 @Builder
 @EqualsAndHashCode
 public class EventCommentAuthorDto {
-    @NotEmpty
+    @NotNull
     private Long id;
 
     @NotEmpty

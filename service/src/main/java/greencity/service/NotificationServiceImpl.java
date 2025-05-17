@@ -76,12 +76,12 @@ public class NotificationServiceImpl implements NotificationService {
 //                });
 //        });
 
-        receivers.forEach(receiver -> {
-            notificationCounterRepo.findById(receiver.getId()).ifPresentOrElse(notificationCounter ->
+        receivers.forEach(nr -> {
+            notificationCounterRepo.findById(nr.getReceiver().getId()).ifPresentOrElse(notificationCounter ->
                     notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
                 () -> notificationCounterRepo.save(NotificationCounter.builder()
                     .countOfNotifications(1)
-                    .user(receiver.getReceiver())
+                    .user(nr.getReceiver())
                     .build())
             );
         });
@@ -130,7 +130,7 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             return NotificationStatus.valueOf(status);
         } catch (IllegalArgumentException e) {
-            throw new InvalidStatusException(ErrorMessage.INVALID_ORIGIN + status);
+            throw new InvalidStatusException(ErrorMessage.INVALID_STATUS + status);
         }
     }
 
@@ -243,7 +243,7 @@ public class NotificationServiceImpl implements NotificationService {
         boolean exists = notificationsRepo.existsLikeNotification(initiatorId, receiverId,
             NotificationType.ECO_NEWS_LIKE, NotificationObjectType.ECO_NEWS, newsId);
         if (exists) {
-            notificationsRepo.existsLikeNotification(
+            notificationsRepo.deleteLikeNotification(
                 initiatorId, receiverId, NotificationType.ECO_NEWS_LIKE, NotificationObjectType.ECO_NEWS, newsId
             );
             decrementCounter(receiverId);

@@ -307,7 +307,7 @@ public class ShoppingListItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(responseList.getFirst().getId().intValue())));
+                .andExpect(jsonPath("$[0].id", is(responseList.get(0).getId().intValue())));
 
         verify(shoppingListItemService, times(1))
                 .findInProgressByUserIdAndLanguageCode(eq(1L), eq("en"));

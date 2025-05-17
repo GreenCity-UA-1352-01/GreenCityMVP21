@@ -908,7 +908,7 @@ public class ModelUtils {
             .creationDate(zonedDateTime)
             .notificationType(NotificationType.EVENT_COMMENT)
             .objectType(NotificationObjectType.EVENT)
-            .initiator(getUser().setId(1L))
+            .initiator(getUser())
             .origin(NotificationOrigin.GREEN_CITY)
             .build();
     }

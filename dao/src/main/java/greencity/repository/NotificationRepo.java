@@ -35,8 +35,6 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
                 AND n.objectType = :objectType
                 AND n.objectId = :objectId
             """)
-    @Modifying
-    @Transactional
     boolean existsLikeNotification(Long initiatorId,
                                    Long receiverId,
                                    NotificationType notificationType,
@@ -57,7 +55,7 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
         """)
     @Modifying
     @Transactional
-    boolean deleteLikeNotification(Long initiatorId,
+    void deleteLikeNotification(Long initiatorId,
                                    Long receiverId,
                                    NotificationType notificationType,
                                    NotificationObjectType objectType,

@@ -33,7 +33,7 @@ public class NotificationsGroupedResponseDtoMapper
             .distinct()
             .toList();
 
-        NotificationResponseDto notification = notifications.getFirst();
+        NotificationResponseDto notification = notifications.get(0);
         NotificationsGroupedResponseDto dto = NotificationsGroupedResponseDto.builder()
             .ids(ids)
             .objectId(notification.getObjectId())

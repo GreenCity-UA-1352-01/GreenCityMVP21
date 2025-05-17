@@ -8,13 +8,12 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.HabitService;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -45,10 +44,11 @@ public class HabitLikeNotificationFactory implements NotificationEventFactory {
             ? habitName.substring(0, 17) + "..."
             : habitName;
         String action = "%s liked your habit %s. %s".formatted(user.getName(), title,
-            CommentDateTimeFormatter.format(creationDate));
+            NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(habitId)
                 .objectName(title)
                 .creationDate(ZonedDateTime.now())
                 .receiverIds(Set.of(habitDto.getUsersIdWhoCreatedCustomHabit()))

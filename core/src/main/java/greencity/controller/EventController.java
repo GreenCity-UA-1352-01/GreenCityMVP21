@@ -23,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
@@ -36,10 +35,10 @@ public class EventController {
     @Operation(summary = "Create a new event")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<CreateEventDtoResponse> createEvent(
@@ -48,7 +47,6 @@ public class EventController {
             @ValidEventImages
             @RequestPart(required = false) List<MultipartFile> images,
             @Parameter(hidden = true) @CurrentUser UserVO user) {
-
         CreateEventDtoResponse response = eventService.createEvent(createEventDto, images, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -56,11 +54,11 @@ public class EventController {
 
     @Operation(summary = "Update events")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Event successfully updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Event not found")
+        @ApiResponse(responseCode = "200", description = "Event successfully updated"),
+        @ApiResponse(responseCode = "400", description = "Invalid request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Event not found")
     })
     @NotifyUser
     @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -85,11 +83,11 @@ public class EventController {
     @Operation(summary = "Delete event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id, @CurrentUser UserVO user) {
@@ -108,9 +106,9 @@ public class EventController {
 
     @Operation(summary = "Like an event")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @NotifyUser
     @PostMapping("/{id}/like")
@@ -130,9 +128,9 @@ public class EventController {
      */
     @Operation(summary = "Unlike an event")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/{id}/like")
     public ResponseEntity<Void> unlikeEvent(@PathVariable("id") Long eventId,
@@ -144,31 +142,32 @@ public class EventController {
     @Operation(summary = "Obtain event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-                    content = @Content(schema = @Schema(implementation = EventVO.class))),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = EventVO.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/{eventId}")
     public ResponseEntity<EventVO> getEventById(@PathVariable Long eventId) {
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(eventService.findById(eventId));
+            .status(HttpStatus.OK)
+            .body(eventService.findById(eventId));
     }
 
     @Operation(summary = "Cancel event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/cancel/{id}")
     @NotifyUser
-    public ResponseEntity<Void> cancelEvent(@PathVariable Long id, @Parameter(hidden = true)
-    @CurrentUser UserVO user, @RequestParam String reason) {
+    public ResponseEntity<Void> cancelEvent(@PathVariable Long id,
+                                            @Parameter(hidden = true) @CurrentUser UserVO user,
+                                            @RequestParam String reason) {
         eventService.cancelEventById(id, user, reason);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -176,14 +175,15 @@ public class EventController {
     @Operation(summary = "Subscribe to event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/subscribe/{id}")
     @NotifyUser
-    public ResponseEntity<Void> subscribeEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<Void> subscribeEvent(@PathVariable Long id,
+                                               @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.attendEvent(id, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -191,14 +191,15 @@ public class EventController {
     @Operation(summary = "Unsubscribe from event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/unsubscribe/{id}")
     @NotifyUser
-    public ResponseEntity<Void> unsubscribeFromEvent(@PathVariable Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<Void> unsubscribeFromEvent(@PathVariable Long id,
+                                                     @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.unsubscribeFromEvent(id, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -206,15 +207,17 @@ public class EventController {
     @Operation(summary = "Accept attender to event")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("{eventId}/accept-attender/{userId}")
     @NotifyUser
-    public ResponseEntity<Void> acceptAttenderToEvent(@PathVariable Long eventId, @PathVariable Long userId, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<Void> acceptAttenderToEvent(@PathVariable Long eventId,
+                                                      @PathVariable Long userId,
+                                                      @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventService.acceptAttenderToEvent(eventId, userId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

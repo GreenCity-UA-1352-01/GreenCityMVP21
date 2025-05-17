@@ -11,7 +11,7 @@ import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EcoNewsService;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class NewsCommentedNotificationFactory implements NotificationEventFactor
                 : newsTitle;
 
         String action = "%s commented on your news %s. %s"
-                .formatted(initiator.getName(), shortenedTitle, CommentDateTimeFormatter.format(creationDate));
+                .formatted(initiator.getName(), shortenedTitle, NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
                 .action(action)

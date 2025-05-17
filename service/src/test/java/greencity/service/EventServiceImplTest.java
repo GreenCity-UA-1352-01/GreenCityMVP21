@@ -139,7 +139,7 @@ class EventServiceImplTest {
         assertEquals(createEventDto.getDescription(), response.getDescription());
         assertEquals(createEventDto.getOpen(), response.getOpen());
         assertEquals(1, response.getImages().size());
-        assertEquals("path/to/image1.jpg", response.getImages().getFirst());
+        assertEquals("path/to/image1.jpg", response.getImages().get(0));
     }
 
     @Test
@@ -258,7 +258,7 @@ class EventServiceImplTest {
         UserVO user = ModelUtils.getUserVO();
         Event event = ModelUtils.getEvent();
         event.setId(request.getId());
-        event.getDateTimes().getFirst().setId(1L);
+        event.getDateTimes().get(0).setId(1L);
 
         request.setMainImage("second.jpg");
         request.setImages(List.of("https://cdn.com/file/second.jpg"));
@@ -297,15 +297,15 @@ class EventServiceImplTest {
         assertNotNull(result.getMainImage());
         assertEquals("https://cdn.com/file/second.jpg", result.getMainImage().getImagePath());
         assertEquals(1, result.getEventImages().size());
-        assertEquals("https://cdn.com/file/second.jpg", result.getEventImages().getFirst().getImagePath());
+        assertEquals("https://cdn.com/file/second.jpg", result.getEventImages().get(0).getImagePath());
         assertEquals(1, result.getDateTimes().size());
-        assertEquals("Update location", result.getDateTimes().getFirst().getLocation());
-        assertEquals("Update link", result.getDateTimes().getFirst().getLink());
-        assertEquals(ZonedDateTime.parse("2026-12-14T10:30Z"), result.getDateTimes().getFirst().getStartDateTime());
-        assertEquals(ZonedDateTime.parse("2026-12-15T12:28Z"), result.getDateTimes().getFirst().getEndDateTime());
+        assertEquals("Update location", result.getDateTimes().get(0).getLocation());
+        assertEquals("Update link", result.getDateTimes().get(0).getLink());
+        assertEquals(ZonedDateTime.parse("2026-12-14T10:30Z"), result.getDateTimes().get(0).getStartDateTime());
+        assertEquals(ZonedDateTime.parse("2026-12-15T12:28Z"), result.getDateTimes().get(0).getEndDateTime());
         assertEquals(1, result.getTags().size());
         TagVO tag = result.getTags().iterator().next();
-        assertEquals("Соціальний", tag.getTagTranslations().getFirst().getName());
+        assertEquals("Соціальний", tag.getTagTranslations().get(0).getName());
 
         verify(eventDateTimeLocationService).isFutureEvent(any());
         verify(eventDateTimeLocationService).updateEventDateTimeLocation(eq(event), any());
@@ -331,7 +331,7 @@ class EventServiceImplTest {
         UserVO user = ModelUtils.getUserVO();
         Event event = ModelUtils.getEvent();
         event.setId(request.getId());
-        event.getDateTimes().getFirst().setId(1L);
+        event.getDateTimes().get(0).setId(1L);
 
 
         request.setImages(List.of(""));
@@ -362,7 +362,7 @@ class EventServiceImplTest {
         assertEquals("https://cdn.com/file/UpdateMain.jpg", result.getEventImages().get(0).getImagePath());
         assertEquals(1, result.getTags().size());
         TagVO tag = result.getTags().iterator().next();
-        assertEquals("Соціальний", tag.getTagTranslations().getFirst().getName());
+        assertEquals("Соціальний", tag.getTagTranslations().get(0).getName());
 
         verify(eventDateTimeLocationService).isFutureEvent(any());
         verify(eventDateTimeLocationService).updateEventDateTimeLocation(eq(event), any());
@@ -526,7 +526,7 @@ class EventServiceImplTest {
         eventService.attendEvent(1L, userVO);
 
         assertEquals(1, event.getAttenders().size());
-        assertEquals(EventAttenderStatus.ACCEPTED, event.getAttenders().getFirst().getStatus());
+        assertEquals(EventAttenderStatus.ACCEPTED, event.getAttenders().get(0).getStatus());
     }
 
     @Test

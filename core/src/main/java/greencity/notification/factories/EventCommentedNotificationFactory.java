@@ -9,7 +9,7 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EventService;
 import java.lang.reflect.Method;
@@ -47,12 +47,12 @@ public class EventCommentedNotificationFactory implements NotificationEventFacto
             ? event.getTitle().substring(0, 17) + "..."
             : event.getTitle();
         String action = "%s commented on your event %s. %s".formatted(initiator.getName(), title,
-            CommentDateTimeFormatter.format(creationDate));
+            NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
             .action(action)
             .objectName(event.getTitle())
-            .creationDate(ZonedDateTime.now())
+            .creationDate(creationDate)
             .receiverIds(Set.of(event.getInitiator().getId()))
             .initiatorId(initiator.getId())
             .objectType(NotificationObjectType.EVENT)

@@ -11,7 +11,7 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.factories.EventCommentedNotificationFactory;
 import greencity.service.EventService;
 import java.lang.reflect.Method;
@@ -58,7 +58,7 @@ class EventCommentedNotificationFactoryTest {
             new Object[]{event.getId(), null, user});
         NotificationRequestDto expected = NotificationRequestDto.builder()
             .action("%s commented on your event %s. %s"
-                .formatted(user.getName(), event.getTitle(), CommentDateTimeFormatter.format(ZonedDateTime.now())))
+                .formatted(user.getName(), event.getTitle(), NotificationDateTimeFormatter.format(ZonedDateTime.now())))
             .objectName("title")
             .creationDate(actual.getCreationDate())
             .receiverIds(Set.of(event.getInitiator().getId()))

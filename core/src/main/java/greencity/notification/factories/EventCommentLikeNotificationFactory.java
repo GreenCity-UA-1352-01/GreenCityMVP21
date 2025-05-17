@@ -8,7 +8,7 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationType;
-import greencity.notification.CommentDateTimeFormatter;
+import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.EventCommentService;
 import java.util.Set;
@@ -39,12 +39,12 @@ public class EventCommentLikeNotificationFactory implements NotificationEventFac
 
         ZonedDateTime creationDate = ZonedDateTime.now();
         String action = "%s liked your comment. %s".formatted(user.getName(),
-            CommentDateTimeFormatter.format(creationDate));
+            NotificationDateTimeFormatter.format(creationDate));
 
         return NotificationRequestDto.builder()
                 .action(action)
                 .objectName("Comment " + comment.getId())
-                .creationDate(ZonedDateTime.now())
+                .creationDate(creationDate)
                 .receiverIds(Set.of(comment.getUser().getId()))
                 .initiatorId(user.getId())
                 .objectType(NotificationObjectType.EVENT)

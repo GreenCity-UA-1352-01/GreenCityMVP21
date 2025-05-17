@@ -114,7 +114,7 @@ class HabitControllerTest {
         List<String> tags = Collections.singletonList("tag");
 
         mockMvc.perform(get(habitLink + "/tags/search")
-                        .param("tags", tags.getFirst()))
+                        .param("tags", tags.get(0)))
                 .andExpect(status().isOk());
 
         verify(habitService).getAllByTagsAndLanguageCode(pageable, tags, "en");
@@ -132,9 +132,9 @@ class HabitControllerTest {
         List<Integer> complexities = Collections.singletonList(1);
 
         mockMvc.perform(get(habitLink + "/search")
-                        .param("tags", tags.getFirst())
+                        .param("tags", tags.get(0))
                         .param("isCustomHabit", isCustom.toString())
-                        .param("complexities", complexities.getFirst().toString())
+                        .param("complexities", complexities.get(0).toString())
                         .principal(principal))
                 .andExpect(status().isOk());
 
