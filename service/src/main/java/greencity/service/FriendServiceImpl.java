@@ -1,10 +1,14 @@
 package greencity.service;
 
+import greencity.dto.notification.NotificationRequestDto;
+import greencity.enums.NotificationStatus;
+import greencity.enums.FriendsStatus;
 import jakarta.persistence.EntityNotFoundException;
 import greencity.dto.PageableDto;
 import greencity.dto.friend.EcoFriendProfileDto;
 import greencity.dto.friend.EcoFriendsResponse;
 import greencity.entity.User;
+import greencity.entity.Friend;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.EcoFriendProfileDtoMapper;
 import greencity.mapping.EcoFriendsResponseMapper;
@@ -27,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -39,6 +45,8 @@ public class FriendServiceImpl implements FriendService {
     private final EcoNewsRepo ecoNewsRepository;
     private final EcoFriendsResponseMapper ecoFriendsResponseMapper;
     private final EcoFriendProfileDtoMapper ecoFriendProfileDtoMapper;
+    private final NotificationService notificationService;
+    private final NotificationWebSocketService notificationWebSocketService;
 
     /**
      * {@inheritDoc}
@@ -98,6 +106,22 @@ public class FriendServiceImpl implements FriendService {
         }
         if (!currentUserId.equals(friendId)) {
             friendRepository.addFriend(currentUserId, friendId);
+
+            String action = "%s sent you a friend request. %s"
+                    .formatted(currentUserId, ZonedDateTime.now());
+
+            var notificationRequest = NotificationRequestDto.builder()
+                    .action(action)
+                    .objectName("Friendship")
+                    .objectLink("/friends/friend/" + friendId)
+                    .creationDate(ZonedDateTime.now())
+                    .status(NotificationStatus.UNREAD)
+                    .receiverId(currentUserId)
+                    .initiatorId(friendId)
+                    .build();
+
+            notificationService.createNotification(notificationRequest);
+            notificationWebSocketService.sendFriendRequestNotification(friendId, notificationRequest);
         }
     }
 
@@ -164,5 +188,20 @@ public class FriendServiceImpl implements FriendService {
         if (deletedCount == 0) {
             throw new NotFoundException("Friendship not found between users");
         }
+    }
+
+    @Transactional
+    public void acceptFriendRequest(Long currentUserId, Long requesterId) {
+        Friend awaited = friendRepository.findByUserIdAndFriendIdAndStatus(currentUserId, requesterId, FriendsStatus.AWAITED)
+                .orElseThrow(() -> new NotFoundException("Friend request not found"));
+
+        Friend requested = friendRepository.findByUserIdAndFriendIdAndStatus(requesterId, currentUserId, FriendsStatus.REQUESTED)
+                .orElseThrow(() -> new NotFoundException("Friend request not found"));
+
+        awaited.setStatus(FriendsStatus.FRIEND);
+        requested.setStatus(FriendsStatus.FRIEND);
+
+        friendRepository.save(awaited);
+        friendRepository.save(requested);
     }
 }

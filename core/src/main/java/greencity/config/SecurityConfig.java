@@ -80,6 +80,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
             config.setAllowedOrigins(Collections.singletonList("http://localhost:4205"));
+            config.setAllowedOrigins(Collections.singletonList("http://localhost:63343"));
             config.setAllowedMethods(
                             Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
             config.setAllowedHeaders(
@@ -153,6 +154,7 @@ public class SecurityConfig {
                                 "/user/emailNotifications",
                                 "/user/activatedUsersAmount",
                                 "/user/{userId}/habit/assign",
+                                "/socket/**",
                                 "/token")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST,
@@ -250,7 +252,8 @@ public class SecurityConfig {
                                 USER_SHOPPING_LIST + "/{shoppingListItemId}/status/{status}",
                                 USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                                 "/user/profilePicture",
-                                "/user/deleteProfilePicture")
+                                "/user/deleteProfilePicture",
+                                "/friends/accept/{friendId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.DELETE,
                                 ECONEWS_COMMENTS,

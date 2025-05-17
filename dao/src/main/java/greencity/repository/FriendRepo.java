@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.Friend;
+import greencity.enums.FriendsStatus;
 import greencity.projection.UserWithMutualFriendsProjection;
 import greencity.repository.query.FriendQueryProvider;
 import org.springframework.data.domain.Page;
@@ -95,4 +96,6 @@ public interface FriendRepo extends JpaRepository<Friend, Long> {
     int countHabitAssignsByUserFriendIdAndStatusAcquired(@Param("userId") Long userId);
            
     int deleteByUserIdAndFriendId(Long userId, Long friendId);
+
+    Optional<Friend> findByUserIdAndFriendIdAndStatus(Long userId, Long friendId, FriendsStatus status);
 }
