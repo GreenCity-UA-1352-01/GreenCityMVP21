@@ -1,11 +1,8 @@
 package greencity.repository;
 
 import greencity.entity.EventDateTimeLocation;
-import greencity.entity.Habit;
-import greencity.entity.Language;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 /**
@@ -21,5 +18,4 @@ public interface EventDateTimeLocationRepo extends JpaRepository<EventDateTimeLo
      * @return {@link EventDateTimeLocation} by Event id.
      */
     List<EventDateTimeLocation> findByEventId(Long eventId);
-
 }

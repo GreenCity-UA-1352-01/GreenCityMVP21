@@ -101,9 +101,9 @@ public class FriendController {
 
     @Operation(summary = "Accept friend request")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
     })
     @PatchMapping("/accept/{friendId}")
     @NotifyUser
@@ -152,24 +152,24 @@ public class FriendController {
      *
      * @param friendId the ID of the friend to be removed
      * @param userVO   the current authenticated user (injected automatically)
-     * @return HTTP 200 if the friendship was deleted,
-     *         or HTTP 404 if no such friendship exists
+     * @return HTTP 200 if the friendship was deleted, or HTTP 404 if no such friendship exists
      */
     @DeleteMapping("/{friendId}")
     @Operation(
-            summary = "Delete a friendship between two users",
-            description = "Removes the friendship connection between the current authenticated user and the user with the given friendId"
+        summary = "Delete a friendship between two users",
+        description = "Removes the friendship connection between the current "
+            + "authenticated user and the user with the given friendId"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
-            @ApiResponse(responseCode = "500", description = HttpStatuses.INTERNAL_SERVER_ERROR)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
+        @ApiResponse(responseCode = "500", description = HttpStatuses.INTERNAL_SERVER_ERROR)
     })
     public ResponseEntity<Void> removeFriend(
-            @PathVariable Long friendId,
-            @Parameter(hidden = true) @CurrentUser UserVO userVO
+        @PathVariable Long friendId,
+        @Parameter(hidden = true) @CurrentUser UserVO userVO
     ) {
         friendService.removeFriend(userVO.getId(), friendId);
         return ResponseEntity.ok().build();

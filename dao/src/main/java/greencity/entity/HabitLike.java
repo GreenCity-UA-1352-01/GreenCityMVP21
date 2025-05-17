@@ -5,12 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "habit_likes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"liked_by_id", "habit_id"})
+    @UniqueConstraint(columnNames = {"liked_by_id", "habit_id"})
 })
 @Data
 @NoArgsConstructor

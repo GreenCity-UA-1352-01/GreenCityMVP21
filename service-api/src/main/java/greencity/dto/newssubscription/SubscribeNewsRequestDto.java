@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubscribeNewsRequestDto {
-
     @NotNull
     @Email(message = "Invalid email format")
     private String email;

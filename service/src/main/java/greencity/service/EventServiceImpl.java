@@ -348,7 +348,7 @@ public class EventServiceImpl implements EventService {
 
         CancelledEvent cancelledEvent = CancelledEvent.builder()
                 .event(event)
-                .canceled_at(ZonedDateTime.now())
+                .canceledAt(ZonedDateTime.now())
                 .user(initiator)
                 .reason(reason)
                 .build();

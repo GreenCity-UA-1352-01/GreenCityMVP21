@@ -3,9 +3,9 @@ package greencity.notifications;
 import greencity.controller.FriendController;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
-import greencity.enums.NotificationStatus;
 import greencity.notification.factories.FriendAcceptedNotificationFactory;
 import greencity.service.UserService;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,9 +62,7 @@ public class FriendAcceptedNotificationFactoryTest {
 
         assertNotNull(result);
         assertEquals("Friendship", result.getObjectName());
-        assertEquals("/friends/friend/" + acceptorId, result.getObjectLink());
-        assertEquals(NotificationStatus.UNREAD, result.getStatus());
-        assertEquals(friendId, result.getReceiverId());
+        assertEquals(Set.of(friendId), result.getReceiverIds());
         assertEquals(acceptorId, result.getInitiatorId());
         assertTrue(result.getAction().contains("Anna accepted your friend request"));
     }

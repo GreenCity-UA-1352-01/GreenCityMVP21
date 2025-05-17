@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import greencity.annotations.CurrentUserId;
 import greencity.constant.HttpStatuses;
 import greencity.dto.notification.BaseNotificationResponseDto;
-import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.notification.NotificationsGroupedResponseDto;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @Validated
 @RestController
@@ -53,7 +51,8 @@ public class NotificationController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notification status updated successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid request data or the notification does not belong to the user"),
+        @ApiResponse(responseCode = "400",
+            description = "Invalid request data or the notification does not belong to the user"),
         @ApiResponse(responseCode = "401", description = "Unauthorized request"),
         @ApiResponse(responseCode = "404", description = "Notification not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -89,16 +88,7 @@ public class NotificationController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<Set<BaseNotificationResponseDto>> getUserNotifications(
             @PathVariable @CurrentUserId Long userId) {
-//        NotificationOrigin originEnum = origin == null ? null : convertOrigin(origin);
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationsService.getAllNotificationsForUser(userId, NotificationOrigin.GREEN_CITY));
     }
-
-//    private NotificationOrigin convertOrigin(String origin) {
-//        try {
-//            return NotificationOrigin.valueOf(origin);
-//        } catch (IllegalArgumentException e) {
-//            throw new InvalidOriginException(ErrorMessage.INVALID_ORIGIN + origin);
-//        }
-//    }
 }

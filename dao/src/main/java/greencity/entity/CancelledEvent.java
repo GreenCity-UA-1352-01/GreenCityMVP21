@@ -2,9 +2,7 @@ package greencity.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.ZonedDateTime;
-
 
 @Entity
 @Table(name = "cancelled_events")
@@ -25,7 +23,7 @@ public class CancelledEvent {
     private Event event;
 
     @Column(name = "cancelled_at", nullable = false)
-    private ZonedDateTime canceled_at;
+    private ZonedDateTime canceledAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cancelled_by_user_id", nullable = false)

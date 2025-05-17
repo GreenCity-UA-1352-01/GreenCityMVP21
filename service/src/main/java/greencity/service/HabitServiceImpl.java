@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
-
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -398,5 +397,4 @@ public class HabitServiceImpl implements HabitService {
         return habitDtoManualMapper.toDto(habitRepo.findById(id).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.HABIT_NOT_FOUND_BY_ID + id)));
     }
-
 }

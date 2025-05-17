@@ -4,7 +4,6 @@ import greencity.annotations.ValidLocationOrOnlineLink;
 import greencity.annotations.ValidTimeRange;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
-
 import java.time.ZonedDateTime;
 
 @NoArgsConstructor

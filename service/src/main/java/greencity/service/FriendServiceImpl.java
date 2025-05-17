@@ -24,6 +24,7 @@ import greencity.projection.UserWithMutualFriendsProjection;
 import greencity.repository.FriendRepo;
 import greencity.repository.HabitAssignRepo;
 import greencity.repository.UserRepo;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +32,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -113,14 +113,12 @@ public class FriendServiceImpl implements FriendService {
             var notificationRequest = NotificationRequestDto.builder()
                     .action(action)
                     .objectName("Friendship")
-                    .objectLink("/friends/friend/" + friendId)
                     .creationDate(ZonedDateTime.now())
-                    .status(NotificationStatus.UNREAD)
-                    .receiverId(currentUserId)
-                    .initiatorId(friendId)
+                    .receiverIds(Set.of(friendId))
+                    .initiatorId(currentUserId)
                     .build();
 
-            notificationService.createNotification(notificationRequest);
+            notificationService.createNotifications(notificationRequest);
             notificationWebSocketService.sendFriendRequestNotification(friendId, notificationRequest);
         }
     }
@@ -167,11 +165,11 @@ public class FriendServiceImpl implements FriendService {
 
     /**
      * Removes a bidirectional friendship between two users.
+     *
      * <p>
      * This method deletes both directions of the friendship:
      * user → friend and friend → user.
      * If no friendship records are found in either direction, it throws an {@link EntityNotFoundException}.
-     * </p>
      *
      * @param userId   the ID of the user initiating the removal
      * @param friendId the ID of the friend to be removed
@@ -179,7 +177,6 @@ public class FriendServiceImpl implements FriendService {
      */
     @Transactional
     public void removeFriend(Long userId, Long friendId) {
-
         int deletedCount = 0;
 
         deletedCount += friendRepository.deleteByUserIdAndFriendId(userId, friendId);
@@ -192,10 +189,12 @@ public class FriendServiceImpl implements FriendService {
 
     @Transactional
     public void acceptFriendRequest(Long currentUserId, Long requesterId) {
-        Friend awaited = friendRepository.findByUserIdAndFriendIdAndStatus(currentUserId, requesterId, FriendsStatus.AWAITED)
+        Friend awaited = friendRepository
+            .findByUserIdAndFriendIdAndStatus(currentUserId, requesterId, FriendsStatus.AWAITED)
                 .orElseThrow(() -> new NotFoundException("Friend request not found"));
 
-        Friend requested = friendRepository.findByUserIdAndFriendIdAndStatus(requesterId, currentUserId, FriendsStatus.REQUESTED)
+        Friend requested = friendRepository
+            .findByUserIdAndFriendIdAndStatus(requesterId, currentUserId, FriendsStatus.REQUESTED)
                 .orElseThrow(() -> new NotFoundException("Friend request not found"));
 
         awaited.setStatus(FriendsStatus.FRIEND);

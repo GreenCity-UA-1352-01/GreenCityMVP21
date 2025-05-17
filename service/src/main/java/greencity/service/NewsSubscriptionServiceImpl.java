@@ -4,7 +4,6 @@ import greencity.entity.NewsSubscription;
 import greencity.repository.NewsSubscriptionRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 
 /**
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class NewsSubscriptionServiceImpl implements NewsSubscriptionService {
-
     private final NewsSubscriptionRepo subscriptionRepository;
 
     /**
@@ -27,7 +25,6 @@ public class NewsSubscriptionServiceImpl implements NewsSubscriptionService {
      * @throws IllegalArgumentException if the email is already subscribed
      */
     public void subscribe(String email) {
-
         if (subscriptionRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already subscribed");
         }

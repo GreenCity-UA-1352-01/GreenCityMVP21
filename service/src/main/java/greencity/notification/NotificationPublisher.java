@@ -2,7 +2,6 @@ package greencity.notification;
 
 import greencity.dto.notification.NotificationRequestDto;
 import jakarta.validation.Valid;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,10 +24,12 @@ public class NotificationPublisher {
      */
     public void publish(@Valid NotificationRequestDto notification) {
         if (notification != null) {
-            notification.setReceiverIds(notification.getReceiverIds().stream()
-                .filter(id -> !id.equals(notification.getInitiatorId()))
-                .collect(Collectors.toSet())
-            );
+            if (notification.getReceiverIds().contains(notification.getInitiatorId())) {
+                notification.setReceiverIds(notification.getReceiverIds().stream()
+                    .filter(id -> !id.equals(notification.getInitiatorId()))
+                    .collect(Collectors.toSet())
+                );
+            }
             publisher.publishEvent(notification);
         }
     }

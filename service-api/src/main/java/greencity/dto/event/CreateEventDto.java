@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
 import java.util.List;
 
 @NoArgsConstructor
@@ -18,7 +17,6 @@ import java.util.List;
 @ToString
 @UniqueEventDates
 public class CreateEventDto {
-
     @NotBlank
     @Size(max = 70, message = "Title must be no longer than 70 characters")
     private String title;
@@ -42,5 +40,4 @@ public class CreateEventDto {
     @NotNull
     @Size(min = 1, message = "At least one initiative type must be selected")
     private List<String> initiativeTypes;
-
 }

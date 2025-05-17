@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -106,9 +105,9 @@ public class EventDateTimeLocationService {
 
     public void checkStartEndDates(List<EventDateTimeLocationRequestDto> dtoList) {
         boolean isFutureEvent = dtoList.stream()
-                .anyMatch(dateTime -> dateTime.getStartDateTime().
-                        isAfter(dateTime.getEndDateTime()) ||
-                        dateTime.getStartDateTime().equals(dateTime.getEndDateTime()));
+                .anyMatch(dateTime ->
+                    dateTime.getStartDateTime().isAfter(dateTime.getEndDateTime())
+                    || dateTime.getStartDateTime().equals(dateTime.getEndDateTime()));
         if (isFutureEvent) {
             throw new BadRequestException(ErrorMessage.START_DATE_TIME_AFTER_END_DATE_TIME);
         }

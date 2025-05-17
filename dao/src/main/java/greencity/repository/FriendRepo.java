@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
 @Repository
@@ -58,7 +57,13 @@ public interface FriendRepo extends JpaRepository<Friend, Long> {
     @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND f.status = 'FRIEND'")
     Page<User> findAllFriendsByUserId(Long userId, Pageable pageable);
 
-    @Query("SELECT COUNT(f) > 0 FROM Friend f WHERE f.user.id = :userId AND f.friend.id = :friendId AND f.status = 'FRIEND'")
+    @Query("""
+            SELECT COUNT(f) > 0
+            FROM Friend f
+            WHERE f.user.id = :userId
+                AND f.friend.id = :friendId
+                AND f.status = 'FRIEND'
+        """)
     boolean isFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     @Query(value = """
@@ -92,9 +97,9 @@ public interface FriendRepo extends JpaRepository<Friend, Long> {
     int countMutualFriends(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 
     @Query(value = "SELECT COUNT(ha.id) FROM HabitAssign ha "
-            + "WHERE upper(ha.status) = 'ACQUIRED' AND ha.user.id = :userId")
+        + "WHERE upper(ha.status) = 'ACQUIRED' AND ha.user.id = :userId")
     int countHabitAssignsByUserFriendIdAndStatusAcquired(@Param("userId") Long userId);
-           
+
     int deleteByUserIdAndFriendId(Long userId, Long friendId);
 
     Optional<Friend> findByUserIdAndFriendIdAndStatus(Long userId, Long friendId, FriendsStatus status);

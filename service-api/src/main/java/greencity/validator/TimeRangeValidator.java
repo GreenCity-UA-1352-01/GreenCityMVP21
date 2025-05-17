@@ -6,11 +6,9 @@ import greencity.dto.event.EventDateLocationDto;
 import greencity.exception.exceptions.InvalidEventDateException;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import java.time.ZonedDateTime;
 
 public class TimeRangeValidator implements ConstraintValidator<ValidTimeRange, EventDateLocationDto> {
-
     @Override
     public void initialize(ValidTimeRange constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
@@ -18,7 +16,9 @@ public class TimeRangeValidator implements ConstraintValidator<ValidTimeRange, E
 
     @Override
     public boolean isValid(EventDateLocationDto dto, ConstraintValidatorContext constraintValidatorContext) {
-        if (dto == null) return true;
+        if (dto == null) {
+            return true;
+        }
 
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime start = dto.getStartDateTime();

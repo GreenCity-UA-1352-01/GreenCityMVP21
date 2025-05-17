@@ -2,7 +2,6 @@ package greencity.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +74,4 @@ public class Event {
     @Column(name = "is_open", nullable = false)
     @Builder.Default
     private boolean isOpen = true;
-
-
 }

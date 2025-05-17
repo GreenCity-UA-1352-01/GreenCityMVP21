@@ -5,12 +5,8 @@ import greencity.entity.EventDateTimeLocation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
-
 @Component
 public class EventDateLocationDtoMapper extends AbstractConverter<EventDateTimeLocation, EventDateLocationDto> {
-
     @Override
     public EventDateLocationDto convert(EventDateTimeLocation entity) {
         return EventDateLocationDto.builder()

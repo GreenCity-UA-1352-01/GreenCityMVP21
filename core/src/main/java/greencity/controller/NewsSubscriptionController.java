@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name = "News Subscription", description = "API for subscribing users to news updates")
 public class NewsSubscriptionController {
-
     private final NewsSubscriptionService newsSubscriptionService;
 
     /**
@@ -32,10 +31,11 @@ public class NewsSubscriptionController {
      * @return 200 OK if subscription is successful, or 400 Bad Request if an error occurs
      */
     @PostMapping
-    @Operation(summary = "Subscribe to news", description = "Subscribe a user to news updates by providing an email address.")
+    @Operation(summary = "Subscribe to news",
+        description = "Subscribe a user to news updates by providing an email address.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Subscribed successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid email or already subscribed")
+        @ApiResponse(responseCode = "200", description = "Subscribed successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid email or already subscribed")
     })
     public ResponseEntity<?> subscribe(@Valid @RequestBody SubscribeNewsRequestDto request) {
         try {

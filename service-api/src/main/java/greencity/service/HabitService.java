@@ -133,6 +133,7 @@ public interface HabitService {
     /**
      * Adds a like from a user to a specific HabitAssign record.
      *
+     * <p>
      * This method checks whether the user has already liked the given HabitAssign.
      * If the like already exists, no additional like is created, and the operation is ignored
      * or may throw a {@link greencity.exception.exceptions.ConflictException}, depending on the implementation.

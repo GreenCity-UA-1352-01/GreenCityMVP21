@@ -12,8 +12,6 @@ import greencity.enums.NotificationStatus;
 import greencity.exception.exceptions.InvalidStatusException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.entity.NotificationCounter;
-import greencity.entity.User;
-import org.modelmapper.ModelMapper;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
@@ -21,12 +19,9 @@ import greencity.repository.NotificationReceiverRepo;
 import greencity.repository.NotificationRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import greencity.entity.NotificationCounter;
 import greencity.entity.NotificationReceiver;
 import greencity.enums.NotificationType;
 import greencity.enums.NotificationOrigin;
-import greencity.mapping.NotificationMapper;
-import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.mapping.NotificationsGroupedResponseDtoMapper;
 import java.util.*;
 import lombok.AllArgsConstructor;
@@ -34,7 +29,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,18 +57,6 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = notificationMapper.convert(dto);
         notification = notificationsRepo.save(notification);
         List<NotificationReceiver> receivers = notification.getNotificationReceivers();
-//
-//        receivers.forEach(nr -> {
-//            notificationCounterRepo.findById(nr.getId()).ifPresentOrElse(notificationCounter ->
-//                    notificationCounter.setCountOfNotifications(notificationCounter.getCountOfNotifications() + 1),
-//                () -> {
-//                    NotificationCounter newNotificationCounter = NotificationCounter.builder()
-//                        .countOfNotifications(1)
-//                        .user(nr.getReceiver())
-//                        .build();
-//                    notificationCounterRepo.save(newNotificationCounter);
-//                });
-//        });
 
         receivers.forEach(nr -> {
             notificationCounterRepo.findById(nr.getReceiver().getId()).ifPresentOrElse(notificationCounter ->
@@ -105,19 +87,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void updateNotificationStatus(UpdateNotificationStatusRequestDto request,
                                          UserVO user) {
-//        Notification notification = notificationsRepo.findById(request.getId())
-//            .orElseThrow(() -> new NotFoundException("Notification with ID " + request.getId() + " not found."));
-//        List<NotificationReceiver> receivers = notification.getNotificationReceivers();
-//
-//        if (!Objects.equals(notification.getReceiver().getId(), user.getId())) {
-//            throw new BadRequestException(
-//                "Notification with ID " + request.getId() + " does not belong to user with ID " + user.getId() + ".");
-//        }
-//
-//        NotificationStatus enumStatus = NotificationStatus.valueOf(request.getStatus().toUpperCase());
-//
-//        notification.setStatus(enumStatus);
-//        notificationsRepo.save(notification);
         NotificationReceiver notificationReceiver = notificationReceiverRepo
             .findNotificationReceiver(request.getId(), user.getId())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_RECEIVER_NOT_FOUND + request.getId()));

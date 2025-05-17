@@ -3,7 +3,6 @@ package greencity.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

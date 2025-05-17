@@ -1,8 +1,6 @@
 package greencity.dto.event;
 
-import greencity.dto.tag.TagUaEnDto;
 import lombok.*;
-
 import java.time.ZonedDateTime;
 import java.util.List;
 
