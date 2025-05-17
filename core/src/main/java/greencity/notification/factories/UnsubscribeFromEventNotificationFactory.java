@@ -50,6 +50,7 @@ public class UnsubscribeFromEventNotificationFactory implements NotificationEven
 
         return NotificationRequestDto.builder()
             .action(action)
+            .objectId(event.getId())
             .objectName(event.getTitle())
             .creationDate(ZonedDateTime.now())
             .receiverIds(Set.of(event.getInitiator().getId()))

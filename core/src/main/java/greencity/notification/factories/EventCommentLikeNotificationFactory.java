@@ -43,6 +43,7 @@ public class EventCommentLikeNotificationFactory implements NotificationEventFac
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(comment.getEvent().getId())
                 .objectName("Comment " + comment.getId())
                 .creationDate(creationDate)
                 .receiverIds(Set.of(comment.getUser().getId()))

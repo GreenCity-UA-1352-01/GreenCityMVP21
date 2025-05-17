@@ -54,6 +54,7 @@ public class NewsCommentedNotificationFactory implements NotificationEventFactor
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(news.getId())
                 .objectName(shortenedTitle)
                 .creationDate(creationDate)
                 .receiverIds(Set.of(receiver.getId()))

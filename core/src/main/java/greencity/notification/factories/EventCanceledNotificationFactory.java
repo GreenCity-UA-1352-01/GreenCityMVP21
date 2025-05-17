@@ -51,6 +51,7 @@ public class EventCanceledNotificationFactory implements NotificationEventFactor
 
         return NotificationRequestDto.builder()
             .action(action)
+            .objectId(event.getId())
             .objectName(event.getTitle())
             .creationDate(ZonedDateTime.now())
             .receiverIds(new HashSet<>(receivers))

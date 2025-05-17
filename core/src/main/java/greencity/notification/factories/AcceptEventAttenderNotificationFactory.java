@@ -50,6 +50,7 @@ public class AcceptEventAttenderNotificationFactory implements NotificationEvent
 
         return NotificationRequestDto.builder()
             .action(action)
+            .objectId(event.getId())
             .objectName(event.getTitle())
             .creationDate(creationDate)
             .receiverIds(Set.of(userId))

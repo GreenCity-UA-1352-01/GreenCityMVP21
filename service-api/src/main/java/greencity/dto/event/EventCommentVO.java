@@ -16,4 +16,5 @@ public class EventCommentVO {
     private String text;
     private LocalDateTime createdDate;
     private UserVO user;
+    private EventVO event;
 }

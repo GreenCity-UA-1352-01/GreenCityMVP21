@@ -5,6 +5,9 @@ import greencity.controller.EventController;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.enums.NotificationObjectType;
+import greencity.enums.NotificationOrigin;
+import greencity.enums.NotificationType;
 import greencity.notification.NotificationDateTimeFormatter;
 import greencity.service.EventService;
 import java.lang.reflect.Method;
@@ -48,10 +51,14 @@ public class EventUpdateNotificationFactory implements NotificationEventFactory 
 
         return NotificationRequestDto.builder()
                 .action(message)
+                .objectId(updatedEvent.getId())
                 .objectName(updatedEvent.getTitle())
                 .creationDate(creationDate)
                 .receiverIds(new HashSet<>(attenders))
                 .initiatorId(user.getId())
+                .objectType(NotificationObjectType.EVENT)
+                .notificationType(NotificationType.EVENT_UPDATE_NAME)
+                .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }
 }

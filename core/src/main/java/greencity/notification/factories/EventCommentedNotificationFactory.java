@@ -51,6 +51,7 @@ public class EventCommentedNotificationFactory implements NotificationEventFacto
 
         return NotificationRequestDto.builder()
             .action(action)
+            .objectId(event.getId())
             .objectName(event.getTitle())
             .creationDate(creationDate)
             .receiverIds(Set.of(event.getInitiator().getId()))

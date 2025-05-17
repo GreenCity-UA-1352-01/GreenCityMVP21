@@ -35,9 +35,8 @@ public class NotificationRequestDto {
     @NotNull
     private NotificationType notificationType;
 
-    @NotNull
-    @Min(1)
-    private Set<Long> receiverIds;
+    @NotEmpty
+    private Set<@Min(1) Long> receiverIds;
 
     @NotNull
     @Min(1)

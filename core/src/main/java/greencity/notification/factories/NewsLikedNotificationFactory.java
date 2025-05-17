@@ -66,6 +66,7 @@ public class NewsLikedNotificationFactory implements NotificationEventFactory {
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(news.getId())
                 .objectName(shortenedTitle)
                 .creationDate(creationDate)
                 .receiverIds(Set.of(receiver.getId()))

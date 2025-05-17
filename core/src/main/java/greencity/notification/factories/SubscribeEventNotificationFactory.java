@@ -50,6 +50,7 @@ public class SubscribeEventNotificationFactory implements NotificationEventFacto
 
         return NotificationRequestDto.builder()
             .action(action)
+            .objectId(event.getId())
             .objectName(title)
             .creationDate(ZonedDateTime.now())
             .receiverIds(Set.of(event.getInitiator().getId()))

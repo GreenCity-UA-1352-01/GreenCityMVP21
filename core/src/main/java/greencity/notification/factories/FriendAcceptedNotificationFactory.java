@@ -45,10 +45,11 @@ public class FriendAcceptedNotificationFactory implements NotificationEventFacto
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(sender.getId())
                 .objectName("Friendship")
                 .creationDate(creationDate)
-                .receiverIds(Set.of(sender.getId()))
-                .initiatorId(acceptor.getId())
+                .receiverIds(Set.of(acceptor.getId()))
+                .initiatorId(sender.getId())
                 .objectType(NotificationObjectType.USER)
                 .notificationType(NotificationType.FRIENDSHIP_REQUEST_ACCEPT)
                 .origin(NotificationOrigin.GREEN_CITY)

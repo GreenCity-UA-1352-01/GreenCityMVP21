@@ -47,6 +47,7 @@ public class EventLikeNotificationFactory implements NotificationEventFactory {
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(event.getId())
                 .objectName(event.getTitle())
                 .creationDate(ZonedDateTime.now())
                 .receiverIds(Set.of(event.getInitiator().getId()))

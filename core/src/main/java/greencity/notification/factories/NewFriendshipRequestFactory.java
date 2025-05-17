@@ -4,7 +4,10 @@ import greencity.annotations.NotificationHandler;
 import greencity.controller.FriendController;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationObjectType;
+import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.notification.NotificationDateTimeFormatter;
 import greencity.notification.NotificationEventFactory;
 import greencity.service.UserService;
@@ -41,10 +44,14 @@ public class NewFriendshipRequestFactory implements NotificationEventFactory {
 
         return NotificationRequestDto.builder()
                 .action(action)
+                .objectId(sender.getId())
                 .objectName("Friendship")
                 .creationDate(ZonedDateTime.now())
                 .receiverIds(Set.of(acceptor.getId()))
                 .initiatorId(sender.getId())
+                .objectType(NotificationObjectType.USER)
+                .notificationType(NotificationType.FRIENDSHIP_REQUEST)
+                .origin(NotificationOrigin.GREEN_CITY)
                 .build();
     }
 }
