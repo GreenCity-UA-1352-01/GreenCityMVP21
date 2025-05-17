@@ -11,6 +11,11 @@ import greencity.enums.NotificationObjectType;
 import greencity.enums.NotificationStatus;
 import greencity.exception.exceptions.InvalidStatusException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.entity.NotificationCounter;
+import greencity.entity.User;
+import org.modelmapper.ModelMapper;
+import greencity.mapping.NotificationMapper;
+import greencity.mapping.NotificationResponseDtoMapper;
 import greencity.repository.NotificationCounterRepo;
 import greencity.repository.NotificationReceiverRepo;
 import greencity.repository.NotificationRepo;
@@ -28,6 +33,8 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

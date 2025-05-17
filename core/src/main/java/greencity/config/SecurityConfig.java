@@ -82,6 +82,7 @@ public class SecurityConfig {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
                     config.setAllowedOrigins(Collections.singletonList("http://localhost:4205"));
+                    config.setAllowedOrigins(Collections.singletonList("http://localhost:63343"));
                     config.setAllowedMethods(
                             Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
                     config.setAllowedHeaders(
@@ -155,12 +156,14 @@ public class SecurityConfig {
                                 "/user/emailNotifications",
                                 "/user/activatedUsersAmount",
                                 "/user/{userId}/habit/assign",
+                                "/socket/**",
                                 "/token")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/ownSecurity/signUp",
                                 "/ownSecurity/signIn",
-                                "/ownSecurity/changePassword")
+                                "/ownSecurity/changePassword",
+                                "/news_subscription")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/achievements",
@@ -200,8 +203,11 @@ public class SecurityConfig {
                                 "/habit/assign/{habitAssignId}",
                                 "/habit/tags/search",
                                 "/habit/search",
+                                "/notifications/user/{userId}",
+                                "/friends/not-friends-yet",
                                 "/habit/{habitId}/friends/profile-pictures",
-                                "/notifications/user/{userId}")
+                                "/friends",
+                                "/friends/friend/{friendId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.POST,
                                 "/habit/{habitId}/unlike",
@@ -230,7 +236,8 @@ public class SecurityConfig {
                                 "/habit/custom",
                                 "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
                                 "/events/comments/{eventId}",
-                                "/events/comments/{commentId}/like")
+                                "/events/comments/{commentId}/like",
+                                "/friends/{friendId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.PUT,
                                 "/habit/statistic/{id}",
@@ -257,13 +264,15 @@ public class SecurityConfig {
                                 USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                                 "/user/profilePicture",
                                 "/user/deleteProfilePicture",
-                                "/events/{eventId}/accept-attender/{userId}")
+                                "/events/{eventId}/accept-attender/{userId}",
+                                "/friends/accept/{friendId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.DELETE,
                                 ECONEWS_COMMENTS,
                                 "/events/comments/{eventCommentId}",
                                 "/events/unsubscribe/{id}",
                                 "/econews/{econewsId}",
+                                "/friends/{friendId}",
                                 CUSTOM_SHOPPING_LIST_ITEMS,
                                 CUSTOM_SHOPPING_LIST_URL,
                                 "/favorite_place/{placeId}",

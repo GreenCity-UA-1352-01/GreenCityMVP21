@@ -13,6 +13,9 @@ import greencity.dto.event.*;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.eventcomment.EventCommentAuthorDto;
+import greencity.dto.friend.SearchFriendDtoResponse;
+import greencity.dto.event.UpdateEventDtoRequest;
+import greencity.dto.event.UpdateEventDtoResponse;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
 import greencity.dto.eventdatetime.EventDateTimeLocationResponseDto;
 import greencity.dto.eventimage.EventImageResponseDto;
@@ -508,5 +511,16 @@ public class ModelUtils {
                 .text("text")
                 .modifiedDate(LocalDateTime.now())
                 .build();
+    }
+
+    public static SearchFriendDtoResponse getSearchFriendDtoResponse() {
+        return SearchFriendDtoResponse.builder()
+            .id(1L)
+            .name("test")
+            .city("test")
+            .picture("test")
+            .rating(1D)
+            .mutualFriends(1)
+            .build();
     }
 }
