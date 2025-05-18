@@ -55,8 +55,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public List<NotificationResponseDto> createNotifications(NotificationRequestDto dto) {
         Notification notification = notificationMapper.convert(dto);
-        notification = notificationsRepo.save(notification);
         List<NotificationReceiver> receivers = notification.getNotificationReceivers();
+        if(receivers.isEmpty()) {
+            return Collections.emptyList();
+        }
+        notification = notificationsRepo.save(notification);
 
         receivers.forEach(nr -> {
             notificationCounterRepo.findById(nr.getReceiver().getId()).ifPresentOrElse(notificationCounter ->

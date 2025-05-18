@@ -269,7 +269,7 @@ public class HabitController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("{habitId}/unlike")
+    @DeleteMapping("{habitId}/unlike")
     public ResponseEntity<Void> unlikeHabit(@PathVariable Long habitId,
                                             @Parameter(hidden = true) @CurrentUser UserVO userVO) {
         habitService.unlikeHabit(habitId, userVO.getId());
