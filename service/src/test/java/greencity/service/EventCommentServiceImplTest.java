@@ -11,6 +11,7 @@ import greencity.dto.user.UserVO;
 import greencity.entity.EventComment;
 import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.AddEventCommentDtoResponseMapper;
 import greencity.mapping.EventCommentMapper;
 import greencity.rating.RatingCalculation;
@@ -121,5 +122,53 @@ class EventCommentServiceImplTest {
             () -> eventCommentService.save(EVENT.getId(), request, USER));
         assertEquals(ErrorMessage.CANNOT_REPLY_THE_REPLY, actual.getMessage());
         verify(eventCommentRepository, never()).save(eventComment);
+    }
+
+    @Test
+    void testDeleteComment_success() {
+        Long commentId = 1L;
+        EventComment eventComment = new EventComment();
+        eventComment.setId(commentId);
+        User user = new User();
+        user.setId(USER.getId());
+        eventComment.setUser(user);
+
+        when(eventCommentRepository.findById(commentId)).thenReturn(Optional.of(eventComment));
+
+        eventCommentService.deleteComment(commentId, USER);
+
+        verify(eventCommentRepository).findById(commentId);
+        verify(eventCommentRepository).save(eventComment);
+        assertTrue(eventComment.getDeleted());
+    }
+
+    @Test
+    void testDeleteComment_commentNotFound() {
+        Long commentId = 1L;
+        when(eventCommentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(BadRequestException.class,
+            () -> eventCommentService.deleteComment(commentId, USER));
+        assertEquals(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION, exception.getMessage());
+        verify(eventCommentRepository).findById(commentId);
+        verify(eventCommentRepository, never()).save(any(EventComment.class));
+    }
+
+    @Test
+    void testDeleteComment_notAuthor() {
+        Long commentId = 1L;
+        EventComment eventComment = new EventComment();
+        eventComment.setId(commentId);
+        User user = new User();
+        user.setId(USER.getId() + 1);
+        eventComment.setUser(user);
+
+        when(eventCommentRepository.findById(commentId)).thenReturn(Optional.of(eventComment));
+
+        Exception exception = assertThrows(UserHasNoPermissionToAccessException.class,
+            () -> eventCommentService.deleteComment(commentId, USER));
+        assertEquals("You can only delete your own comments", exception.getMessage());
+        verify(eventCommentRepository).findById(commentId);
+        verify(eventCommentRepository, never()).save(any(EventComment.class));
     }
 }
