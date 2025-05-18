@@ -9,16 +9,19 @@ import greencity.dto.notification.BaseNotificationResponseDto;
 import greencity.dto.notification.NotificationRequestDto;
 import greencity.dto.notification.NotificationResponseDto;
 import greencity.dto.notification.NotificationsGroupedResponseDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
+import greencity.entity.NotificationReceiver;
 import greencity.enums.NotificationType;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.NotificationsGroupedResponseDtoMapper;
 import greencity.enums.NotificationOrigin;
 import greencity.enums.NotificationStatus;
-import greencity.repository.NotificationRepo;
+import greencity.repository.*;
 import greencity.entity.NotificationCounter;
 import greencity.mapping.NotificationMapper;
 import greencity.mapping.NotificationResponseDtoMapper;
-import greencity.repository.NotificationCounterRepo;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +54,7 @@ import static org.mockito.Mockito.*;
 class NotificationServiceImplTest {
 
     private static final Long USER_ID = 1L;
+    private static final Long NOTIFICATION_ID = 99L;
     private static final NotificationOrigin NOTIFICATION_ORIGIN;
     private static final Notification NOTIFICATION;
     private static final NotificationCounter NOTIFICATION_COUNTER;
@@ -73,6 +77,10 @@ class NotificationServiceImplTest {
     private NotificationCounterRepo notificationCounterRepo;
     @Mock
     private NotificationMapper notificationMapper;
+
+    @Mock
+    private NotificationReceiverRepo notificationReceiverRepo;
+
     @Spy
     private NotificationResponseDtoMapper notificationResponseDtoMapper;
     @Spy
@@ -199,5 +207,45 @@ class NotificationServiceImplTest {
         verify(notificationRepo).findNotificationsForUser(USER_ID, NOTIFICATION_ORIGIN);
         verify(notificationResponseDtoMapper, atLeast(1)).convert(any(Notification.class));
         verify(notificationsGroupedResponseDtoMapper, atLeast(1)).convert(anyList());
+    }
+
+    @Test
+    void deleteNotification_shouldDeleteNotificationReceiverAndDecrementCounter() {
+        // Given
+        UserVO user = UserVO.builder().id(USER_ID).build();
+        NotificationReceiver mockReceiver = mock(NotificationReceiver.class);
+        NotificationCounter counter = NotificationCounter.builder()
+                .user(null)
+                .countOfNotifications(2)
+                .build();
+
+        when(notificationReceiverRepo.findNotificationReceiver(NOTIFICATION_ID, USER_ID))
+                .thenReturn(Optional.of(mockReceiver));
+        when(notificationCounterRepo.findById(USER_ID)).thenReturn(Optional.of(counter));
+
+        // When
+        notificationService.deleteNotification(NOTIFICATION_ID, user);
+
+        // Then
+        verify(notificationReceiverRepo).delete(mockReceiver);
+        verify(notificationCounterRepo).save(counter);
+        assertEquals(1, counter.getCountOfNotifications());
+    }
+
+    @Test
+    void deleteNotification_shouldThrowNotFound_whenNotificationReceiverNotExists() {
+        // Given
+        UserVO user = UserVO.builder().id(USER_ID).build();
+
+        when(notificationReceiverRepo.findNotificationReceiver(NOTIFICATION_ID, USER_ID))
+                .thenReturn(Optional.empty());
+
+        // Expect
+        assertThrows(NotFoundException.class, () ->
+                notificationService.deleteNotification(NOTIFICATION_ID, user)
+        );
+
+        verify(notificationReceiverRepo, never()).delete(any());
+        verify(notificationCounterRepo, never()).save(any());
     }
 }

@@ -46,4 +46,6 @@ public interface NotificationService {
     Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId, NotificationOrigin origin);
 
     void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, Long newsId);
+
+    void deleteNotification(Long notificationId, UserVO user);
 }

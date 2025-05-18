@@ -276,6 +276,7 @@ public class SecurityConfig {
                                 "/habit/{habitId}/unlike",
                                 "/econews/{econewsId}",
                                 "/friends/{friendId}",
+                                "/notifications/{notificationId}",
                                 CUSTOM_SHOPPING_LIST_ITEMS,
                                 CUSTOM_SHOPPING_LIST_URL,
                                 "/favorite_place/{placeId}",

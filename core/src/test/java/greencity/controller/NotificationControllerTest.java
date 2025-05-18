@@ -31,13 +31,12 @@ import java.time.ZonedDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @WebMvcTest(NotificationController.class)
 @ContextConfiguration (classes = {NotificationController.class})
@@ -63,6 +62,8 @@ class NotificationControllerTest {
     private JwtTool jwtTool;
 
     private ObjectMapper objectMapper;
+
+    private static final Long NOTIFICATION_ID = 1L;
 
     @BeforeEach
     void setup() {
@@ -208,5 +209,14 @@ class NotificationControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].action", is("liked")))
                 .andExpect(jsonPath("$[0].objectName", is("Some News")));
+    }
+
+    @Test
+    @WithMockUser(username = "user12@gmail.com")
+    void deleteNotification_shouldReturnOk_whenNotificationExists() throws Exception {
+        mockMvc.perform(delete("/notifications/{id}", NOTIFICATION_ID))
+                .andExpect(status().isOk());
+
+        verify(notificationService).deleteNotification(eq(NOTIFICATION_ID), any(UserVO.class));
     }
 }
