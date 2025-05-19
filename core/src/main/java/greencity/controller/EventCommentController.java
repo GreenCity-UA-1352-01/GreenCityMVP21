@@ -58,9 +58,9 @@ public class EventCommentController {
     })
     @PatchMapping("{commentId}")
     @NotifyUser
-    public ResponseEntity<EventCommentDtoResponse> save(@PathVariable Long commentId,
-                                                        @Valid @RequestBody EditEventCommentDtoRequest comment,
-                                                        @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<EventCommentDtoResponse> update(@PathVariable Long commentId,
+                                                          @Valid @RequestBody EditEventCommentDtoRequest comment,
+                                                          @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(eventCommentService.update(commentId, comment, user));

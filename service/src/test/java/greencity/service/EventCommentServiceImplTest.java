@@ -72,7 +72,7 @@ class EventCommentServiceImplTest {
         eventComment.setModifiedDate(now);
 
         when(eventService.findById(EVENT.getId())).thenReturn(EVENT);
-        when(eventCommentRepository.save(any(EventComment.class))).thenReturn(eventComment);
+        when(eventCommentRepository.saveAndFlush(any(EventComment.class))).thenReturn(eventComment);
 
         EventCommentDtoResponse actual = eventCommentService.save(EVENT.getId(), request, USER);
         EventCommentDtoResponse expected = ModelUtils.getEventCommentDtoResponse();
@@ -80,7 +80,7 @@ class EventCommentServiceImplTest {
         expected.setModifiedDate(actual.getModifiedDate());
 
         assertEquals(expected, actual);
-        verify(eventCommentRepository).save(any(EventComment.class));
+        verify(eventCommentRepository).saveAndFlush(any(EventComment.class));
     }
 
     @Test
@@ -108,7 +108,7 @@ class EventCommentServiceImplTest {
         eventComment.setModifiedDate(now);
 
         when(eventService.findById(EVENT.getId())).thenReturn(EVENT);
-        when(eventCommentRepository.save(any(EventComment.class))).thenReturn(eventComment);
+        when(eventCommentRepository.saveAndFlush(any(EventComment.class))).thenReturn(eventComment);
         when(eventCommentRepository.findById(request.getParentCommentId()))
             .thenReturn(Optional.of(ModelUtils.getEventComment()));
 
@@ -118,7 +118,7 @@ class EventCommentServiceImplTest {
         expected.setModifiedDate(actual.getModifiedDate());
 
         assertEquals(expected, actual);
-        verify(eventCommentRepository).save(any(EventComment.class));
+        verify(eventCommentRepository).saveAndFlush(any(EventComment.class));
     }
 
     @Test

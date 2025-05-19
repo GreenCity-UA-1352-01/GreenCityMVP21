@@ -75,7 +75,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
-        return eventCommentDtoResponseMapper.convert(eventCommentRepo.save(eventComment));
+        return eventCommentDtoResponseMapper.convert(eventCommentRepo.saveAndFlush(eventComment));
     }
 
     /**
@@ -89,6 +89,7 @@ public class EventCommentServiceImpl implements EventCommentService {
      * @author Rostyslav Zadyraichuk
      */
     @Override
+    @Transactional
     public EventCommentDtoResponse update(Long commentId, EditEventCommentDtoRequest comment, UserVO user) {
         EventComment eventComment = eventCommentRepo.findById(commentId).orElseThrow(
             () -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));

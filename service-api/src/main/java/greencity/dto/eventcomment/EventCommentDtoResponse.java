@@ -14,6 +14,6 @@ public class EventCommentDtoResponse {
     private EventCommentAuthorDto author;
     private String text;
     private LocalDateTime modifiedDate;
-    private Boolean isModified;
-    private Boolean isDeleted;
+    private Boolean modified;
+    private Boolean deleted;
 }

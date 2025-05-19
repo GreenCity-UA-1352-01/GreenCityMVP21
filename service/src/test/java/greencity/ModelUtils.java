@@ -1023,8 +1023,8 @@ public class ModelUtils {
             .author(getEventCommentAuthorDto())
             .text("text")
             .modifiedDate(LocalDateTime.now())
-            .isModified(false)
-            .isDeleted(false)
+            .modified(false)
+            .deleted(false)
             .build();
     }
 

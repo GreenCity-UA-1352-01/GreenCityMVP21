@@ -21,8 +21,8 @@ public class EventCommentDtoResponseMapper extends AbstractConverter<EventCommen
                 .name(author.getName())
                 .userProfilePicturePath(author.getProfilePicturePath())
                 .build())
-            .isModified(!eventComment.getModifiedDate().isEqual(eventComment.getCreatedDate()))
-            .isDeleted(eventComment.getDeleted())
+            .modified(!eventComment.getModifiedDate().isEqual(eventComment.getCreatedDate()))
+            .deleted(eventComment.getDeleted())
             .build();
     }
 }
