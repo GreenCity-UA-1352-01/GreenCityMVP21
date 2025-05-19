@@ -1,8 +1,8 @@
 package greencity.dto.eventcomment;
 
-import jakarta.validation.constraints.NotBlank;
+import greencity.annotations.ValidComment;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -11,9 +11,8 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @EqualsAndHashCode
 public class AddEventCommentDtoRequest {
-    @NotBlank(message = "The text of comment can not be empty")
-    @Length(min = 1, max = 8000)
+    @ValidComment
     private String text;
-
+    @NotNull
     private Long parentCommentId;
 }

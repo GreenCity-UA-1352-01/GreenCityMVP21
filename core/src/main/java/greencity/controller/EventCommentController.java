@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class EventCommentController {
     private final EventCommentService eventCommentService;
 
-    @Operation(summary = "Add comment.")
+    @Operation(summary = "Add new/reply comment.")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
@@ -68,7 +68,7 @@ public class EventCommentController {
     })
     @DeleteMapping("{commentId}/like")
     public ResponseEntity<Void> unlikeEventComment(@PathVariable("commentId") Long commentId,
-                                                  @Parameter(hidden = true) @CurrentUser UserVO user) {
+                                                   @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.unlikeComment(commentId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
