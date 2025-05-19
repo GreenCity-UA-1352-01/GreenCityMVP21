@@ -4,7 +4,8 @@ import greencity.annotations.CurrentUser;
 import greencity.annotations.NotifyUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EditEventCommentDtoRequest;
+import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.service.EventCommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,19 +32,38 @@ public class EventCommentController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
-            content = @Content(schema = @Schema(implementation = AddEventCommentDtoResponse.class))),
+            content = @Content(schema = @Schema(implementation = EventCommentDtoResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("{eventId}")
     @NotifyUser
-    public ResponseEntity<AddEventCommentDtoResponse> save(@PathVariable Long eventId,
-                                                           @Valid @RequestBody AddEventCommentDtoRequest comment,
-                                                           @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<EventCommentDtoResponse> save(@PathVariable Long eventId,
+                                                        @Valid @RequestBody AddEventCommentDtoRequest comment,
+                                                        @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(eventCommentService.save(eventId, comment, user));
+    }
+
+    @Operation(summary = "Update comment.")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = EventCommentDtoResponse.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("{commentId}")
+    @NotifyUser
+    public ResponseEntity<EventCommentDtoResponse> save(@PathVariable Long commentId,
+                                                        @Valid @RequestBody EditEventCommentDtoRequest comment,
+                                                        @Parameter(hidden = true) @CurrentUser UserVO user) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(eventCommentService.update(commentId, comment, user));
     }
 
     @Operation(summary = "Like comment of event")

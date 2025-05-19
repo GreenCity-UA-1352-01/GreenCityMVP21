@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,7 +11,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
 import greencity.config.SecurityConfig;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EditEventCommentDtoRequest;
+import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.security.jwt.JwtTool;
 import greencity.service.EventCommentService;
@@ -31,13 +33,15 @@ import org.springframework.test.web.servlet.MockMvc;
 class EventCommentControllerTest {
 
     private static final String CONTROLLER_LINK;
-    private static final AddEventCommentDtoRequest REQUEST;
-    private static final AddEventCommentDtoResponse RESPONSE;
+    private static final AddEventCommentDtoRequest ADD_REQUEST;
+    private static final EditEventCommentDtoRequest EDIT_REQUEST;
+    private static final EventCommentDtoResponse RESPONSE;
 
     static {
         CONTROLLER_LINK = "/events/comments";
-        REQUEST = ModelUtils.getAddEventCommentDtoRequest();
-        RESPONSE = ModelUtils.getAddEventCommentDtoResponse();
+        ADD_REQUEST = ModelUtils.getAddEventCommentDtoRequest();
+        EDIT_REQUEST = ModelUtils.getEditEventCommentDtoRequest();
+        RESPONSE = ModelUtils.getEventCommentDtoResponse();
     }
 
     @MockBean
@@ -60,16 +64,16 @@ class EventCommentControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com")
+    @WithMockUser
     void testSave() throws Exception {
         String content = """
             {
-              "parentCommentId": null,
+              "parentCommentId": 0,
               "text": "%s"
             }
-            """.formatted(REQUEST.getText());
+            """.formatted(ADD_REQUEST.getText());
 
-        when(eventCommentService.save(eq(1L), eq(REQUEST), any(UserVO.class))).thenReturn(RESPONSE);
+        when(eventCommentService.save(eq(1L), eq(ADD_REQUEST), any(UserVO.class))).thenReturn(RESPONSE);
 
         mockMvc.perform(post(CONTROLLER_LINK + "/{eventId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +81,7 @@ class EventCommentControllerTest {
             .andExpect(status().isCreated())
             .andExpect(content().json(objectMapper.writeValueAsString(RESPONSE)));
 
-        verify(eventCommentService).save(eq(1L), eq(REQUEST), any(UserVO.class));
+        verify(eventCommentService).save(eq(1L), eq(ADD_REQUEST), any(UserVO.class));
     }
 
     @Test
@@ -99,5 +103,47 @@ class EventCommentControllerTest {
             .andExpect(status().isBadRequest());
 
         verify(eventCommentService, never()).save(any(), any(), any());
+    }
+
+    @Test
+    @WithMockUser
+    void testUpdate() throws Exception {
+        String content = """
+            {
+              "newText": "%s"
+            }
+            """.formatted(EDIT_REQUEST.getNewText());
+
+        when(eventCommentService.update(eq(1L), eq(EDIT_REQUEST), any(UserVO.class)))
+            .thenReturn(RESPONSE);
+
+        mockMvc.perform(patch(CONTROLLER_LINK + "/{commentId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(RESPONSE)));
+
+        verify(eventCommentService).update(eq(1L), eq(EDIT_REQUEST), any(UserVO.class));
+    }
+
+    @Test
+    void testUpdate_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(patch(CONTROLLER_LINK + "/{commentId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+            .andExpect(status().isUnauthorized());
+
+        verify(eventCommentService, never()).update(any(), any(), any());
+    }
+
+    @Test
+    @WithMockUser
+    void testUpdate_whenInvalidRequestBody() throws Exception {
+        mockMvc.perform(patch(CONTROLLER_LINK + "/{commentId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+            .andExpect(status().isBadRequest());
+
+        verify(eventCommentService, never()).update(any(), any(), any());
     }
 }

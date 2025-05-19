@@ -5,7 +5,8 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.event.EventCommentVO;
 import greencity.dto.event.EventVO;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EditEventCommentDtoRequest;
+import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
@@ -13,7 +14,8 @@ import greencity.entity.EventCommentLike;
 import greencity.entity.User;
 import greencity.enums.NotificationObjectType;
 import greencity.exception.exceptions.BadRequestException;
-import greencity.mapping.AddEventCommentDtoResponseMapper;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.mapping.EventCommentDtoResponseMapper;
 import greencity.mapping.EventCommentMapper;
 import greencity.exception.exceptions.ConflictException;
 import greencity.exception.exceptions.NotFoundException;
@@ -36,7 +38,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private EventService eventService;
     private ModelMapper modelMapper;
     private EventCommentMapper eventCommentMapper;
-    private AddEventCommentDtoResponseMapper addEventCommentDtoResponseMapper;
+    private EventCommentDtoResponseMapper eventCommentDtoResponseMapper;
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
     private final NotificationService notificationService;
@@ -52,9 +54,9 @@ public class EventCommentServiceImpl implements EventCommentService {
      */
     @Override
     @Transactional
-    public AddEventCommentDtoResponse save(Long eventId,
-                                           AddEventCommentDtoRequest comment,
-                                           UserVO userVO) {
+    public EventCommentDtoResponse save(Long eventId,
+                                        AddEventCommentDtoRequest comment,
+                                        UserVO userVO) {
         EventVO event = eventService.findById(eventId);
         EventComment eventComment = eventCommentMapper.convert(comment);
         eventComment.setUser(modelMapper.map(userVO, User.class));
@@ -62,7 +64,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         if (comment.getParentCommentId() != 0) {
             EventComment parentComment =
                 eventCommentRepo.findById(comment.getParentCommentId()).orElseThrow(
-                    () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                    () -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
             if (parentComment.getParentComment() == null) {
                 eventComment.setParentComment(parentComment);
                 parentComment.getComments().add(eventComment);
@@ -73,7 +75,28 @@ public class EventCommentServiceImpl implements EventCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
-        return addEventCommentDtoResponseMapper.convert(eventCommentRepo.save(eventComment));
+        return eventCommentDtoResponseMapper.convert(eventCommentRepo.save(eventComment));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param commentId the ID of the comment to update
+     * @param comment   the new comment information
+     * @param user      the user who is updating the comment
+     * @return the updated comment
+     * @throws BadRequestException if the comment with the given ID does not exist or is not editable by the user
+     * @author Rostyslav Zadyraichuk
+     */
+    @Override
+    public EventCommentDtoResponse update(Long commentId, EditEventCommentDtoRequest comment, UserVO user) {
+        EventComment eventComment = eventCommentRepo.findById(commentId).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        if (!eventComment.getUser().getId().equals(user.getId())) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_IS_NOT_COMMENT_AUTHOR);
+        }
+        eventComment.setText(comment.getNewText());
+        return eventCommentDtoResponseMapper.convert(eventComment);
     }
 
     /**

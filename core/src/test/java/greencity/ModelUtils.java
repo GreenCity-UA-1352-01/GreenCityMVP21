@@ -11,7 +11,8 @@ import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
 import greencity.dto.event.*;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EditEventCommentDtoRequest;
+import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.eventcomment.EventCommentAuthorDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.event.UpdateEventDtoRequest;
@@ -494,6 +495,7 @@ public class ModelUtils {
     public static AddEventCommentDtoRequest getAddEventCommentDtoRequest() {
         return AddEventCommentDtoRequest.builder()
                 .text("text")
+                .parentCommentId(0L)
                 .build();
     }
 
@@ -504,12 +506,14 @@ public class ModelUtils {
                 .build();
     }
 
-    public static AddEventCommentDtoResponse getAddEventCommentDtoResponse() {
-        return AddEventCommentDtoResponse.builder()
+    public static EventCommentDtoResponse getEventCommentDtoResponse() {
+        return EventCommentDtoResponse.builder()
                 .id(1L)
                 .author(getEventCommentAuthorDto())
                 .text("text")
                 .modifiedDate(LocalDateTime.now())
+                .isModified(false)
+                .isDeleted(false)
                 .build();
     }
 
@@ -521,6 +525,12 @@ public class ModelUtils {
             .picture("test")
             .rating(1D)
             .mutualFriends(1)
+            .build();
+    }
+
+    public static EditEventCommentDtoRequest getEditEventCommentDtoRequest() {
+        return EditEventCommentDtoRequest.builder()
+            .newText("new text")
             .build();
     }
 }

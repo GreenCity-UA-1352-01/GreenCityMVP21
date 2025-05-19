@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.eventcomment.EventCommentAuthorDto;
 import greencity.entity.EventComment;
 import greencity.entity.User;
@@ -8,11 +8,11 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AddEventCommentDtoResponseMapper extends AbstractConverter<EventComment, AddEventCommentDtoResponse> {
+public class EventCommentDtoResponseMapper extends AbstractConverter<EventComment, EventCommentDtoResponse> {
     @Override
-    public AddEventCommentDtoResponse convert(EventComment eventComment) {
+    public EventCommentDtoResponse convert(EventComment eventComment) {
         User author = eventComment.getUser();
-        return AddEventCommentDtoResponse.builder()
+        return EventCommentDtoResponse.builder()
             .id(eventComment.getId())
             .text(eventComment.getText())
             .modifiedDate(eventComment.getModifiedDate())
@@ -21,6 +21,8 @@ public class AddEventCommentDtoResponseMapper extends AbstractConverter<EventCom
                 .name(author.getName())
                 .userProfilePicturePath(author.getProfilePicturePath())
                 .build())
+            .isModified(!eventComment.getModifiedDate().isEqual(eventComment.getCreatedDate()))
+            .isDeleted(eventComment.getDeleted())
             .build();
     }
 }

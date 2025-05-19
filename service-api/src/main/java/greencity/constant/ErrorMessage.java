@@ -158,6 +158,7 @@ public final class ErrorMessage {
     public static final String INVALID_STATUS = "String cannot be converted to status: ";
     public static final String UNREGISTERED_FACTORY = "There is no factory for method: ";
     public static final String NOTIFICATION_RECEIVER_NOT_FOUND = "Notification receiver with id not found: ";
+    public static final String USER_IS_NOT_COMMENT_AUTHOR = "You are not author of this comment";
 
     private ErrorMessage() {
     }

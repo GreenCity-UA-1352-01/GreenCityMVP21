@@ -265,7 +265,8 @@ public class SecurityConfig {
                                 "/user/profilePicture",
                                 "/user/deleteProfilePicture",
                                 "/events/{eventId}/accept-attender/{userId}",
-                                "/friends/accept/{friendId}")
+                                "/friends/accept/{friendId}",
+                                "/events/comments/{commentId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.DELETE,
                                 ECONEWS_COMMENTS,

@@ -9,9 +9,11 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class AddEventCommentDtoResponse {
+public class EventCommentDtoResponse {
     private Long id;
     private EventCommentAuthorDto author;
     private String text;
     private LocalDateTime modifiedDate;
+    private Boolean isModified;
+    private Boolean isDeleted;
 }

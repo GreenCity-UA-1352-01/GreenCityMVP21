@@ -6,7 +6,8 @@ import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
 import greencity.dto.event.*;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.AddEventCommentDtoResponse;
+import greencity.dto.eventcomment.EditEventCommentDtoRequest;
+import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.eventcomment.EventCommentAuthorDto;
 import greencity.dto.friend.SearchFriendDtoResponse;
 import greencity.dto.habit.*;
@@ -16,8 +17,6 @@ import greencity.dto.event.CreateEventDtoResponse;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.UpdateEventDtoRequest;
 import greencity.dto.eventdatetime.EventDateTimeLocationRequestDto;
-import greencity.dto.habit.*;
-import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
@@ -50,7 +49,6 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static greencity.enums.UserStatus.ACTIVATED;
 
@@ -972,11 +970,12 @@ public class ModelUtils {
     }
 
     public static EventComment getEventComment() {
+        LocalDateTime now = LocalDateTime.now();
         return EventComment.builder()
             .id(1L)
             .text("text")
-            .createdDate(LocalDateTime.now())
-            .modifiedDate(LocalDateTime.now())
+            .createdDate(now)
+            .modifiedDate(now)
             .user(getUser())
             .event(getEvent())
             .deleted(false)
@@ -1018,12 +1017,20 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddEventCommentDtoResponse getAddEventCommentDtoResponse() {
-        return AddEventCommentDtoResponse.builder()
+    public static EventCommentDtoResponse getEventCommentDtoResponse() {
+        return EventCommentDtoResponse.builder()
             .id(1L)
             .author(getEventCommentAuthorDto())
             .text("text")
             .modifiedDate(LocalDateTime.now())
+            .isModified(false)
+            .isDeleted(false)
+            .build();
+    }
+
+    public static EditEventCommentDtoRequest getEditEventCommentDtoRequest() {
+        return EditEventCommentDtoRequest.builder()
+            .newText("new text")
             .build();
     }
 }
