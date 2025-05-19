@@ -51,7 +51,7 @@ public class EventSearchRepo {
     }
 
     private Predicate buildPredicate(String searchText, Root<Event> root) {
-        List<Predicate> predicates = Arrays.stream(searchText.split(" "))
+        List<Predicate> predicates = Arrays.stream(searchText.split("\\s+"))
                 .map(word -> cb.like(cb.lower(root.get("title")), "%" + word.toLowerCase() + "%"))
                 .collect(Collectors.toList());
 

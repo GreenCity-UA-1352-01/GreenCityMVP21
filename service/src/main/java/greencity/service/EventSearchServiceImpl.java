@@ -3,6 +3,8 @@ package greencity.service;
 import greencity.dto.PageableDto;
 import greencity.dto.search.SearchEventsDto;
 import greencity.entity.Event;
+import greencity.entity.localization.TagTranslation;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.repository.EventSearchRepo;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,10 +23,18 @@ public class EventSearchServiceImpl implements EventSearchService {
 
     @Override
     public PageableDto<SearchEventsDto> search(Pageable pageable, String query) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new BadRequestException("Search query must not be empty");
+        }
+
         Page<Event> page = eventSearchRepo.find(pageable, query);
 
         List<SearchEventsDto> dtos = page.getContent().stream()
-                .map(event -> modelMapper.map(event, SearchEventsDto.class))
+                .map(event -> {
+                    SearchEventsDto dto = modelMapper.map(event, SearchEventsDto.class);
+                    dto.setTags(mapTagsToNames(event));
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         return new PageableDto<>(
@@ -33,5 +43,12 @@ public class EventSearchServiceImpl implements EventSearchService {
                 page.getNumber(),
                 page.getTotalPages()
         );
+    }
+
+    private List<String> mapTagsToNames(Event event) {
+        return event.getTags().stream()
+                .flatMap(tag -> tag.getTagTranslations().stream())
+                .map(TagTranslation::getName)
+                .collect(Collectors.toList());
     }
 }

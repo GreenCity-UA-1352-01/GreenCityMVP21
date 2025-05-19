@@ -11,6 +11,8 @@ import greencity.dto.search.SearchResponseDto;
 import greencity.service.SearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
@@ -68,11 +70,25 @@ public class SearchController {
             .body(searchService.searchAllNews(pageable, searchQuery, locale.getLanguage()));
     }
 
+    /**
+     * Method for search.
+     *
+     * @param searchQuery query to search.
+     * @return PageableDto of {@link SearchEventsDto} instances.
+     */
     @Operation(summary = "Search Events.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "303", description = HttpStatuses.SEE_OTHER),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
+    @Parameters({
+            @Parameter(name = "page", schema = @Schema(type = "int", minimum = "0", defaultValue = "0"),
+                    description = "Page index you want to retrieve [0..N]. " +
+                            "If page index is less than 0 or not specified then default value is used!"),
+            @Parameter(name = "size", schema = @Schema(type = "int", minimum = "1", defaultValue = "10"),
+                    description = "Number of records per page [1..100]. " +
+                            "If size is less than 1 or not specified then default value is used!If size is bigger than 100, size becomes 100."),
     })
     @GetMapping("/events")
     public ResponseEntity<PageableDto<SearchEventsDto>> searchEvent(
