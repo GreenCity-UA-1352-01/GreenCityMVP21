@@ -19,7 +19,7 @@ public interface NotificationService {
      * @author Rostyslav Zadyraichuk
      */
     List<NotificationResponseDto> createNotifications(NotificationRequestDto dto);
-  
+
     void updateNotificationStatus(UpdateNotificationStatusRequestDto updateNotificationStatusRequestDto, UserVO user);
 
     void deleteEventLikeNotification(Long initiatorId,
@@ -34,7 +34,7 @@ public interface NotificationService {
                             Long receiverId,
                             NotificationObjectType objectType,
                             Long objectId);
-  
+
     /**
      * Method to retrieve all notifications for a specific user.
      *
@@ -46,4 +46,16 @@ public interface NotificationService {
     Set<BaseNotificationResponseDto> getAllNotificationsForUser(Long userId, NotificationOrigin origin);
 
     void deleteLikeNewsNotificationIfExists(Long initiatorId, Long receiverId, Long newsId);
+
+    /**
+     * Get a notification by its ID for a specific user.
+     *
+     * @param id the ID of the notification
+     * @param user the user who should receive the notification
+     * @return the notification if it exists and belongs to the user
+     * @throws greencity.exception.exceptions.NotFoundException if the notification is not found
+     * @throws IllegalArgumentException if the notification does not belong to the user
+     * @author Roman Diakov
+     */
+    NotificationResponseDto getNotificationById(Long id, UserVO user);
 }

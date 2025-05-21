@@ -33,6 +33,7 @@ public class NotificationMapper extends AbstractConverter<NotificationRequestDto
             .notificationType(dto.getNotificationType())
             .initiator(initiator)
             .origin(dto.getOrigin())
+            .commentId(dto.getCommentId())
             .build();
         List<NotificationReceiver> notificationReceivers = receivers.stream()
             .map(receiver -> NotificationReceiver.builder()

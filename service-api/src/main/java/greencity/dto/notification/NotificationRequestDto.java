@@ -44,4 +44,6 @@ public class NotificationRequestDto {
 
     @NotNull
     private NotificationOrigin origin;
+
+    private Long commentId;
 }

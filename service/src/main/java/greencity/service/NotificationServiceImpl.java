@@ -231,6 +231,26 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationResponseDto getNotificationById(Long id, UserVO user) {
+        Notification notification = notificationsRepo.findById(id)
+            .orElseThrow(() -> new NotFoundException("Notification not found with id: " + id));
+
+        NotificationReceiver notificationReceiver = notificationReceiverRepo
+            .findNotificationReceiver(id, user.getId())
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Notification with id " + id + " does not belong to user with id " + user.getId()));
+
+        List<NotificationResponseDto> dtos = notificationResponseDtoMapper.convert(notification);
+        return dtos.stream()
+            .filter(dto -> dto.getReceiverId().equals(user.getId()))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException("Notification not found with id: " + id));
+    }
+
     @AllArgsConstructor
     @Getter
     @EqualsAndHashCode

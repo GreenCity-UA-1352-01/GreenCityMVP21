@@ -140,4 +140,13 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    /**
+     * Find users by name containing the given string.
+     *
+     * @param name the name to search for
+     * @return list of users with names containing the given string
+     */
+    @Query("FROM User WHERE LOWER(name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<User> findByNameContainingIgnoreCase(String name);
 }
