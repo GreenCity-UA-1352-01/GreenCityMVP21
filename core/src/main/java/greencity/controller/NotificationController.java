@@ -4,6 +4,7 @@ import greencity.annotations.CurrentUser;
 import greencity.dto.notification.UpdateNotificationStatusRequestDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.notification.NotificationResponseDto;
+import greencity.enums.NotificationType;
 import greencity.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Validated
 @RestController
@@ -90,5 +92,49 @@ public class NotificationController {
             @PathVariable @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationsService.getAllNotificationsForUser(userId, NotificationOrigin.GREEN_CITY));
+    }
+
+    /**
+     * Redirects to the appropriate page when a user clicks on a notification.
+     * For USER_MENTION notifications, redirects to the comment where the user was mentioned.
+     *
+     * @param notificationId the ID of the notification
+     * @param user the currently authenticated user
+     * @return a RedirectView to the appropriate page
+     */
+    @Operation(summary = "Redirect to the appropriate page when a user clicks on a notification")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirected successfully"),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = "Notification not found", content = @Content)
+    })
+    @GetMapping("/redirect/{notificationId}")
+    public RedirectView redirectToNotificationTarget(
+            @PathVariable Long notificationId,
+            @Parameter(hidden = true) @CurrentUser UserVO user) {
+
+        NotificationResponseDto notification = notificationsService.getNotificationById(notificationId, user);
+
+        UpdateNotificationStatusRequestDto updateRequest = new UpdateNotificationStatusRequestDto();
+        updateRequest.setId(notificationId);
+        updateRequest.setStatus("READ");
+        notificationsService.updateNotificationStatus(updateRequest, user);
+
+        String redirectUrl = "/";
+
+        if (notification.getNotificationType() == NotificationType.USER_MENTION && notification.getCommentId() != null) {
+            String objectType = notification.getObjectType().name().toLowerCase();
+            Long objectId = notification.getObjectId();
+            Long commentId = notification.getCommentId();
+
+            if ("event".equals(objectType)) {
+                redirectUrl = "/events/" + objectId + "?commentId=" + commentId;
+            } else if ("econews".equals(objectType)) {
+                redirectUrl = "/news/" + objectId + "?commentId=" + commentId;
+            }
+        }
+
+        return new RedirectView(redirectUrl);
     }
 }

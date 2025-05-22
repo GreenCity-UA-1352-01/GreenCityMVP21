@@ -23,4 +23,5 @@ public abstract class BaseNotificationResponseDto {
     private NotificationType notificationType;
     private NotificationOrigin origin;
     private Long receiverId;
+    private Long commentId;
 }

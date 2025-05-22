@@ -69,4 +69,12 @@ public class Notification {
     @Column
     @Enumerated(EnumType.STRING)
     private NotificationOrigin origin;
+
+    /**
+     * Field represents the identifier of the comment
+     * that is associated with this notification.
+     * This is used for user mention notifications to redirect to the specific comment.
+     */
+    @Column(name = "comment_id")
+    private Long commentId;
 }

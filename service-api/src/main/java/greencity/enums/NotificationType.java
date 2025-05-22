@@ -44,7 +44,9 @@ public enum NotificationType {
     ECO_NEWS_LIKE("%s likes your news %s. %s", 2, true,
         GroupedMessageConverter::objectNameMessage),
     ECO_NEWS_COMMENT("%s commented on your news %s. %s", 2, true,
-        GroupedMessageConverter::objectNameMessage);
+        GroupedMessageConverter::objectNameMessage),
+    USER_MENTION("%s mentioned you in a comment on %s %s. %s", 2, true,
+        GroupedMessageConverter::objectNameAndTypeMessage);
 
     private final String groupMessageTemplate;
     private final int shownInitiatorsCount;

@@ -26,6 +26,7 @@ public class NotificationResponseDtoMapper extends AbstractConverter<Notificatio
                 .initiatorId(notification.getInitiator().getId())
                 .initiatorName(notification.getInitiator().getName())
                 .origin(notification.getOrigin())
+                .commentId(notification.getCommentId())
                 .build();
             dto.setObjectLink(dto.getObjectType().getLinkBuilder().apply(dto));
             dtos.add(dto);
